@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "430627611160",
+    "firebase_url": "https://area-student-d501b.firebaseio.com",
+    "project_id": "area-student-d501b",
+    "storage_bucket": "area-student-d501b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430627611160:android:5786530d3253a240b5d96d",
+        "android_client_info": {
+          "package_name": "com.asonisimov.areastudent"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "430627611160-6lr74rithqqbr4sqhb7mdkq0jv3fjqr4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbJ8bxt-3s0WZAMoqD_6UFNK2OCyC8_gw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "430627611160-6lr74rithqqbr4sqhb7mdkq0jv3fjqr4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "430627611160-ncjlks318ufh3bk7qrtjtd6ni099s6q4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.asonisimov.areastudent"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

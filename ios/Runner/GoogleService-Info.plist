@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>430627611160-ncjlks318ufh3bk7qrtjtd6ni099s6q4.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.430627611160-ncjlks318ufh3bk7qrtjtd6ni099s6q4</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDERPZMmCBiTmntoSz6L7sJAPx67FznKEo</string>
+	<key>GCM_SENDER_ID</key>
+	<string>430627611160</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.asonisimov.areastudent</string>
+	<key>PROJECT_ID</key>
+	<string>area-student-d501b</string>
+	<key>STORAGE_BUCKET</key>
+	<string>area-student-d501b.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:430627611160:ios:052e2761df75c71cb5d96d</string>
+	<key>DATABASE_URL</key>
+	<string>https://area-student-d501b.firebaseio.com</string>
+</dict>
+</plist>

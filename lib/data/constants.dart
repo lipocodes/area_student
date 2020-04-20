@@ -1,0 +1,32 @@
+const String screen2WelcomeTitle = "Welcome.";
+const String screen2WelcomeBody = "Please create an account to continue!";
+const String screen2Signup = "Signup";
+
+const String screen3Login = "Login";
+const String screen3WelcomeBack = "Welcome back!";
+const String screen3PhoneNumberHint = "Enter phone number";
+const String screen3PhoneNumberEmpty = "You didn't enter a number!";
+
+const String screen4Welcome = "Welcome.";
+const String screen4LetsSetup = "Let's setup an account!";
+const String screen4FirstName = "First Name";
+const String screen4LastName = "Last Name";
+const String screen4PhoneNumber = "Phone Number";
+const String screen4BirthDate = "Birth Date";
+const String screen4AcademicField = "Academic Field";
+const String screen4CountryCity = "Country & City";
+const String screen4Man = "Man";
+const String screen4Woman = "Woman";
+const String screen4Signup = "Signup";
+const String screen4NoFirstName = "First Name cannot be empty";
+const String screen4NoLastName = "Last Name cannot be empty";
+const String screen4NoPhoneNumber = "Phone Number cannot be empty";
+const String screen4NoBirthDate = "Birth Date cannot be empty";
+const String screen4NoAcademicField = "Academic Field cannot be empty";
+const String screen4NoCOuntryCity = "Country & City cannot be empty";
+const String screen4PrivacyPolicy1 = "By clicking 'Signup'  I agree to the ";
+const String screen4PrivacyPolicy2 = "Terms & Conditions";
+const String screen4TitlePrivacyPolicy = "Terms & Conditions";
+const String screen4ContentPrivactPolicy = "Here will be the Terms & Conditions of this app."; 
+const String screen4FirebaseCollectionName = "userData";
+const String screen4FirebaseUserAlreadyExists = "You already have an account!";
