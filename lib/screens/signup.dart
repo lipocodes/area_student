@@ -16,8 +16,10 @@ class _SignupState extends State<Signup> {
   TextEditingController controllerFirstName = new TextEditingController();
   TextEditingController controllerLastName = new TextEditingController();
   TextEditingController controllerPhoneNumber = new TextEditingController();
-  TextEditingController controllerBirthDate = new TextEditingController();
-  TextEditingController controllerAcademicField = new TextEditingController();
+  //TextEditingController controllerBirthDate = new TextEditingController();
+  DateTime _birthDate = DateTime.now();
+  String birthDate;
+  //TextEditingController controllerAcademicField = new TextEditingController();
   TextEditingController controllerCountryCity = new TextEditingController();
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   FirebaseMethods firebaseMethod = new FirebaseMethods();
@@ -25,6 +27,70 @@ class _SignupState extends State<Signup> {
   int _radioValue = 0;
   String gender = "male";
   List<File> imageList = [];
+  String textBirthdate = "Birth Date";
+  String textAcademicField = "Academic Field";
+  String textCountryCity="Country & City";
+
+  List<String> academicFields = [
+    'Agriculture',
+    'Anthropology',
+    'Archeology',
+    'Architecture',
+    'Arts',
+    'Astronomy',
+    'Biology',
+    'Business',
+    'Chemistry',
+    'CS',
+    'Culinary',
+    'Economics',
+    'Education',
+    'Engineering',
+    'Environmental',
+    'Geography',
+    'History',
+    'Journalism',
+    'Languages',
+    'Librarianship',
+    'Literature',
+    'Law',
+    'Mathematics',
+    'Medicine',
+    'Military',
+    'Philosophy',
+    'Physics',
+    'Political',
+    'Psychology',
+    'Religion',
+    'Social-Work',
+    'Sociology',
+    'Space',
+    'Statistics',
+    'Transportation',
+  ];
+
+  List<String> countryCity = ["Israel, Tel Aviv", "Israel, Haifa", "Israel, Beer Sheba", "Israel, North", "Israel, South"];
+
+  Future<Null> selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate,
+      firstDate: DateTime(1980),
+      lastDate: DateTime(2030),
+    );
+
+    if (picked != null && picked != _birthDate) {
+      this.birthDate = picked.day.toString() +
+          "/" +
+          picked.month.toString() +
+          "/" +
+          picked.year.toString();
+      setState(() {
+        _birthDate = picked;
+        textBirthdate = this.birthDate;
+      });
+    }
+  }
 
   void _handleRadioValueChange(int value) {
     setState(() {
@@ -57,13 +123,13 @@ class _SignupState extends State<Signup> {
     } else if (controllerPhoneNumber.text.length == 0) {
       showSnackBar(screen4NoPhoneNumber, scaffoldKey);
       return;
-    } else if (controllerBirthDate.text.length == 0) {
+    } else if (textBirthdate == "Birth Date") {
       showSnackBar(screen4NoBirthDate, scaffoldKey);
       return;
-    } else if (controllerAcademicField.text.length == 0) {
+    } else if (this.textAcademicField == "Academic Field") {
       showSnackBar(screen4NoAcademicField, scaffoldKey);
       return;
-    } else if (controllerCountryCity.text.length == 0) {
+    } else if (textCountryCity == "Country & City") {
       showSnackBar(screen4NoCOuntryCity, scaffoldKey);
       return;
     }
@@ -85,9 +151,9 @@ class _SignupState extends State<Signup> {
             firstName: controllerFirstName.text,
             lastName: controllerLastName.text,
             phoneNumber: controllerPhoneNumber.text,
-            birthDate: controllerBirthDate.text,
-            academicField: controllerAcademicField.text,
-            countryCity: controllerCountryCity.text,
+            birthDate: birthDate,
+            academicField: this.textAcademicField,
+            countryCity: textCountryCity,
             gender: gender);
         if (imageList.length > 0) {
           imagesUrl = await firebaseMethod.uploadProductImages(
@@ -116,9 +182,11 @@ class _SignupState extends State<Signup> {
 
   pickImage() async {
     File file;
-    try{
-    file = await ImagePicker.pickImage(source: ImageSource.gallery);
-    } on PlatformException catch(e) {print("Image picker issue: " + e.toString());}
+    try {
+      file = await ImagePicker.pickImage(source: ImageSource.gallery);
+    } on PlatformException catch (e) {
+      print("Image picker issue: " + e.toString());
+    }
     if (file != null) {
       //imagesMap[imagesMap.length] = file;
       List<File> imageFile = new List();
@@ -235,29 +303,136 @@ class _SignupState extends State<Signup> {
                   controller: controllerPhoneNumber,
                   textInputType: TextInputType.phone),
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
-              child: signupInputBox(
-                  labelText: screen4BirthDate,
-                  controller: controllerBirthDate,
-                  textInputType: TextInputType.datetime),
+            SizedBox(
+              width: 500.0,
+              child: Padding(
+                padding:
+                    const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+                child: RaisedButton(
+                  onPressed: () {
+                    selectDate(context);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 10.0,
+                      bottom: 10.0,
+                    ),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          this.textBirthdate,
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.grey[600]),
+                        )),
+                  ),
+                  textColor: Colors.grey,
+                  color: Colors.grey[100],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(10.0),
+                    side: BorderSide(color: Colors.black45),
+                  ),
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                ),
+              ),
             ),
             Padding(
               padding:
                   const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
-              child: signupInputBox(
-                  labelText: screen4AcademicField,
-                  controller: controllerAcademicField,
-                  textInputType: TextInputType.text),
+              child: Container(
+                decoration: ShapeDecoration(
+                  color: Colors.grey[100],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(10.0),
+                    side: BorderSide(color: Colors.black45),
+                  ),
+                ),
+                child: SizedBox(
+                  width: 500.0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left:10.0),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top:5.0, bottom:5.0),
+                        child: new DropdownButton<String>(
+                          underline: SizedBox(),
+                          iconSize: 2,
+                          hint: new Text(
+                            this.textAcademicField,
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey[600]),
+                          ),
+                          items: academicFields.map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: new Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              this.textAcademicField = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            Padding(
+               Padding(
               padding:
                   const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
-              child: signupInputBox(
-                  labelText: screen4CountryCity,
-                  controller: controllerCountryCity,
-                  textInputType: TextInputType.text),
+              child: Container(
+                decoration: ShapeDecoration(
+                  color: Colors.grey[100],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(10.0),
+                    side: BorderSide(color: Colors.black45),
+                  ),
+                ),
+                child: SizedBox(
+                  width: 500.0,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left:10.0),
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      
+                      child: Padding(
+                       padding: const EdgeInsets.only(top:5.0, bottom:5.0),
+                        child: new DropdownButton<String>(
+                          iconSize: 2,
+                          underline: SizedBox(),
+                          hint: new Text(
+                            this.textCountryCity,
+                            textAlign: TextAlign.start,
+                            style: TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.grey[600]),
+                          ),
+                          items: countryCity.map((String value) {
+                            return new DropdownMenuItem<String>(
+                              value: value,
+                              child: new Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              this.textCountryCity = value;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.start,

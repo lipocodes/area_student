@@ -19,6 +19,7 @@ Widget signupInputBox(
     keyboardType: textInputType,
     style: new TextStyle(
       fontFamily: "Poppins",
+      color: Colors.grey[600],
     ),
   );
 }
