@@ -3,13 +3,16 @@
 <plist version="1.0">
 <dict>
     <key>NSPhotoLibraryUsageDescription</key>
-	<string>Access to your photo library</string>
+	<string>This app needs access to  photo library when open</string>
 
     <key>NSCameraUsageDescription</key>
-	<string>Access to your camera</string>
+	<string>This app needs Access to  camera when open</string>
 
 	<key>NSPhotoMicrophoneUsageDescription</key>
-	<string>Access to your microphone</string>
+	<string>This app needs access to  microphone when open</string>
+
+	<key>NSLocationWhenInUseUsageDescription</key> 
+    <string>This app needs access to location when open.</string>
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

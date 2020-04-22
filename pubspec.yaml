@@ -28,6 +28,7 @@ dependencies:
   firebase_storage:
   cloud_firestore:
   image_picker: 
+  geolocator:
   
   
 dev_dependencies:

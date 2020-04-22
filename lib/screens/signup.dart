@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
+import 'package:geolocator/geolocator.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -16,11 +17,9 @@ class _SignupState extends State<Signup> {
   TextEditingController controllerFirstName = new TextEditingController();
   TextEditingController controllerLastName = new TextEditingController();
   TextEditingController controllerPhoneNumber = new TextEditingController();
-  //TextEditingController controllerBirthDate = new TextEditingController();
   DateTime _birthDate = DateTime.now();
   String birthDate;
-  //TextEditingController controllerAcademicField = new TextEditingController();
-  TextEditingController controllerCountryCity = new TextEditingController();
+  String userAddress;
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   FirebaseMethods firebaseMethod = new FirebaseMethods();
 
@@ -29,7 +28,7 @@ class _SignupState extends State<Signup> {
   List<File> imageList = [];
   String textBirthdate = "Birth Date";
   String textAcademicField = "Academic Field";
-  String textCountryCity="Country & City";
+
 
   List<String> academicFields = [
     'Agriculture',
@@ -69,7 +68,7 @@ class _SignupState extends State<Signup> {
     'Transportation',
   ];
 
-  List<String> countryCity = ["Israel, Tel Aviv", "Israel, Haifa", "Israel, Beer Sheba", "Israel, North", "Israel, South"];
+
 
   Future<Null> selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
@@ -129,10 +128,26 @@ class _SignupState extends State<Signup> {
     } else if (this.textAcademicField == "Academic Field") {
       showSnackBar(screen4NoAcademicField, scaffoldKey);
       return;
-    } else if (textCountryCity == "Country & City") {
-      showSnackBar(screen4NoCOuntryCity, scaffoldKey);
-      return;
     }
+
+
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    List<Placemark> newPlace = await Geolocator()
+        .placemarkFromCoordinates(position.latitude, position.longitude);
+        
+
+ //important!!!!! subRegion is most important. If non-existent: region.  If non-existent:country.
+  String latitude = position.latitude.toString();
+  String longitude = position.longitude.toString();     
+  Placemark placeMark  = newPlace[0]; 
+  String locality = placeMark.locality;
+  String administrativeArea = placeMark.administrativeArea;
+  String subAdministrativeArea = placeMark.subAdministrativeArea;
+  String country = placeMark.country;
+ 
+
+       
 
     displayProgressDialog(context);
 
@@ -153,7 +168,12 @@ class _SignupState extends State<Signup> {
             phoneNumber: controllerPhoneNumber.text,
             birthDate: birthDate,
             academicField: this.textAcademicField,
-            countryCity: textCountryCity,
+            latitude: latitude,
+            longitude: longitude,
+            country: country,
+            region: administrativeArea,
+            subRegion: subAdministrativeArea,
+            locality: locality,
             gender: gender);
         if (imageList.length > 0) {
           imagesUrl = await firebaseMethod.uploadProductImages(
@@ -289,7 +309,7 @@ class _SignupState extends State<Signup> {
             ),
             Padding(
               padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
               child: signupInputBox(
                   labelText: screen4LastName,
                   controller: controllerLastName,
@@ -297,7 +317,7 @@ class _SignupState extends State<Signup> {
             ),
             Padding(
               padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
               child: signupInputBox(
                   labelText: screen4PhoneNumber,
                   controller: controllerPhoneNumber,
@@ -307,22 +327,22 @@ class _SignupState extends State<Signup> {
               width: 500.0,
               child: Padding(
                 padding:
-                    const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+                    const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
                 child: RaisedButton(
                   onPressed: () {
                     selectDate(context);
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(
-                      top: 10.0,
-                      bottom: 10.0,
+                      top: 5.0,
+                      bottom: 6.0,
                     ),
                     child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           this.textBirthdate,
                           style: TextStyle(
-                              fontSize: 16.0,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.normal,
                               color: Colors.grey[600]),
                         )),
@@ -339,7 +359,7 @@ class _SignupState extends State<Signup> {
             ),
             Padding(
               padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
+                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom:10.0),
               child: Container(
                 decoration: ShapeDecoration(
                   color: Colors.grey[100],
@@ -351,89 +371,38 @@ class _SignupState extends State<Signup> {
                 child: SizedBox(
                   width: 500.0,
                   child: Padding(
-                    padding: const EdgeInsets.only(left:10.0),
+                    padding: const EdgeInsets.only(left: 10.0),
                     child: Align(
                       alignment: Alignment.bottomLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top:5.0, bottom:5.0),
-                        child: new DropdownButton<String>(
-                          underline: SizedBox(),
-                          iconSize: 2,
-                          hint: new Text(
-                            this.textAcademicField,
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.grey[600]),
-                          ),
-                          items: academicFields.map((String value) {
-                            return new DropdownMenuItem<String>(
-                              value: value,
-                              child: new Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              this.textAcademicField = value;
-                            });
-                          },
+                      child: new DropdownButton<String>(
+                        underline: SizedBox(),
+                        iconSize: 2,
+                        hint: new Text(
+                          this.textAcademicField,
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.grey[600]),
                         ),
+                        items: academicFields.map((String value) {
+                          return new DropdownMenuItem<String>(
+                            value: value,
+                            child: new Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            this.textAcademicField = value;
+                          });
+                        },
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-               Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
-              child: Container(
-                decoration: ShapeDecoration(
-                  color: Colors.grey[100],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
-                    side: BorderSide(color: Colors.black45),
-                  ),
-                ),
-                child: SizedBox(
-                  width: 500.0,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left:10.0),
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      
-                      child: Padding(
-                       padding: const EdgeInsets.only(top:5.0, bottom:5.0),
-                        child: new DropdownButton<String>(
-                          iconSize: 2,
-                          underline: SizedBox(),
-                          hint: new Text(
-                            this.textCountryCity,
-                            textAlign: TextAlign.start,
-                            style: TextStyle(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.grey[600]),
-                          ),
-                          items: countryCity.map((String value) {
-                            return new DropdownMenuItem<String>(
-                              value: value,
-                              child: new Text(value),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              this.textCountryCity = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+
             new Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [

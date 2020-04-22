@@ -11,6 +11,7 @@ Widget signupInputBox(
       labelText: labelText,
       fillColor: Colors.grey[100],
       filled: true,
+      contentPadding: EdgeInsets.only(top:10.0, left:10.0, bottom: 10.0,),
       border: new OutlineInputBorder(
         borderRadius: new BorderRadius.circular(10.0),
       ),
@@ -18,6 +19,7 @@ Widget signupInputBox(
     controller: controller,
     keyboardType: textInputType,
     style: new TextStyle(
+      fontSize: 14.0,
       fontFamily: "Poppins",
       color: Colors.grey[600],
     ),

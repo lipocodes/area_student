@@ -28,7 +28,12 @@ class FirebaseMethods {
       String phoneNumber,
       String birthDate,
       String academicField,
-      String countryCity,
+      String latitude,
+      String longitude,
+      String country,
+      String region,
+      String subRegion,
+      String locality,
       String gender}) async {
     DocumentReference ref = await firestore.collection("userData").add({
       'firstName': firstName,
@@ -36,7 +41,12 @@ class FirebaseMethods {
       'phoneNumber': phoneNumber,
       'birthDate': birthDate,
       'academicField': academicField,
-      'countryCity': countryCity,
+      'latitude' : latitude,
+      'longitude' : longitude,
+      'country': country,
+      'region': region,
+      'subRegion': subRegion,
+      'locality': locality,
       'gender': gender,
     });
     print(ref.documentID);
