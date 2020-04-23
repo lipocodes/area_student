@@ -30,3 +30,10 @@ const String screen4TitlePrivacyPolicy = "Terms & Conditions";
 const String screen4ContentPrivactPolicy = "Here will be the Terms & Conditions of this app."; 
 const String screen4FirebaseCollectionName = "userData";
 const String screen4FirebaseUserAlreadyExists = "You already have an account!";
+
+const String screen8TitleText = "SMS Protection";
+const String screen8TitleBody = "Please enter 6 digits code which you have received via SMS";
+const String screen8SendVerificationCodeButton = "Done";
+const String screen8NotSufficientDigits = "Please enter 6 digits!";
+const String screen8AuthenticationFailed = "Authentication failed.  Please try again!";
+const String screen8TooMuchMistakes = "You have already been wrong for 3 times.";

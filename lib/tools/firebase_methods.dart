@@ -9,6 +9,8 @@ class FirebaseMethods {
   Firestore firestore = Firestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
 
+
+
   Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')

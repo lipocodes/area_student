@@ -47,6 +47,28 @@ Widget signupButton({int whichScreen}) {
   );
 }
 
+
+Widget sendVerificationCodeButton({int whichScreen}) {
+  return RaisedButton(
+    onPressed: null, //the click event is impolemented in the screen classes
+    padding: const EdgeInsets.all(0.0),
+    child: Container(
+      decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: <Color>[
+              Color(0xFFB3F5FC),
+              Color(0xFF81D4FA),
+              Color(0xFF29B6F6),
+            ],
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(8.0))),
+      padding: const EdgeInsets.fromLTRB(110, 12, 110, 12),
+      child: new Text(screen8SendVerificationCodeButton,
+          style: TextStyle(fontSize: 20, color: Colors.white)),
+    ),
+  );
+}
+
 Widget multiImagePickerList(
     {List<File> imageList, VoidCallback removeNewImage(int position)}) {
   return new Padding(

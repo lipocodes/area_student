@@ -29,6 +29,7 @@ dependencies:
   cloud_firestore:
   image_picker: 
   geolocator:
+  pin_code_fields:
   
   
 dev_dependencies:

@@ -7,6 +7,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:areastudent/screens/authentication.dart';
+import 'package:flutter/cupertino.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -182,7 +184,9 @@ class _SignupState extends State<Signup> {
               docID: documentID, data: imagesUrl);
         }
         closeProgressDialog(context);
-        Navigator.of(context).pop();
+        
+        //it's time for authentication through SMS
+        Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
       }
     } on PlatformException catch (e) {
       closeProgressDialog(context);
