@@ -30,6 +30,7 @@ dependencies:
   image_picker: 
   geolocator:
   pin_code_fields:
+  shared_preferences:
   
   
 dev_dependencies:

@@ -6,8 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'signup.dart';
 import 'profile.dart';
-import 'package:areastudent/tools/methods.dart';
+import 'package:areastudent/screens/authentication.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:areastudent/tools/widgets.dart';
+import 'package:areastudent/tools/methods.dart';
+
 
 class Login extends StatelessWidget {
   MediaQueryData queryData;
@@ -16,103 +19,20 @@ class Login extends StatelessWidget {
   String verificationId = "";
   FirebaseMethods firebaseMethod = new FirebaseMethods();
 
-  void validateUser(BuildContext context) async {
-    String phoneNumber = controllerPhoneNumber.text;
-
-    controllerPhoneNumber.text = "";
-    if (phoneNumber.length == 0) {
-      showSnackBar(screen3PhoneNumberEmpty, scaffoldKey);
-      Navigator.of(context).pop();
-    } else {
-      Navigator.of(context).pop();
-
-      Navigator.of(context).push(new CupertinoPageRoute(
-          builder: (BuildContext context) => new Profile()));
-    }
-  }
 
   buttonLoginTapped(BuildContext context) async {
  
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool accountExists = prefs.getBool('accountExists');
+    if(accountExists == true){
+      Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
+    }
+    else{
+       showSnackBar(screen4NoAccountYet , scaffoldKey);
+    }
+  
 
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                        child: Text(
-                          "X",
-                          style:
-                              new TextStyle(fontSize: 26.0, color: Colors.grey),
-                        ),
-                        onTap: () => Navigator.of(context).pop())
-                  ],
-                ),
-                Text(
-                  screen3Login,
-                  style: new TextStyle(
-                      fontSize: 26.0, fontWeight: FontWeight.w800),
-                ),
-                SizedBox(height: 20.0),
-                Text(screen3WelcomeBack,
-                    style: new TextStyle(fontSize: 22.0, color: Colors.grey)),
-              ],
-            ),
-            content: new TextFormField(
-              decoration: new InputDecoration(
-                labelText: screen3PhoneNumberHint,
-                fillColor: Colors.grey[100],
-                filled: true,
-                border: new OutlineInputBorder(
-                  borderRadius: new BorderRadius.circular(5.0),
-                ),
-              ),
-              controller: controllerPhoneNumber,
-              keyboardType: TextInputType.phone,
-              style: new TextStyle(
-                fontFamily: "Poppins",
-              ),
-            ),
-            actions: <Widget>[
-              Column(
-                children: <Widget>[
-                  RaisedButton(
-                    //Login button
-                    onPressed: () {
-                      validateUser(context);
-                    },
-                    textColor: Colors.white,
-                    padding: const EdgeInsets.all(0.0),
-                    //shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(80.0)),
-                    child: Container(
-                      decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: <Color>[
-                              Color(0xFFB3F5FC),
-                              Color(0xFF81D4FA),
-                              Color(0xFF29B6F6),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                      padding: const EdgeInsets.fromLTRB(100, 15, 100, 15),
-                      child: const Text(screen3Login,
-                          style: TextStyle(fontSize: 20)),
-                    ),
-                  ),
-                  new SizedBox(
-                    height: 10.0,
-                  ),
-                ],
-              ),
-            ],
-          );
-        });
+    
   }
 
   @override

@@ -9,6 +9,7 @@ import 'package:areastudent/tools/firebase_methods.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:areastudent/screens/authentication.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -185,8 +186,12 @@ class _SignupState extends State<Signup> {
         }
         closeProgressDialog(context);
         
+         SharedPreferences prefs = await SharedPreferences.getInstance();
+         prefs.setBool('accountExists', true);
+
         //it's time for authentication through SMS
-        Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
+        //Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
+       Navigator.of(context).pop();
       }
     } on PlatformException catch (e) {
       closeProgressDialog(context);

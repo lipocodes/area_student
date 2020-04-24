@@ -63,7 +63,7 @@ Widget sendVerificationCodeButton({int whichScreen}) {
           ),
           borderRadius: BorderRadius.all(Radius.circular(8.0))),
       padding: const EdgeInsets.fromLTRB(110, 12, 110, 12),
-      child: new Text(screen8SendVerificationCodeButton,
+      child: new Text(screen8AuthenticationButton,
           style: TextStyle(fontSize: 20, color: Colors.white)),
     ),
   );
