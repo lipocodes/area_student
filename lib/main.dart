@@ -22,7 +22,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
      
-      home: new AuthService().hanldeAuth(),
+      //home: new AuthService().hanldeAuth(),
+      home: Login(),
     );
   }
 }
