@@ -31,6 +31,7 @@ dependencies:
   geolocator:
   pin_code_fields:
   shared_preferences:
+  country_code_picker:
   
   
 dev_dependencies:

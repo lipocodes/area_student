@@ -32,7 +32,6 @@ class _SignupState extends State<Signup> {
   String textBirthdate = "Birth Date";
   String textAcademicField = "Academic Field";
 
-
   List<String> academicFields = [
     'Agriculture',
     'Anthropology',
@@ -70,8 +69,6 @@ class _SignupState extends State<Signup> {
     'Statistics',
     'Transportation',
   ];
-
-
 
   Future<Null> selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
@@ -133,24 +130,19 @@ class _SignupState extends State<Signup> {
       return;
     }
 
-
     Position position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     List<Placemark> newPlace = await Geolocator()
         .placemarkFromCoordinates(position.latitude, position.longitude);
-        
 
- //important!!!!! subRegion is most important. If non-existent: region.  If non-existent:country.
-  String latitude = position.latitude.toString();
-  String longitude = position.longitude.toString();     
-  Placemark placeMark  = newPlace[0]; 
-  String locality = placeMark.locality;
-  String administrativeArea = placeMark.administrativeArea;
-  String subAdministrativeArea = placeMark.subAdministrativeArea;
-  String country = placeMark.country;
- 
-
-       
+    //important!!!!! subRegion is most important. If non-existent: region.  If non-existent:country.
+    String latitude = position.latitude.toString();
+    String longitude = position.longitude.toString();
+    Placemark placeMark = newPlace[0];
+    String locality = placeMark.locality;
+    String administrativeArea = placeMark.administrativeArea;
+    String subAdministrativeArea = placeMark.subAdministrativeArea;
+    String country = placeMark.country;
 
     displayProgressDialog(context);
 
@@ -185,13 +177,13 @@ class _SignupState extends State<Signup> {
               docID: documentID, data: imagesUrl);
         }
         closeProgressDialog(context);
-        
-         SharedPreferences prefs = await SharedPreferences.getInstance();
-         prefs.setBool('accountExists', true);
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setBool('accountExists', true);
 
         //it's time for authentication through SMS
         //Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
-       Navigator.of(context).pop();
+        Navigator.of(context).pop();
       }
     } on PlatformException catch (e) {
       closeProgressDialog(context);
@@ -367,8 +359,8 @@ class _SignupState extends State<Signup> {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0, bottom:10.0),
+              padding: const EdgeInsets.only(
+                  left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
               child: Container(
                 decoration: ShapeDecoration(
                   color: Colors.grey[100],
@@ -411,7 +403,6 @@ class _SignupState extends State<Signup> {
                 ),
               ),
             ),
-
             new Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [

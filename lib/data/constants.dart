@@ -33,8 +33,8 @@ const String screen4FirebaseUserAlreadyExists = "You already have an account!";
 const String screen4NoAccountYet = "You need to create an account before you can log in!";
 
 const String screen8TitleText = "Phone Validation";
-const String screen8TitleBody = "Please enter full phone number:";
-const String screen8HintText = "Example:  +972541234567";
+const String screen8TitleBody = "Phone Number";
+const String screen8HintText = "Phone Number";
 const String screen8AuthenticationButton = "Login";
 const String screen8NotSufficientDigits = "Please enter 6 digits!";
 const String screen8AuthenticationFailed = "Authentication failed.  Please try again!";

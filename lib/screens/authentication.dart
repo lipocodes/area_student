@@ -5,7 +5,7 @@ import 'package:areastudent/tools/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'profile.dart';
 import 'package:areastudent/tools/methods.dart';
-import 'package:areastudent/data/constants.dart';
+import 'package:country_code_picker/country_code_picker.dart';
 
 class Authentication extends StatefulWidget {
   @override
@@ -18,6 +18,12 @@ class _AuthenticationState extends State<Authentication> {
   static String verificationId;
   static final scaffoldKey = new GlobalKey<ScaffoldState>();
   static BuildContext con;
+  String countryCode="+972";
+
+ void _onCountrySelected(CountryCode countryCode) {
+    //TODO : manipulate the selected country code here
+    this.countryCode = countryCode.toString();
+  }
 
 //called when the server creates a new authentication account successfully
   final PhoneVerificationCompleted verified = (AuthCredential authResult) {
@@ -45,17 +51,17 @@ class _AuthenticationState extends State<Authentication> {
   Future<void> verifyPhone() async {
     FocusScope.of(context).requestFocus(FocusNode());
 
-    if(this.phoneNo.length>0) {
-       await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: this.phoneNo,
-        timeout: const Duration(seconds: 5),
-        verificationCompleted: verified,
-        verificationFailed: verificationFailed,
-        codeSent: smsSent,
-        codeAutoRetrievalTimeout: autoTimeout);
-    }
+    if (this.phoneNo.length > 0) {
+      if(this.phoneNo.substring(0,1) == "0")   this.phoneNo = this.phoneNo.substring(1);
 
-   
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: this.countryCode + this.phoneNo,
+          timeout: const Duration(seconds: 5),
+          verificationCompleted: verified,
+          verificationFailed: verificationFailed,
+          codeSent: smsSent,
+          codeAutoRetrievalTimeout: autoTimeout);
+    }
   }
 
   @override
@@ -96,6 +102,18 @@ class _AuthenticationState extends State<Authentication> {
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                CountryCodePicker(
+                  onChanged: _onCountrySelected,
+                  // Initial selection and favorite can be one of code ('IT') OR dial_code('+39')
+                  initialSelection: 'IL',
+                  favorite: ['+972', 'IL'],
+                  // optional. Shows only country name and flag
+                  showCountryOnly: false,
+                  // optional. Shows only country name and flag when popup is closed.
+                  showOnlyCountryWhenClosed: false,
+                  // optional. aligns the flag and the Text left
+                  alignLeft: false,
+                ),
                 new Padding(
                   padding: EdgeInsets.only(left: 25.0, right: 25.0),
                   child: new TextFormField(
@@ -104,7 +122,7 @@ class _AuthenticationState extends State<Authentication> {
                       fontFamily: "Poppins",
                       color: Colors.grey[600],
                     ),
-                    keyboardType: TextInputType.text,
+                    keyboardType: TextInputType.phone,
                     decoration: new InputDecoration(
                       hintText: screen8HintText,
                       fillColor: Colors.grey[100],
