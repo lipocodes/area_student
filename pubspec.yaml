@@ -32,6 +32,7 @@ dependencies:
   pin_code_fields:
   shared_preferences:
   country_code_picker:
+  firebase_crashlytics:
   
   
 dev_dependencies:
