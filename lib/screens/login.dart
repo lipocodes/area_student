@@ -28,7 +28,8 @@ class Login extends StatelessWidget {
       Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
     }
     else{
-       showSnackBar(screen4NoAccountYet , scaffoldKey);
+       //showSnackBar(screen4NoAccountYet , scaffoldKey);
+         Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
     }
   
 
