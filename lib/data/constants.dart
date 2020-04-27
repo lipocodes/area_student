@@ -40,3 +40,17 @@ const String screen8NotSufficientDigits = "Please enter 6 digits!";
 const String screen8AuthenticationFailed = "Authentication failed.  Please try again!";
 const String screen8TooMuchMistakes = "You have already been wrong for 3 times.";
 const String screen8WrongNumber = "You entered a wrong number.  Please try again!";
+
+const List<String> screen12PopupChoices = ['Profile', 'Settings', 'Block Users', 'About Us', 'Contact Us', 'Recommend to Friend', 'Logout']; 
+const String screen12Logout = "Logout";
+const String screen12RecommendToFriend = "Recommend to Friend";
+const String screen12ContactUs = "Contact Us";
+
+const String screen12ContactUsTitle = "Contact Us";
+const String screen12ContactUsBody = "Please write down your questions.";
+const String screen12AboutUs = "About Us";
+const String screen12AboutUsBody = "We are a team of enthusiastic app developers.";
+const String screen12BlockedUsers = "Blocked Users";
+const String screen12Settings = "Settings";
+const String screen12EditProfile = "Edit Profile";
+
