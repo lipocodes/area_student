@@ -157,7 +157,7 @@ class _SignupState extends State<Signup> {
         closeProgressDialog(context);
         showSnackBar(screen4FirebaseUserAlreadyExists, scaffoldKey);
       } else {
-        documentID = await firebaseMethod.createUserAccount(
+         await firebaseMethod.createUserAccount(
             firstName: controllerFirstName.text,
             lastName: controllerLastName.text,
             phoneNumber: controllerPhoneNumber.text,
@@ -172,9 +172,9 @@ class _SignupState extends State<Signup> {
             gender: gender);
         if (imageList.length > 0) {
           imagesUrl = await firebaseMethod.uploadProductImages(
-              docID: documentID, imageList: imageList);
+             imageList: imageList);
           updateImageList = await firebaseMethod.updateProductImages(
-              docID: documentID, data: imagesUrl);
+               data: imagesUrl);
         }
         closeProgressDialog(context);
 
@@ -228,6 +228,8 @@ class _SignupState extends State<Signup> {
       setState(() {});
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {

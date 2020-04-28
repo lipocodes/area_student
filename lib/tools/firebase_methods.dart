@@ -1,17 +1,57 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class FirebaseMethods {
   Firestore firestore = Firestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
+  final  dbRef = FirebaseDatabase.instance.reference();
+  GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+
+  
+  login() async{  
+    try{
+      final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+       final GoogleSignInAuthentication googleAuth = await googleUser.authentication; 
+
+       final AuthCredential credential = GoogleAuthProvider.getCredential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final FirebaseUser user =
+          (await auth.signInWithCredential(credential)).user;
+
+      var uid = user.uid;
+
+          
+        
+        
+    } catch (err){
+      print("eeeeeeeeeeeeeeeeeeeeeeeeeee= " + err);
+    }
+  }
+
+  logout(){
+    _googleSignIn.signOut();
+  }
 
 
+    bool authenticateGoogle(){
+ 
 
-  Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
+      return true;
+  }
+
+
+Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
         .where('phoneNumber', isEqualTo: phoneNumber)
@@ -24,7 +64,13 @@ class FirebaseMethods {
     }
   }
 
-  Future<String> createUserAccount(
+    Future<String> inputData() async {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    final String uid = user.uid.toString();
+    return uid;
+  }
+
+  Future<void> createUserAccount(
       {String firstName,
       String lastName,
       String phoneNumber,
@@ -37,7 +83,11 @@ class FirebaseMethods {
       String subRegion,
       String locality,
       String gender}) async {
-    DocumentReference ref = await firestore.collection("userData").add({
+
+      String uid = await inputData();
+    
+      await firestore.collection("userData").document(uid).setData(({
+      'uid'  :uid, 
       'firstName': firstName,
       'lastName': lastName,
       'phoneNumber': phoneNumber,
@@ -50,23 +100,36 @@ class FirebaseMethods {
       'subRegion': subRegion,
       'locality': locality,
       'gender': gender,
+    })).whenComplete( () {
+       updatePreference();
     });
-    print(ref.documentID);
+    
+  }
 
-    return ref.documentID;
+
+  updatePreference() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('existAccount', true);
+  }
+
+  Future<bool> existAccount() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool yes_no = prefs.getBool('existAccount');
+    return yes_no;
   }
 
   Future<List<String>> uploadProductImages(
-      {String docID, List<File> imageList}) async {
+      { List<File> imageList}) async {
     List<String> imagesUrl = new List();
+      String uid = await inputData();
 
     try {
       for (int s = 0; s < imageList.length; s++) {
         StorageReference storageReference = FirebaseStorage.instance
             .ref()
             .child("userData")
-            .child(docID)
-            .child(docID + ".$s.jpg");
+            .child(uid)
+            .child(uid + ".$s.jpg");
         StorageUploadTask uploadTask = storageReference.putFile(imageList[s]);
         await uploadTask.onComplete;
         print('File Uploaded');
@@ -80,13 +143,14 @@ class FirebaseMethods {
     }
   }
 
-  Future<bool> updateProductImages({String docID, List<String> data}) async {
+  Future<bool> updateProductImages({ List<String> data}) async {
     bool msg;
-
+   String uid = await inputData();
+   
     try {
       await firestore
           .collection("userData")
-          .document(docID)
+          .document(uid)
           .updateData({'profileImages': data}).whenComplete(() {
         msg = true;
       });

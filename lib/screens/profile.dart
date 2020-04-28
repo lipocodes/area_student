@@ -3,8 +3,12 @@ import 'package:areastudent/tools/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:share/share.dart';
+import 'blocked_users.dart';
 import 'contact.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:areastudent/tools/firebase_methods.dart';
+
+
 
 class Profile extends StatefulWidget {
   @override
@@ -12,6 +16,17 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  FirebaseMethods firebaseMethods = new FirebaseMethods();
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+
   void onTappedSettingsButton(String choice) {
     if (choice == screen12Logout)
       signOut();
@@ -54,8 +69,10 @@ class _ProfileState extends State<Profile> {
               FlatButton(
                 child: Text('Ok'),
                 onPressed: () {
+                  Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) => new BlockedUsers()));
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
+                  //Navigator.of(context).pop();
                 },
               ),
             ],
@@ -183,7 +200,7 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> signOut() async {
-    await AuthService().signOut();
+    await firebaseMethods.logout();
     //exit(0);
     Navigator.popUntil(context, ModalRoute.withName('/'));
   }
@@ -191,6 +208,7 @@ class _ProfileState extends State<Profile> {
 
   Future<bool> _onBackPressed() {
    signOut();
+   Navigator.of(context).pop();
 }
 
   @override

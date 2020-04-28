@@ -1,16 +1,13 @@
 import 'package:areastudent/tools/firebase_methods.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:areastudent/data/constants.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'signup.dart';
 import 'profile.dart';
-import 'package:areastudent/screens/authentication.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:areastudent/tools/methods.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatelessWidget {
   MediaQueryData queryData;
@@ -18,23 +15,29 @@ class Login extends StatelessWidget {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   String verificationId = "";
   FirebaseMethods firebaseMethod = new FirebaseMethods();
+  FirebaseMethods firebaseMethods = new FirebaseMethods();
 
+  Future loginSignup(BuildContext context) async {
+    await firebaseMethods.login();  
+    Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Signup() )); 
+  }
 
-  buttonLoginTapped(BuildContext context) async {
- 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool accountExists = prefs.getBool('accountExists');
-    if(accountExists == true){
-      Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
-    }
-    else{
-       //showSnackBar(screen4NoAccountYet , scaffoldKey);
-         Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
-    }
-  
+    Future loginProfile(BuildContext context) async {
+      
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool yesNo = prefs.getBool('existAccount');
 
+      if(yesNo==true){
+        await firebaseMethods.login();  
+        Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
+      }
+      else{
+        showSnackBar(screen2WelcomeBody, scaffoldKey);
+      }
     
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +101,8 @@ class Login extends StatelessWidget {
               children: <Widget>[
                 GestureDetector(
                     onTap: () {
-                      Navigator.of(context).push(new CupertinoPageRoute(
-                          builder: (BuildContext context) => new Signup()));
+                      loginSignup(context);
+                     
                     },
                     child: signupButton(whichScreen: 2)),
               ],
@@ -146,7 +149,8 @@ class Login extends StatelessWidget {
                   ),
                   GestureDetector(
                       onTap: () {
-                        buttonLoginTapped(context);
+                        // buttonLoginTapped(context);
+                        loginProfile(context);
                       },
                       child: new Text(
                         "LOGIN",

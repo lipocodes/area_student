@@ -36,9 +36,7 @@ class _AuthenticationState extends State<Authentication> {
   final PhoneVerificationFailed verificationFailed =
       (AuthException authException) {
     print("ddddddddddddddddddddddddddd= " + authException.message);
-    Navigator.of(con).push(new CupertinoPageRoute(
-        builder: (BuildContext context) => new Profile()));
-    //showSnackBar(screen8WrongNumber, scaffoldKey);
+    showSnackBar(screen8WrongNumber, scaffoldKey);
   };
 
 //called once a SMS is sent to the user (though the user doesn't do anything with it)

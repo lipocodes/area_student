@@ -34,8 +34,11 @@ dependencies:
   country_code_picker:
   firebase_crashlytics:
   share:
-  url_launcher:  
-  
+  url_launcher: 
+  cached_network_image:
+  page_transition:
+  google_sign_in:        
+  flutter_auth_buttons:
   
 dev_dependencies:
   flutter_native_splash:
