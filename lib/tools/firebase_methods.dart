@@ -82,7 +82,9 @@ Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
       String region,
       String subRegion,
       String locality,
-      String gender}) async {
+      String gender,
+      List<String> blockedUsers,
+      }) async {
 
       String uid = await inputData();
     
@@ -100,6 +102,7 @@ Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
       'subRegion': subRegion,
       'locality': locality,
       'gender': gender,
+      'blockedUsers': blockedUsers
     })).whenComplete( () {
        updatePreference();
     });

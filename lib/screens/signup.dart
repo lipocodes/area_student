@@ -169,7 +169,9 @@ class _SignupState extends State<Signup> {
             region: administrativeArea,
             subRegion: subAdministrativeArea,
             locality: locality,
-            gender: gender);
+            gender: gender,
+            blockedUsers: [],
+            );
         if (imageList.length > 0) {
           imagesUrl = await firebaseMethod.uploadProductImages(
              imageList: imageList);

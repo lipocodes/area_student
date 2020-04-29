@@ -58,27 +58,9 @@ class _ProfileState extends State<Profile> {
         },
       );
     } else if (choice == screen12BlockedUsers) {
-      showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Blocked Users'),
-            content: const Text(
-                'Here will be the Blocked Users screen in the future!!'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('Ok'),
-                onPressed: () {
-                  Navigator.of(context).push(new CupertinoPageRoute(
+      Navigator.of(context).push(new CupertinoPageRoute(
           builder: (BuildContext context) => new BlockedUsers()));
-                  Navigator.of(context).pop();
-                  //Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+  
     } else if (choice == screen12Settings) {
       showDialog<void>(
         context: context,

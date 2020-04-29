@@ -3,27 +3,30 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BlockedUsers extends StatefulWidget {
   @override
   _BlockedUsersState createState() => _BlockedUsersState();
 }
 
-
-
-
 class _BlockedUsersState extends State<BlockedUsers> {
-
   final DBRef = FirebaseDatabase.instance.reference();
   List<String> listVisitedUid = List();
   List<String> firstName = List();
   List<String> lastName = List();
   List<String> icon = List();
   List<String> email = List();
-  int performedSetState=0;
-
+  int performedSetState = 0;
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
+  Firestore firestore = Firestore.instance;
+  List<dynamic> blockedUsers = [];
+  List<dynamic> blockedUsersUid = [];
+  List<dynamic> blockedUsersProfileImage = [];
+  List<dynamic> blockedUsersFirstName = [];
+  List<dynamic> blockedUsersLastName = [];
+  int listViewDataUploaded = 0;
+  String uid;
 
   Future<String> inputData() async {
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
@@ -31,133 +34,174 @@ class _BlockedUsersState extends State<BlockedUsers> {
     return uid;
   }
 
-
-
-
-  void listBlockedUsers(){
-
-    inputData().then((uid) {
-      
-
-      DBRef.child("accounts").child(uid).once().then((
-          DataSnapshot dataSnapshot) {
-        var arr = dataSnapshot.value;
-
-        List blockedUsers = arr["blockedUsers"];
-
-
-
-        for(var i=0; i<blockedUsers.length; i++){
-
-          DBRef.child("accounts").child(blockedUsers[i]).once().then((
-              DataSnapshot dataSnapshot) {
-            Map<dynamic, dynamic> values = dataSnapshot.value;
-
-            try {
-              values.forEach((key, values) {
-                if (key == "uid") listVisitedUid.add(values.toString());
-                if (key == "valueFirstName")
-                  firstName.add(values.toString());
-                else if (key == "valueLastName")
-                  lastName.add(values.toString());
-                else if (key == "profilePhoto") icon.add(values.toString());
-                else if (key == "email") email.add(values.toString());
-              });
-            } catch(e) {}
-
-          }).then((res) {setState(() {
-            this.performedSetState=1;
-          });});
-        }
-
-      }).then((res) {});
-
-    });
-
+  getDataOfUsers(String uid) async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    this.blockedUsersUid.add(snapshot[0].data['uid']);
+    this.blockedUsersFirstName.add(snapshot[0].data['firstName']);
+    this.blockedUsersLastName.add(snapshot[0].data['lastName']);
+    this.blockedUsersProfileImage.add(snapshot[0].data['profileImages'][0]);
   }
 
+  void listBlockedUsers() async {
+    this.uid = await inputData();
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    this.blockedUsers = snapshot[0].data['blockedUsers'];
+
+    for (int i = 0; i < this.blockedUsers.length; i++) {
+      await getDataOfUsers(this.blockedUsers[0]);
+    }
+
+    setState(() {});
+  }
+
+  removeBlockedUser(index) async {
+    this.blockedUsers.removeAt(index);
+    await firestore
+        .collection("userData")
+        .document(this.uid)
+        .updateData(({'blockedUsers': blockedUsers}))
+        .whenComplete(() {
+      blockedUsers = [];
+      blockedUsersUid = [];
+      blockedUsersProfileImage = [];
+      blockedUsersFirstName = [];
+      blockedUsersLastName = [];
+      listBlockedUsers();
+    });
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-
-
+    listBlockedUsers();
   }
-
 
   @override
   Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        resizeToAvoidBottomPadding: false,
+        key: scaffoldKey,
+        appBar: AppBar(
+          leading: new IconButton(
+            icon: new Icon(Icons.arrow_back, color: Colors.black, size:40.0),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          
+          title: new Text(
+            "Blocked Users",
+            style: new TextStyle(
+                color: Colors.black,
+                fontSize: 24.0,
+                fontWeight: FontWeight.w900),
+          ),
+          backgroundColor: Colors.white,
+        ),
 
 
-     if(performedSetState == 0){
-       listBlockedUsers();
-       return Container();
-     }
+              bottomNavigationBar: BottomNavigationBar(
+       type: BottomNavigationBarType.fixed,
+       currentIndex: 0, // this will be set when a new tab is tapped
+       items: [
+         BottomNavigationBarItem(
 
-     if(performedSetState == 1) {
-       return    SafeArea(
-         child: MaterialApp(
-           home: Scaffold(
-               body:  Column(
-                 children: <Widget>[
-                   ListTile(
-                     title: Text('Blocked Users', style: new TextStyle(
-                       fontSize: 20.0,
-                     ),),
-
-                   ),
-                   GestureDetector(
-
-                     child: Container(
-                       height:220.0,
-
-                       child:  ListView.builder(
-                           itemCount: firstName.length,
-                           itemBuilder: (BuildContext ctxt, int index) {
-                             return GestureDetector(
-                               onTap: () {
-                                 //Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: VisitedProfile(firstName[index] +  " " + lastName[index] , email[index], icon[index], listVisitedUid[index])));
-                               },
-                               child: Row(
-                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                 children: <Widget>[
-
-                                   Container(
-                                     width: 50.0,
-                                     height: 50.0,
-                                     decoration: new BoxDecoration(
-                                       shape: BoxShape.circle,
-                                       image: new DecorationImage(
-                                         fit: BoxFit.fill,
-                                         image: new CachedNetworkImageProvider(icon[index],),
-
-                                       ),
-                                     ),
-                                   ),
-
-                                   new Text(firstName[index]),
-                                   new Text(lastName[index]),
-
-
-
-                                 ],
-                               ),
-                             );
-                           }
-                       ),
-                     ),
-                   ),
-                 ],
-               )
-           ),
+           icon: new Icon(Icons.perm_identity, size:30.0),
+           title: new Text('Profile'),
          ),
-       );
-     }
+         BottomNavigationBarItem(
+           icon: new Icon(Icons.group, size:30.0),
+           title: new Text('Groups'),
+         ),
+         BottomNavigationBarItem(
+           icon: Icon(Icons.home, size:30.0),
+           title: Text('Home')
+         ),
+         BottomNavigationBarItem(
+           icon: Icon(Icons.favorite_border, size:30.0),
+           title: Text('Meet')
+         ),
+         BottomNavigationBarItem(
+           icon: Icon(Icons.chat_bubble_outline, size:30.0),
+           title: Text('Chats')
+         )
+       ],
+     ),
 
 
-
-
+        body: Column(
+          children: <Widget>[
+            SizedBox(height:20.0),
+            Container(
+              height: 220.0,
+              child: ListView.builder(
+                  itemCount: blockedUsersFirstName.length,
+                  itemBuilder: (BuildContext ctxt, int index) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            //Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: VisitedProfile(firstName[index] +  " " + lastName[index] , email[index], icon[index], listVisitedUid[index])));
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 50.0,
+                            decoration: new BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: new DecorationImage(
+                                fit: BoxFit.fill,
+                                image: new CachedNetworkImageProvider(
+                                  blockedUsersProfileImage[index],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        new Text(
+                          blockedUsersFirstName[index],
+                          style: new TextStyle(
+                            fontSize: 20.0,
+                            fontFamily: "Poppins",
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        new Text(
+                          blockedUsersLastName[index],
+                          style: new TextStyle(
+                            fontSize: 20.0,
+                            fontFamily: "Poppins",
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        new IconButton(
+                          icon: Icon(
+                            Icons.cancel,
+                            color: Colors.red,
+                            size: 46.0,
+                          ),
+                          onPressed: () {
+                            removeBlockedUser(index);
+                          },
+                        ),
+                      ],
+                    );
+                  }),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
