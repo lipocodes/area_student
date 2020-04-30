@@ -32,7 +32,9 @@ class Login extends StatelessWidget {
         Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
       }
       else{
-        showSnackBar(screen2WelcomeBody, scaffoldKey);
+        await firebaseMethods.login();  
+        Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
+        //showSnackBar(screen2WelcomeBody, scaffoldKey);
       }
     
   }

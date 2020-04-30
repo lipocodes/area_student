@@ -54,3 +54,5 @@ const String screen12BlockedUsers = "Blocked Users";
 const String screen12Settings = "Settings";
 const String screen12EditProfile = "Edit Profile";
 
+const String screen13DefaultProfileImage = "https://firebasestorage.googleapis.com/v0/b/area-student-d501b.appspot.com/o/userData%2Fimportant%2Fno_image_available.png?alt=media&token=5a1746c8-6376-4d95-8de5-255401c4ebd4";
+
