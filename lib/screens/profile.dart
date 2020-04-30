@@ -184,13 +184,16 @@ class _ProfileState extends State<Profile> {
   Future<void> signOut() async {
     await firebaseMethods.logout();
     //exit(0);
-    Navigator.popUntil(context, ModalRoute.withName('/'));
+    //Navigator.popUntil(context, ModalRoute.withName('/login'));
+    Navigator.pushNamed(context, '/login');
+    
   }
 
 
-  Future<bool> _onBackPressed() {
-   signOut();
-   Navigator.of(context).pop();
+  Future<bool> _onBackPressed() async{
+   //signOut();
+   //Navigator.popUntil(context, ModalRoute.withName('/'));
+   return true;
 }
 
   @override

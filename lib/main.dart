@@ -21,6 +21,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
+      routes: {
+        '/login' :(context) => Login(),
+      },
       theme: ThemeData(
    
         primarySwatch: Colors.blue,
