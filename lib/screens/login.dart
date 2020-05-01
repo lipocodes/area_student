@@ -135,12 +135,31 @@ class Login extends StatelessWidget {
               ),
             ]),
 
+             new Row(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: [
+                      GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
+                      },
+                      child: new Text(
+                        "לוגאין מישל",
+                        style: new TextStyle(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 16.0,
+                          color: Colors.lightBlue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      )),
+               ],
+             ),
             //Login option for users who already have an account
             new Expanded(
               child: new Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+             
                   new Text(
                     "Already Have an Account?",
                     style: new TextStyle(

@@ -7,7 +7,7 @@ import 'blocked_users.dart';
 import 'contact.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
-
+import 'followers.dart';
 
 
 class Profile extends StatefulWidget {
@@ -26,6 +26,13 @@ class _ProfileState extends State<Profile> {
     super.initState();
 
   }
+
+
+  void onPressedFollowersButton() {
+    Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) => new Followers()));
+  }
+
 
   void onTappedSettingsButton(String choice) {
     if (choice == screen12Logout)
@@ -218,6 +225,11 @@ class _ProfileState extends State<Profile> {
                 child: new IconButton(
                     icon: Icon(Icons.settings),
                     onPressed: onPressedSettingsButton)),
+             Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: new IconButton(
+                    icon: Icon(Icons.favorite),
+                    onPressed: onPressedFollowersButton)),        
           ],
         ),
       ),

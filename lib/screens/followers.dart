@@ -1,33 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:areastudent/data/constants.dart';
 
-
-class BlockedUsers extends StatefulWidget {
+class Followers extends StatefulWidget {
   @override
-  _BlockedUsersState createState() => _BlockedUsersState();
+  _FollowersState createState() => _FollowersState();
 }
 
-class _BlockedUsersState extends State<BlockedUsers> {
-  final DBRef = FirebaseDatabase.instance.reference();
-
-  List<String> firstName = List();
-  List<String> lastName = List();
-  List<String> icon = List();
-  List<String> email = List();
+class _FollowersState extends State<Followers> {
   int performedSetState = 0;
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   Firestore firestore = Firestore.instance;
-  List blockedUsersFirstName = [];
-  int listViewDataUploaded = 0;
   String uid;
-  List blockedUsers = [];
-  List blockedUid = [];
-  List blockedFirstName = [];
-  List blockedLastName = [];
-  List blockedProfileImage = [];
+  List followers = [];
+  List followerUid = [];
+  List followerFirstName = [];
+  List followerLastName = [];
+  List followerProfileImage = [];
   bool tempUid = false;
 
   Future<String> inputData() async {
@@ -49,20 +40,20 @@ class _BlockedUsersState extends State<BlockedUsers> {
     final List<DocumentSnapshot> snapshot = result.documents;
 
     try {
-      this.blockedUid.add(snapshot[0].data['uid']);
-      this.blockedFirstName.add(snapshot[0].data['firstName']);
-      this.blockedLastName.add(snapshot[0].data['lastName']);
-      this.blockedProfileImage.add('none');
-      int len = this.blockedProfileImage.length;
-      this.blockedProfileImage[len - 1] = snapshot[0].data['profileImages'][0];
+      this.followerUid.add(snapshot[0].data['uid']);
+      this.followerFirstName.add(snapshot[0].data['firstName']);
+      this.followerLastName.add(snapshot[0].data['lastName']);
+      this.followerProfileImage.add('none');
+      int len = this.followerProfileImage.length;
+      this.followerProfileImage[len - 1] = snapshot[0].data['profileImages'][0];
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
     }
   }
 
-  void listBlockedUsers() async {
+  void listFollowers() async {
     this.uid = await inputData();
-    if (this.tempUid == true) { 
+    if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
       this.tempUid = true;
     }
@@ -72,28 +63,28 @@ class _BlockedUsersState extends State<BlockedUsers> {
         .where('uid', isEqualTo: uid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
-    this.blockedUsers = snapshot[0].data['blockedUsers'];
+    this.followers = snapshot[0].data['followers'];
 
-    for (int i = 0; i < this.blockedUsers.length; i++) {
-      await getDataOfUsers(this.blockedUsers[i]);
+    for (int i = 0; i < this.followers.length; i++) {
+      await getDataOfUsers(this.followers[i]);
     }
 
     setState(() {});
   }
 
-  removeBlockedUser(index) async {
-    this.blockedUsers.removeAt(index);
+  removeFollower(index) async {
+    this.followers.removeAt(index);
     await firestore
         .collection("userData")
         .document(this.uid)
-        .updateData(({'blockedUsers': blockedUsers}))
+        .updateData(({'followers': followers}))
         .whenComplete(() {
-      blockedUsers = [];
-      blockedUid = [];
-      blockedProfileImage = [];
-      blockedFirstName = [];
-      blockedLastName = [];
-      listBlockedUsers();
+      followers = [];
+      followerUid = [];
+      followerProfileImage = [];
+      followerFirstName = [];
+      followerLastName = [];
+      listFollowers();
     });
   }
 
@@ -101,7 +92,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    listBlockedUsers();
+    listFollowers();
   }
 
   @override
@@ -118,7 +109,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
           centerTitle: true,
           elevation: 0,
           title: new Text(
-            "Blocked Users",
+            "Followers",
             style: new TextStyle(
                 color: Colors.black,
                 fontSize: 24.0,
@@ -154,7 +145,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
             Container(
               height: 220.0,
               child: ListView.builder(
-                  itemCount: blockedFirstName.length,
+                  itemCount: followerFirstName.length,
                   itemBuilder: (BuildContext ctxt, int index) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 20.0),
@@ -169,7 +160,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
                               width: 50.0,
                               height: 50.0,
                               child: new CachedNetworkImage(
-                                imageUrl: blockedProfileImage[index],
+                                imageUrl: followerProfileImage[index],
                                 placeholder: (context, url) =>
                                     CircularProgressIndicator(),
                                 errorWidget: (context, url, error) =>
@@ -178,12 +169,12 @@ class _BlockedUsersState extends State<BlockedUsers> {
                             ),
                           ),
                           SizedBox(
-                            width: 150.0,
+                            width: 200.0,
                             child: new Text(
-                              blockedFirstName[index] != null
-                                  ? blockedFirstName[index] +
+                              followerFirstName[index] != null
+                                  ? followerFirstName[index] +
                                       " " +
-                                      blockedLastName[index]
+                                      followerLastName[index]
                                   : "",
                               style: new TextStyle(
                                 fontSize: 20.0,
@@ -192,15 +183,29 @@ class _BlockedUsersState extends State<BlockedUsers> {
                               ),
                             ),
                           ),
-                          new IconButton(
-                            icon: Icon(
-                              Icons.cancel,
-                              color: Colors.red,
-                              size: 46.0,
+                          SizedBox(
+                            width: 80.0,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: <Color>[
+                                      Color(0xFFB3F5FC),
+                                      Color(0xFF81D4FA),
+                                      Color(0xFF29B6F6),
+                                    ],
+                                  ),
+                                borderRadius:
+                                      BorderRadius.all(Radius.circular(8.0))),  
+                              child: new FlatButton(
+                                 color: Colors.transparent,
+                                onPressed: () {
+                              removeFollower(index);
+                            }, //the click event is impolemented in the screen classes
+                                padding: const EdgeInsets.all(0.0),
+                                child: new Text(screen10Delete ,  style: TextStyle(
+                                      fontSize: 18, color: Colors.white,)),
+                              ),
                             ),
-                            onPressed: () {
-                              removeBlockedUser(index);
-                            },
                           ),
                         ],
                       ),

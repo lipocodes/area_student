@@ -41,6 +41,8 @@ const String screen8AuthenticationFailed = "Authentication failed.  Please try a
 const String screen8TooMuchMistakes = "You have already been wrong for 3 times.";
 const String screen8WrongNumber = "You entered a wrong number.  Please try again!";
 
+const String screen10Delete = "Delete";
+
 const List<String> screen12PopupChoices = ['Profile', 'Settings', 'Block Users', 'About Us', 'Contact Us', 'Recommend to Friend', 'Logout']; 
 const String screen12Logout = "Logout";
 const String screen12RecommendToFriend = "Recommend to Friend";
