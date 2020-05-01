@@ -8,6 +8,7 @@ import 'contact.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
 import 'followers.dart';
+import 'following.dart';
 
 
 class Profile extends StatefulWidget {
@@ -27,6 +28,11 @@ class _ProfileState extends State<Profile> {
 
   }
 
+
+    void onPressedFollowingButton() {
+    Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) => new Followings()));
+  }
 
   void onPressedFollowersButton() {
     Navigator.of(context).push(new CupertinoPageRoute(
@@ -229,7 +235,13 @@ class _ProfileState extends State<Profile> {
                 padding: const EdgeInsets.all(20.0),
                 child: new IconButton(
                     icon: Icon(Icons.favorite),
-                    onPressed: onPressedFollowersButton)),        
+                    onPressed: onPressedFollowersButton)),  
+
+             Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: new IconButton(
+                    icon: Icon(Icons.local_drink),
+                    onPressed: onPressedFollowingButton)),               
           ],
         ),
       ),
