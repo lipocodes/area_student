@@ -10,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:areastudent/screens/authentication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -20,11 +22,17 @@ class _SignupState extends State<Signup> {
   TextEditingController controllerFirstName = new TextEditingController();
   TextEditingController controllerLastName = new TextEditingController();
   TextEditingController controllerPhoneNumber = new TextEditingController();
+  TextEditingController controllerAboutMe = new TextEditingController();
+  List<String> blocked = [];
+  List<String> followers = [];
+  List<String> following = [];
   DateTime _birthDate = DateTime.now();
   String birthDate;
   String userAddress;
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   FirebaseMethods firebaseMethod = new FirebaseMethods();
+  String uid = "";
+  List<DocumentSnapshot> globalSnapshot;
 
   int _radioValue = 0;
   String gender = "male";
@@ -69,6 +77,73 @@ class _SignupState extends State<Signup> {
     'Statistics',
     'Transportation',
   ];
+
+  Future<String> inputData() async {
+    try {
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      String uid = user.uid.toString();
+      return uid;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  Future<void> populateSignupFields() async {
+    this.uid = await inputData();
+    try {
+      final QuerySnapshot result = await Firestore.instance
+          .collection('userData')
+          .where('uid', isEqualTo: uid)
+          .getDocuments();
+      final List<DocumentSnapshot> snapshot = result.documents;
+
+      setState(() {
+        controllerFirstName.text = snapshot[0].data['firstName'];
+        controllerLastName.text = snapshot[0].data['lastName'];
+        controllerPhoneNumber.text = snapshot[0].data['phoneNumber'];
+        controllerAboutMe.text = snapshot[0].data['aboutMe'];
+        this.textAcademicField = snapshot[0].data['academicField'];
+        this.textBirthdate = snapshot[0].data['birthDate'];
+        this.birthDate = snapshot[0].data['birthDate'];
+        this.gender = snapshot[0].data['gender'];
+        
+        List<dynamic> str1 = snapshot[0].data['blockedUsers'];
+        List<String> str2 = [];
+        for (int i = 0; i < str1.length; i++) {
+          str2.add(str1[i].toString());
+        }
+        this.blocked = str2;
+
+        str1 = snapshot[0].data['followers'];
+        str2 = [];
+        for (int i = 0; i < str1.length; i++) {
+          str2.add(str1[i].toString());
+        }
+        this.followers = str2;
+
+        str1 = snapshot[0].data['following'];
+        str2 = [];
+        for (int i = 0; i < str1.length; i++) {
+          str2.add(str1[i].toString());
+        }
+        this.following = str2;
+
+        if (this.gender == 'Man')
+          _radioValue = 0;
+        else
+          _radioValue = 1;
+
+       /* if (snapshot[0].data['profileImages'] != null) {
+          List<File> tempList;
+          List<dynamic> listImages = snapshot[0].data['profileImages'];
+          print("aaaaaaaaaaaaaaaaaaaaaaa= " + listImages.toString());
+         
+        }*/
+      });
+    } on PlatformException catch (e) {
+      print("eeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
+    }
+  }
 
   Future<Null> selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
@@ -153,42 +228,41 @@ class _SignupState extends State<Signup> {
     try {
       doesUserAlreadyExist = await firebaseMethod.checkUserAlreadyExists(
           phoneNumber: controllerPhoneNumber.text);
-      if (doesUserAlreadyExist == true) {
-        closeProgressDialog(context);
-        showSnackBar(screen4FirebaseUserAlreadyExists, scaffoldKey);
-      } else {
-         await firebaseMethod.createUserAccount(
-            firstName: controllerFirstName.text,
-            lastName: controllerLastName.text,
-            phoneNumber: controllerPhoneNumber.text,
-            birthDate: birthDate,
-            academicField: this.textAcademicField,
-            latitude: latitude,
-            longitude: longitude,
-            country: country,
-            region: administrativeArea,
-            subRegion: subAdministrativeArea,
-            locality: locality,
-            gender: gender,
-            blockedUsers: [],
-            followers: [],
-            following: [],
-            );
-        if (imageList.length > 0) {
-          imagesUrl = await firebaseMethod.uploadProductImages(
-             imageList: imageList);
-          updateImageList = await firebaseMethod.updateProductImages(
-               data: imagesUrl);
-        }
-        closeProgressDialog(context);
 
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setBool('accountExists', true);
+      List<String> blocked = [];
 
-        //it's time for authentication through SMS
-        //Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
-        Navigator.of(context).pop();
+      await firebaseMethod.createUserAccount(
+        firstName: controllerFirstName.text,
+        lastName: controllerLastName.text,
+        phoneNumber: controllerPhoneNumber.text,
+        aboutMe: controllerAboutMe.text,
+        birthDate: birthDate,
+        academicField: this.textAcademicField,
+        latitude: latitude,
+        longitude: longitude,
+        country: country,
+        region: administrativeArea,
+        subRegion: subAdministrativeArea,
+        locality: locality,
+        gender: gender,
+        blockedUsers: this.blocked,
+        followers: this.followers,
+        following: this.following,
+      );
+      if (imageList.length > 0) {
+        imagesUrl =
+            await firebaseMethod.uploadProductImages(imageList: imageList);
+        updateImageList =
+            await firebaseMethod.updateProductImages(data: imagesUrl);
       }
+      closeProgressDialog(context);
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('accountExists', true);
+
+      //it's time for authentication through SMS
+      //Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Authentication() ));
+      Navigator.of(context).pop();
     } on PlatformException catch (e) {
       closeProgressDialog(context);
       Navigator.of(context).pop();
@@ -233,7 +307,12 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    populateSignupFields();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,6 +488,7 @@ class _SignupState extends State<Signup> {
                 ),
               ),
             ),
+    
             new Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -426,6 +506,22 @@ class _SignupState extends State<Signup> {
                 ),
                 new Text(screen4Woman),
               ],
+            ),
+                    Padding(
+              padding: const EdgeInsets.only(
+                  left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
+              child: TextField(
+                keyboardType: TextInputType.multiline,
+                maxLines: 5,
+                controller: controllerAboutMe,
+                decoration: new InputDecoration(
+                  labelText: 'About',
+                  
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.yellow)
+                  )
+                ),
+              ),
             ),
             new SizedBox(height: 20.0),
             Row(
