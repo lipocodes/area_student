@@ -13,6 +13,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:http/http.dart' show get;
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+
 class Signup extends StatefulWidget {
   @override
   _SignupState createState() => _SignupState();
@@ -39,6 +43,8 @@ class _SignupState extends State<Signup> {
   List<File> imageList = [];
   String textBirthdate = "Birth Date";
   String textAcademicField = "Academic Field";
+  BuildContext context;
+  bool tempUid=false;
 
   List<String> academicFields = [
     'Agriculture',
@@ -84,12 +90,17 @@ class _SignupState extends State<Signup> {
       String uid = user.uid.toString();
       return uid;
     } catch (e) {
+      this.tempUid = true;
       return "";
     }
   }
 
   Future<void> populateSignupFields() async {
     this.uid = await inputData();
+    if (this.tempUid == true) { 
+      this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
+      this.tempUid = true;
+    }
     try {
       final QuerySnapshot result = await Firestore.instance
           .collection('userData')
@@ -106,7 +117,7 @@ class _SignupState extends State<Signup> {
         this.textBirthdate = snapshot[0].data['birthDate'];
         this.birthDate = snapshot[0].data['birthDate'];
         this.gender = snapshot[0].data['gender'];
-        
+
         List<dynamic> str1 = snapshot[0].data['blockedUsers'];
         List<String> str2 = [];
         for (int i = 0; i < str1.length; i++) {
@@ -133,16 +144,28 @@ class _SignupState extends State<Signup> {
         else
           _radioValue = 1;
 
-       /* if (snapshot[0].data['profileImages'] != null) {
+        if (snapshot[0].data['profileImages'] != null) {
           List<File> tempList;
           List<dynamic> listImages = snapshot[0].data['profileImages'];
-          print("aaaaaaaaaaaaaaaaaaaaaaa= " + listImages.toString());
-         
-        }*/
+          for (int i = 0; i < listImages.length; i++) {
+            downloadImage(listImages[i].toString(), i);
+          }
+        }
       });
     } on PlatformException catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
     }
+  }
+
+  downloadImage(String url, int index) async {
+    var response = await get(url);
+    var documentDirectory = await getApplicationDocumentsDirectory();
+    File file = new File(join(documentDirectory.path, index.toString() + '.png'));
+    file.writeAsBytesSync(response.bodyBytes);
+
+    setState(() {
+      this.imageList.add(file);
+    });
   }
 
   Future<Null> selectDate(BuildContext context) async {
@@ -316,6 +339,7 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     return new Scaffold(
       key: scaffoldKey,
       resizeToAvoidBottomPadding: false,
@@ -488,7 +512,6 @@ class _SignupState extends State<Signup> {
                 ),
               ),
             ),
-    
             new Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -507,7 +530,7 @@ class _SignupState extends State<Signup> {
                 new Text(screen4Woman),
               ],
             ),
-                    Padding(
+            Padding(
               padding: const EdgeInsets.only(
                   left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
               child: TextField(
@@ -515,12 +538,9 @@ class _SignupState extends State<Signup> {
                 maxLines: 5,
                 controller: controllerAboutMe,
                 decoration: new InputDecoration(
-                  labelText: 'About',
-                  
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow)
-                  )
-                ),
+                    labelText: 'About',
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.yellow))),
               ),
             ),
             new SizedBox(height: 20.0),

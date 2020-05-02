@@ -47,6 +47,7 @@ const List<String> screen12PopupChoices = ['Profile', 'Settings', 'Block Users',
 const String screen12Logout = "Logout";
 const String screen12RecommendToFriend = "Recommend to Friend";
 const String screen12ContactUs = "Contact Us";
+const String screen12EditProfileWarning = "Please Click on Signup!";
 
 const String screen12ContactUsTitle = "Contact Us";
 const String screen12ContactUsBody = "Please write down your questions.";

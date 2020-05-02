@@ -39,6 +39,8 @@ dependencies:
   page_transition:
   google_sign_in:        
   flutter_auth_buttons:
+  network_to_file_image: 2.0.0
+  path:
   
 dev_dependencies:
   flutter_native_splash:
