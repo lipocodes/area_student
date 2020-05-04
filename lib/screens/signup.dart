@@ -16,6 +16,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' show get;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -44,7 +45,7 @@ class _SignupState extends State<Signup> {
   String textBirthdate = "Birth Date";
   String textAcademicField = "Academic Field";
   BuildContext context;
-  bool tempUid=false;
+  bool tempUid = false;
 
   List<String> academicFields = [
     'Agriculture',
@@ -97,7 +98,7 @@ class _SignupState extends State<Signup> {
 
   Future<void> populateSignupFields() async {
     this.uid = await inputData();
-    if (this.tempUid == true) { 
+    if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
       this.tempUid = true;
     }
@@ -160,7 +161,8 @@ class _SignupState extends State<Signup> {
   downloadImage(String url, int index) async {
     var response = await get(url);
     var documentDirectory = await getApplicationDocumentsDirectory();
-    File file = new File(join(documentDirectory.path, index.toString() + '.png'));
+    File file =
+        new File(join(documentDirectory.path, index.toString() + '.png'));
     file.writeAsBytesSync(response.bodyBytes);
 
     setState(() {
@@ -305,7 +307,10 @@ class _SignupState extends State<Signup> {
   pickImage() async {
     File file;
     try {
-      file = await ImagePicker.pickImage(source: ImageSource.gallery);
+      var documentDirectory = await getApplicationDocumentsDirectory();
+      file = await ImagePicker.pickImage(
+          source: ImageSource.gallery, maxHeight: 200, maxWidth: 200);
+
     } on PlatformException catch (e) {
       print("Image picker issue: " + e.toString());
     }

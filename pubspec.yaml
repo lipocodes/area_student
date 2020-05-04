@@ -41,6 +41,7 @@ dependencies:
   flutter_auth_buttons:
   network_to_file_image: 2.0.0
   path:
+  flutter_image_compress:
   
 dev_dependencies:
   flutter_native_splash:

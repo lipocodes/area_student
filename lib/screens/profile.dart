@@ -13,6 +13,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   FirebaseMethods firebaseMethods = new FirebaseMethods();
-
+  MediaQueryData queryData;
   String uid = "";
   bool tempUid = false;
   List<String> profileImages = [];
@@ -49,6 +50,8 @@ class _ProfileState extends State<Profile> {
   List<List<String>> postsImages = [];
 
   String gender = "";
+
+  PageController pageController;
 
   Future<String> inputData() async {
     try {
@@ -80,7 +83,9 @@ class _ProfileState extends State<Profile> {
       for (int i = 0; i < str1.length; i++) {
         str2.add(str1[i].toString());
       }
-      this.profileImages = str2;
+      setState(() {
+        this.profileImages = str2;
+      });
 
       this.name =
           snapshot[0].data['firstName'] + "  " + snapshot[0].data['lastName'];
@@ -147,23 +152,25 @@ class _ProfileState extends State<Profile> {
       try {
         this.postsId.add(snapshot[i].data['postId'].toString());
         this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
-        this.postsCreationLatitude.add(snapshot[i].data['creationLatitude'].toString());
-        this.postsCreationLongitude.add(snapshot[i].data['creationLongitude'].toString());
+        this
+            .postsCreationLatitude
+            .add(snapshot[i].data['creationLatitude'].toString());
+        this
+            .postsCreationLongitude
+            .add(snapshot[i].data['creationLongitude'].toString());
         this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
         this.postsText.add(snapshot[i].data['text'].toString());
-        
+
         List<dynamic> str9 = snapshot[i].data['images'];
         List<String> str10 = [];
-        for(int i=0; i<str9.length; i++){
+        for (int i = 0; i < str9.length; i++) {
           str10.add(str9[i].toString());
         }
         this.postsImages.add(str10);
-      
       } catch (e) {
         print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
       }
     }
-       
   }
 
   void onPressedFollowingButton() {
@@ -345,6 +352,10 @@ class _ProfileState extends State<Profile> {
     // TODO: implement initState
     super.initState();
     retrieveUserData();
+    pageController = PageController(
+      initialPage: 1,
+      viewportFraction: 0.6,
+    );
   }
 
   @override
@@ -386,23 +397,176 @@ class _ProfileState extends State<Profile> {
         ),
         body: Column(
           children: [
-            Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: new IconButton(
-                    icon: Icon(Icons.settings),
-                    onPressed: onPressedSettingsButton)),
-            Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: new IconButton(
-                    icon: Icon(Icons.favorite),
-                    onPressed: onPressedFollowersButton)),
-            Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: new IconButton(
-                    icon: Icon(Icons.local_drink),
-                    onPressed: onPressedFollowingButton)),
+            Container(
+              //width: MediaQuery.of(context).size.width,
+              //height:MediaQuery.of(context).size.height*0.6,
+              child: Row(
+                // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  this.profileImages.length > 0
+                      ? SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          child: CachedNetworkImage(
+                            imageUrl: this.profileImages[0],
+                            placeholder: (context,url) => Container(
+                              child: Center(child: new CircularProgressIndicator()),
+                            ),
+                            errorWidget:(context,url,error) => new Icon(Icons.error), 
+                            fadeInCurve: Curves.easeIn,
+                            fadeInDuration: Duration(milliseconds: 1000),
+                            fit: BoxFit.fill,
+                          ),
+                          /*child: Image.network(
+                            this.profileImages[0],
+                            fit: BoxFit.fill,
+                          ),*/
+                        )
+                      : Container(),
+                ],
+              ),
+            ),
+            SingleChildScrollView(
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            this.name,
+                            style: TextStyle(
+                                fontSize: 22.0, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            this.age,
+                            style: TextStyle(
+                                fontSize: 22.0, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(Icons.location_on),
+                              Text(this.country + ",",
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w400)),
+                              Text(this.region,
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w400)),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(Icons.school),
+                              Text(this.academicField,
+                                  style: TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w400)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.0),
+                      Text(
+                        this.aboutMe,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w300, fontSize: 16),
+                        textAlign: TextAlign.justify,
+                      ),
+                      SizedBox(height: 20.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            this.numFollowers.toString(),
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.w800),
+                          ),
+                          // Container(height: 60, child: VerticalDivider(color: Colors.grey)),
+                          Text(
+                            this.numFollowings.toString(),
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.w800),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            "Followers",
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.w300),
+                          ),
+                          Text(
+                            "Followings",
+                            style: TextStyle(
+                                fontSize: 18.0, fontWeight: FontWeight.w300),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.0),
+                      /*ListView.builder(
+                        itemBuilder: _buildProductItem,
+                        itemCount: this.profileImages.length,
+                      )*/
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductItem(BuildContext context, int index) {
+    return Card(
+      child: Column(
+        children: <Widget>[
+          Image.asset('assets/macbook.jpg'),
+          Text(this.profileImages[index],
+              style: TextStyle(color: Colors.deepPurple))
+        ],
+      ),
+    );
+  }
+
+  imageSlider(int index) {
+    return AnimatedBuilder(
+      animation: pageController,
+      builder: (context, widget) {
+        double value = 1;
+        if (pageController.position.haveDimensions) {
+          value = pageController.page - index;
+          value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
+        }
+        return Center(
+          child: FittedBox(
+            //height: Curves.easeInOut.transform(value) * 200,
+            //width: Curves.easeInOut.transform(value) * 300,
+            fit: BoxFit.fill,
+            child: widget,
+          ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.all(10.0),
+        child: Image.network(this.profileImages[index], fit: BoxFit.fitWidth),
       ),
     );
   }
