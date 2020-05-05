@@ -1,5 +1,6 @@
 import 'package:areastudent/data/constants.dart';
 import 'package:areastudent/tools/auth_service.dart';
+import 'package:areastudent/tools/widgets.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:share/share.dart';
@@ -47,6 +48,7 @@ class _ProfileState extends State<Profile> {
   List<String> postsCreationLongitude = [];
   List<String> postsCreationTime = [];
   List<String> postsText = [];
+  List<List<String>> postsTags = [];
   List<List<String>> postsImages = [];
 
   String gender = "";
@@ -64,7 +66,7 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  Future<void> retrieveUserData() async {
+  Future<void> retrieveUserData() async {   
     this.uid = await inputData();
     if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
@@ -112,7 +114,7 @@ class _ProfileState extends State<Profile> {
       for (int i = 0; i < str3.length; i++) {
         str4.add(str3[i].toString());
       }
-      this.listFollowers = str4;
+     this.listFollowers = str4;
       this.numFollowers = str4.length;
 
       List<dynamic> str5 = snapshot[0].data['following'];
@@ -136,6 +138,7 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> retrievePostsCurrentUser() async {
+   
     this.uid = await inputData();
     if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
@@ -167,10 +170,24 @@ class _ProfileState extends State<Profile> {
           str10.add(str9[i].toString());
         }
         this.postsImages.add(str10);
+
+        List<dynamic> str11 = snapshot[i].data['tags'];
+        
+        List<String> str12 = [];
+        for (int i = 0; i < str11.length; i++) {
+          str12.add(str11[i].toString());
+        }
+        this.postsTags.add(str12);
+   
+      
+
       } catch (e) {
         print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
       }
     }
+      setState(() {
+          
+        });
   }
 
   void onPressedFollowingButton() {
@@ -360,9 +377,12 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+  
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
+        resizeToAvoidBottomInset: false, 
+        resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           elevation: 0,
           iconTheme: IconThemeData(
@@ -395,139 +415,35 @@ class _ProfileState extends State<Profile> {
                 title: Text('Chats'))
           ],
         ),
-        body: Column(
+        body: new Stack(
           children: [
-            Container(
-              //width: MediaQuery.of(context).size.width,
-              //height:MediaQuery.of(context).size.height*0.6,
-              child: Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  this.profileImages.length > 0
-                      ? SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * 0.3,
-                          child: CachedNetworkImage(
-                            imageUrl: this.profileImages[0],
-                            placeholder: (context,url) => Container(
-                              child: Center(child: new CircularProgressIndicator()),
-                            ),
-                            errorWidget:(context,url,error) => new Icon(Icons.error), 
-                            fadeInCurve: Curves.easeIn,
-                            fadeInDuration: Duration(milliseconds: 1000),
-                            fit: BoxFit.fill,
-                          ),
-                          /*child: Image.network(
-                            this.profileImages[0],
-                            fit: BoxFit.fill,
-                          ),*/
-                        )
-                      : Container(),
-                ],
-              ),
+            Positioned(
+                top: 0,
+                left: 0,
+                height: 150.0,
+                child: largeProfileImage(context, this.profileImages)),
+            Positioned(
+              child: buttonsOnTopProfileImage(),
             ),
-            SingleChildScrollView(
-              child: Container(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            this.name,
-                            style: TextStyle(
-                                fontSize: 22.0, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            this.age,
-                            style: TextStyle(
-                                fontSize: 22.0, fontWeight: FontWeight.bold),
-                          ),
-                        ],
+            Positioned(
+              top:160,
+              height:400,
+              child: SingleChildScrollView(
+                              child: Column(
+                  children: [
+                    userDetails(name, age, country, region, academicField, aboutMe, numFollowers, numFollowings, context),
+                    SizedBox(height:20.0),
+                    SizedBox(
+                      height: 800.0 * postsId.length,
+                      child: listStoriesProfileScreen(context, this.postsId, this.name, this.profileImages, this.postsCreationTime ,this.postsCreationLatitude, this.postsCreationLongitude, this.postsTags, this.postsText, this.postsImages),
                       ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Icon(Icons.location_on),
-                              Text(this.country + ",",
-                                  style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w400)),
-                              Text(this.region,
-                                  style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w400)),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Icon(Icons.school),
-                              Text(this.academicField,
-                                  style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w400)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        this.aboutMe,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w300, fontSize: 16),
-                        textAlign: TextAlign.justify,
-                      ),
-                      SizedBox(height: 20.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            this.numFollowers.toString(),
-                            style: TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.w800),
-                          ),
-                          // Container(height: 60, child: VerticalDivider(color: Colors.grey)),
-                          Text(
-                            this.numFollowings.toString(),
-                            style: TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.w800),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            "Followers",
-                            style: TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.w300),
-                          ),
-                          Text(
-                            "Followings",
-                            style: TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.w300),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                      /*ListView.builder(
-                        itemBuilder: _buildProductItem,
-                        itemCount: this.profileImages.length,
-                      )*/
-                    ],
-                  ),
+                   
+                  ],
                 ),
               ),
             ),
+       
+        
           ],
         ),
       ),
