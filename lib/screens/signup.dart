@@ -28,6 +28,7 @@ class _SignupState extends State<Signup> {
   TextEditingController controllerLastName = new TextEditingController();
   TextEditingController controllerPhoneNumber = new TextEditingController();
   TextEditingController controllerAboutMe = new TextEditingController();
+  List<String> posts = [];
   List<String> blocked = [];
   List<String> followers = [];
   List<String> following = [];
@@ -125,6 +126,15 @@ class _SignupState extends State<Signup> {
           str2.add(str1[i].toString());
         }
         this.blocked = str2;
+
+        str1 = snapshot[0].data['posts'];
+        str2 = [];
+        if (str1 != null) {
+          for (int i = 0; i < str1.length; i++) {
+            str2.add(str1[i].toString());
+          }
+          this.posts = str2;
+        }
 
         str1 = snapshot[0].data['followers'];
         str2 = [];
@@ -271,6 +281,7 @@ class _SignupState extends State<Signup> {
         locality: locality,
         gender: gender,
         blockedUsers: this.blocked,
+        posts: this.posts,
         followers: this.followers,
         following: this.following,
       );
@@ -310,7 +321,6 @@ class _SignupState extends State<Signup> {
       var documentDirectory = await getApplicationDocumentsDirectory();
       file = await ImagePicker.pickImage(
           source: ImageSource.gallery, maxHeight: 200, maxWidth: 200);
-
     } on PlatformException catch (e) {
       print("Image picker issue: " + e.toString());
     }

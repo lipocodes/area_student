@@ -15,6 +15,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:areastudent/tools/methods.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -22,11 +23,13 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
   FirebaseMethods firebaseMethods = new FirebaseMethods();
   MediaQueryData queryData;
   String uid = "";
   bool tempUid = false;
   List<String> profileImages = [];
+  int indexProfileImage = 0;
   String name = "";
   String country = "";
   String region = "";
@@ -44,8 +47,9 @@ class _ProfileState extends State<Profile> {
 
   List<String> postsCreatorUid = [];
   List<String> postsId = [];
-  List<String> postsCreationLatitude = [];
-  List<String> postsCreationLongitude = [];
+  List<String> postsCreationCountry = [];
+  List<String> postsCreationRegion = [];
+  List<String> postsCreationSubRegion = [];
   List<String> postsCreationTime = [];
   List<String> postsText = [];
   List<List<String>> postsTags = [];
@@ -66,7 +70,7 @@ class _ProfileState extends State<Profile> {
     }
   }
 
-  Future<void> retrieveUserData() async {   
+  Future<void> retrieveUserData() async {
     this.uid = await inputData();
     if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
@@ -114,7 +118,7 @@ class _ProfileState extends State<Profile> {
       for (int i = 0; i < str3.length; i++) {
         str4.add(str3[i].toString());
       }
-     this.listFollowers = str4;
+      this.listFollowers = str4;
       this.numFollowers = str4.length;
 
       List<dynamic> str5 = snapshot[0].data['following'];
@@ -138,7 +142,6 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> retrievePostsCurrentUser() async {
-   
     this.uid = await inputData();
     if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
@@ -156,11 +159,14 @@ class _ProfileState extends State<Profile> {
         this.postsId.add(snapshot[i].data['postId'].toString());
         this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
         this
-            .postsCreationLatitude
-            .add(snapshot[i].data['creationLatitude'].toString());
+            .postsCreationCountry
+            .add(snapshot[i].data['creationCountry'].toString());
         this
-            .postsCreationLongitude
-            .add(snapshot[i].data['creationLongitude'].toString());
+            .postsCreationRegion
+            .add(snapshot[i].data['creationRegion'].toString());
+        this
+            .postsCreationSubRegion
+            .add(snapshot[i].data['creationSubRegion'].toString());
         this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
         this.postsText.add(snapshot[i].data['text'].toString());
 
@@ -172,22 +178,17 @@ class _ProfileState extends State<Profile> {
         this.postsImages.add(str10);
 
         List<dynamic> str11 = snapshot[i].data['tags'];
-        
+
         List<String> str12 = [];
         for (int i = 0; i < str11.length; i++) {
           str12.add(str11[i].toString());
         }
         this.postsTags.add(str12);
-   
-      
-
       } catch (e) {
         print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
       }
     }
-      setState(() {
-          
-        });
+    setState(() {});
   }
 
   void onPressedFollowingButton() {
@@ -377,11 +378,14 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-  
+
+
+
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
-        resizeToAvoidBottomInset: false, 
+        key: scaffoldKey,
+        resizeToAvoidBottomInset: false,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
           elevation: 0,
@@ -420,30 +424,156 @@ class _ProfileState extends State<Profile> {
             Positioned(
                 top: 0,
                 left: 0,
-                height: 150.0,
-                child: largeProfileImage(context, this.profileImages)),
+                height: MediaQuery.of(context).size.height * 0.4,
+                child: Container(
+                  child: Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      profileImages.length > 0
+                          ? SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height,
+                              child: CachedNetworkImage(
+                                imageUrl: profileImages[indexProfileImage],
+                                placeholder: (context, url) => Container(
+                                  child: Center(
+                                      child: new CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    new Icon(Icons.error),
+                                fadeInCurve: Curves.easeIn,
+                                fadeInDuration: Duration(milliseconds: 1000),
+                                fit: BoxFit.fill,
+                              ),
+                            )
+                          : Container(),
+                    ],
+                  ),
+                )),
             Positioned(
-              child: buttonsOnTopProfileImage(),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.settings,
+                          ),
+                          iconSize: 35,
+                          color: Colors.white,
+                          onPressed: () {
+                            onPressedSettingsButton();
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0, right: 10.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.notifications_none,
+                          ),
+                          iconSize: 35,
+                          color: Colors.white,
+                          onPressed: () {
+                            showSnackBar("In the future - Inbox will be here!",
+                                scaffoldKey);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 40.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding( 
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Container(
+                           decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.white70,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30))),
+                          child: IconButton( 
+                              icon: Icon( 
+                                Icons.arrow_back,
+                              ),
+                              iconSize: 35,
+                              color: Colors.white,
+                              onPressed: () {
+                                setState(() {
+                                  if (indexProfileImage > 0) {
+                                    indexProfileImage = indexProfileImage - 1;
+                                  }
+                                });
+                              }),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.white70,
+                              ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(30))),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_forward,
+                            ),
+                            iconSize: 35,
+                            color: Colors.white,
+                            onPressed: () {
+                              if (indexProfileImage <
+                                  this.profileImages.length - 1) {
+                                setState(() {
+                                  indexProfileImage = indexProfileImage + 1;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             Positioned(
-              top:160,
-              height:400,
+              top: 220,
+              height: 400,
+            
+              width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
-                              child: Column(
+                child: Column(
                   children: [
-                    userDetails(name, age, country, region, academicField, aboutMe, numFollowers, numFollowings, context),
-                    SizedBox(height:20.0),
+                    userDetails(name, age, country, region, academicField,
+                        aboutMe, numFollowers, numFollowings, context),
+                    SizedBox(height: 50.0),
                     SizedBox(
-                      height: 800.0 * postsId.length,
-                      child: listStoriesProfileScreen(context, this.postsId, this.name, this.profileImages, this.postsCreationTime ,this.postsCreationLatitude, this.postsCreationLongitude, this.postsTags, this.postsText, this.postsImages),
-                      ),
-                   
+                      height: 400,
+                      child: listStoriesProfileScreen(
+                          context,
+                          this.postsId,
+                          this.name,
+                          this.profileImages,
+                          this.postsCreationTime,
+                          this.postsCreationCountry,
+                          this.postsCreationRegion,
+                          this.postsCreationSubRegion,
+                          this.postsTags,
+                          this.postsText,
+                          this.postsImages),
+                    ),
                   ],
                 ),
               ),
             ),
-       
-        
           ],
         ),
       ),

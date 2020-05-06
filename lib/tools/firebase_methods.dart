@@ -84,6 +84,7 @@ Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
       String subRegion,
       String locality,
       String gender,
+      List<String> posts,
       List<String> blockedUsers,
       List<String> followers,
       List<String> following,
@@ -107,6 +108,7 @@ Future<bool> checkUserAlreadyExists({String phoneNumber}) async {
       'locality': locality,
       'gender': gender,
       'blockedUsers': blockedUsers,
+       'posts': posts,
       'followers': followers,
       'following': following,
     })).whenComplete( () {
