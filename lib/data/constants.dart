@@ -31,6 +31,8 @@ const String screen4ContentPrivactPolicy = "Here will be the Terms & Conditions 
 const String screen4FirebaseCollectionName = "userData";
 const String screen4FirebaseUserAlreadyExists = "You already have an account!";
 const String screen4NoAccountYet = "You need to create an account before you can log in!";
+const String screen4NoGPSAvailable = "Your GPS isn't working. Your profile is created without your location!";
+const String screen4NoMore3Images = "No more than 3 images please";
 
 const String screen8TitleText = "Phone Validation";
 const String screen8TitleBody = "Phone Number";

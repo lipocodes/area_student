@@ -42,6 +42,9 @@ dependencies:
   network_to_file_image: 2.0.0
   path:
   flutter_image_compress:
+  permission_handler:
+  location:
+      
   
 dev_dependencies:
   flutter_native_splash:

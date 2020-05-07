@@ -7,16 +7,14 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:areastudent/screens/authentication.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:http/http.dart' show get;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:location/location.dart';
 
 class Signup extends StatefulWidget {
   @override
@@ -240,19 +238,31 @@ class _SignupState extends State<Signup> {
       return;
     }
 
-    Position position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    List<Placemark> newPlace = await Geolocator()
-        .placemarkFromCoordinates(position.latitude, position.longitude);
+    var location = Location();
+    bool enabled = await location.serviceEnabled();
+    String latitude,
+        longitude,
+        locality,
+        administrativeArea,
+        subAdministrativeArea,
+        country;
+    Placemark placeMark;
 
-    //important!!!!! subRegion is most important. If non-existent: region.  If non-existent:country.
-    String latitude = position.latitude.toString();
-    String longitude = position.longitude.toString();
-    Placemark placeMark = newPlace[0];
-    String locality = placeMark.locality;
-    String administrativeArea = placeMark.administrativeArea;
-    String subAdministrativeArea = placeMark.subAdministrativeArea;
-    String country = placeMark.country;
+    if (enabled == true) {
+      Position position = await Geolocator().getCurrentPosition(
+          /*desiredAccuracy: LocationAccuracy.high*/);
+      List<Placemark> newPlace = await Geolocator()
+          .placemarkFromCoordinates(position.latitude, position.longitude);
+
+      //important!!!!! subRegion is most important. If non-existent: region.  If non-existent:country.
+      latitude = position.latitude.toString();
+      longitude = position.longitude.toString();
+      placeMark = newPlace[0];
+      locality = placeMark.locality;
+      administrativeArea = placeMark.administrativeArea;
+      subAdministrativeArea = placeMark.subAdministrativeArea;
+      country = placeMark.country;
+    } 
 
     displayProgressDialog(context);
 
@@ -333,7 +343,7 @@ class _SignupState extends State<Signup> {
         imageList = new List.from(imageFile, growable: true);
       } else {
         if (imageList.length >= 3) {
-          showSnackBar("No more than 3 images please!", scaffoldKey);
+          showSnackBar(screen4NoMore3Images, scaffoldKey);
           return;
         }
 
