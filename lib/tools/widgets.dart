@@ -203,12 +203,12 @@ Widget userDetails(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Icon(Icons.location_on),
-                    Text(country + ",",
+                    country!=null? Text(country + ",",
                         style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w400)),
-                    Text(region,
+                            fontSize: 16.0, fontWeight: FontWeight.w400)) : Text("NA"),
+                    region!=null? Text(region,
                         style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w400)),
+                            fontSize: 16.0, fontWeight: FontWeight.w400))  :Text(""),
                   ],
                 ),
               ),
