@@ -97,10 +97,10 @@ class _SignupState extends State<Signup> {
 
   Future<void> populateSignupFields() async {
     this.uid = await inputData();
-    if (this.tempUid == true) {
+    /*if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
       this.tempUid = true;
-    }
+    }*/
     try {
       final QuerySnapshot result = await Firestore.instance
           .collection('userData')
@@ -236,6 +236,9 @@ class _SignupState extends State<Signup> {
     } else if (this.textAcademicField == "Academic Field") {
       showSnackBar(screen4NoAcademicField, scaffoldKey);
       return;
+    } else if (this.imageList.length == 0 || this.imageList.length == null) {
+      showSnackBar("Please upload at least 1 image!", scaffoldKey);
+      return;
     }
 
     var location = Location();
@@ -262,7 +265,7 @@ class _SignupState extends State<Signup> {
       administrativeArea = placeMark.administrativeArea;
       subAdministrativeArea = placeMark.subAdministrativeArea;
       country = placeMark.country;
-    } 
+    }
 
     displayProgressDialog(context);
 

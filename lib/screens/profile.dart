@@ -2,6 +2,8 @@ import 'package:areastudent/data/constants.dart';
 import 'package:areastudent/tools/auth_service.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:share/share.dart';
 import 'blocked_users.dart';
@@ -16,6 +18,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/tools/methods.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -54,10 +57,15 @@ class _ProfileState extends State<Profile> {
   List<String> postsText = [];
   List<List<String>> postsTags = [];
   List<List<String>> postsImages = [];
-
+  List<File> postImageList = [];
   String gender = "";
-
+  String textWarning = "";
   PageController pageController;
+  TextEditingController controllerPostText = new TextEditingController();
+  TextEditingController controllerAddTag = new TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String textTag1 = "Add tag";
+  String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
 
   Future<String> inputData() async {
     try {
@@ -72,10 +80,10 @@ class _ProfileState extends State<Profile> {
 
   Future<void> retrieveUserData() async {
     this.uid = await inputData();
-    if (this.tempUid == true) {
+    /*if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
       this.tempUid = true;
-    }
+    }*/
 
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
@@ -143,10 +151,10 @@ class _ProfileState extends State<Profile> {
 
   Future<void> retrievePostsCurrentUser() async {
     this.uid = await inputData();
-    if (this.tempUid == true) {
+    /*if (this.tempUid == true) {
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
       this.tempUid = true;
-    }
+    }*/
 
     final QuerySnapshot result = await Firestore.instance
         .collection('posts')
@@ -171,10 +179,13 @@ class _ProfileState extends State<Profile> {
         this.postsText.add(snapshot[i].data['text'].toString());
 
         List<dynamic> str9 = snapshot[i].data['images'];
+
         List<String> str10 = [];
+
         for (int i = 0; i < str9.length; i++) {
           str10.add(str9[i].toString());
         }
+
         this.postsImages.add(str10);
 
         List<dynamic> str11 = snapshot[i].data['tags'];
@@ -365,6 +376,394 @@ class _ProfileState extends State<Profile> {
     return true;
   }
 
+  Future pickImage() async {
+    File file;
+    try {
+      file = await ImagePicker.pickImage(
+          source: ImageSource.gallery, maxHeight: 200, maxWidth: 200);
+    } on PlatformException catch (e) {
+      print("Image picker issue: " + e.toString());
+    }
+
+    if (file != null) {
+      List<File> imageFile = new List();
+      imageFile.add(file);
+      //imageList = new List.from(imageFile);
+      if (this.postImageList == null) {
+        this.postImageList = new List.from(imageFile, growable: true);
+      } else {
+        if (this.postImageList.length > 2) {
+          setState(() {
+            this.textWarning = screen13NoMore2Images;
+          });
+          return;
+        } else {
+          setState(() {
+            this.textWarning = screen13NoMore2Images;
+          });
+        }
+
+        for (int s = 0; s < imageFile.length; s++) {
+          this.postImageList.add(file);
+        }
+      }
+      setState(() {});
+    }
+  }
+
+  onPressedCreateButton() async {
+    if (this.controllerPostText.text.toString().length == 0 &&
+        postImageList.length == 0) {
+      setState(() {
+        this.textWarning = screen13Warning;
+      });
+
+      return;
+    } else {
+      displayProgressDialog(context);
+
+      await firebaseMethods.createNewPost(this.controllerPostText.text,
+          this.postImageList, this.postsId, this.tag1, this.tag2, this.tag3);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String postId = prefs.getString('postId');
+
+      if (this.postImageList.length > 0) {
+        await firebaseMethods.uploadPostImages(this.postImageList, postId);
+        List<String> imagesUrl = prefs.getStringList('imagesUrl');
+        await firebaseMethod.updatePostsImages(imagesUrl, postId, this.postsId);
+      } else {
+        await firebaseMethod
+            .updatePostsImages(['123456789'], postId, this.postsId);
+      }
+      closeProgressDialog(context);
+ 
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    }
+  }
+
+  addTag(int indexTag) async {
+    String textNewTag = "";
+    showDialog(
+        context: context,
+        builder: (_) => new AlertDialog(
+              title: new Text("Add a tag:"),
+              //content: new Text("Hey! I'm Coflutter!"),
+              content: new TextField(
+                //controller: controllerAddTag,
+                onChanged: (text) {
+                  //print("First text field: $text");
+                  textNewTag = text;
+                },
+                autofocus: true,
+                decoration: new InputDecoration(labelText: '', hintText: 'Tag'),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    setState(() {
+                      if (indexTag == 1 && textNewTag.length > 0) {
+                        this.tag1 = textNewTag;
+                      } else if (indexTag == 2 && textNewTag.length > 0)
+                        this.tag2 = textNewTag;
+                      else if (indexTag == 3 && textNewTag.length > 0)
+                        this.tag3 = textNewTag;
+                    });
+
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            ));
+  }
+
+  Future showDialogPostCreation() async {
+    String textTag1 = "Add Tag", textTag2 = "Add Tag", textTag3 = "Add Tag";
+    showDialog(
+      context: context,
+      builder: (context) {
+        String contentText = "Content of Dialog";
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text("New Post"),
+                  RaisedButton(
+                    child: Text(
+                      "X",
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
+                    ),
+                    color: Colors.white,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        GestureDetector(
+                            onTap: () {
+                              String textNewTag = "";
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => new AlertDialog(
+                                        title: new Text("Add a tag:"),
+                                        //content: new Text("Hey! I'm Coflutter!"),
+                                        content: new TextField(
+                                          //controller: controllerAddTag,
+                                          onChanged: (text) {
+                                            //print("First text field: $text");
+                                            textNewTag = text;
+                                          },
+                                          autofocus: true,
+                                          decoration: new InputDecoration(
+                                              labelText: '', hintText: 'Tag'),
+                                        ),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text('Cancel'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          FlatButton(
+                                            child: Text('OK'),
+                                            onPressed: () {
+                                              setState(() {
+                                                if (textNewTag.length > 0)
+                                                  this.tag1 = textNewTag;
+                                              });
+
+                                              Navigator.of(context).pop();
+                                            },
+                                          )
+                                        ],
+                                      ));
+                            },
+                            child: tag1 != '123456789'
+                                ? Text(tag1,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.blue))
+                                : Text("Add Tag",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.blue))),
+                        GestureDetector(
+                            onTap: () {
+                              String textNewTag = "";
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => new AlertDialog(
+                                        title: new Text("Add a tag:"),
+                                        //content: new Text("Hey! I'm Coflutter!"),
+                                        content: new TextField(
+                                          //controller: controllerAddTag,
+                                          onChanged: (text) {
+                                            //print("First text field: $text");
+                                            textNewTag = text;
+                                          },
+                                          autofocus: true,
+                                          decoration: new InputDecoration(
+                                              labelText: '', hintText: 'Tag'),
+                                        ),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text('Cancel'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          FlatButton(
+                                            child: Text('OK'),
+                                            onPressed: () {
+                                              setState(() {
+                                                if (textNewTag.length > 0)
+                                                  this.tag2 = textNewTag;
+                                              });
+
+                                              Navigator.of(context).pop();
+                                            },
+                                          )
+                                        ],
+                                      ));
+                            },
+                            child: tag2 != '123456789'
+                                ? Text(tag2,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.blue))
+                                : Text("Add Tag",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.blue))),
+                        GestureDetector(
+                            onTap: () {
+                              String textNewTag = "";
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => new AlertDialog(
+                                        title: new Text("Add a tag:"),
+                                        //content: new Text("Hey! I'm Coflutter!"),
+                                        content: new TextField(
+                                          //controller: controllerAddTag,
+                                          onChanged: (text) {
+                                            //print("First text field: $text");
+                                            textNewTag = text;
+                                          },
+                                          autofocus: true,
+                                          decoration: new InputDecoration(
+                                              labelText: '', hintText: 'Tag'),
+                                        ),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text('Cancel'),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          FlatButton(
+                                            child: Text('OK'),
+                                            onPressed: () {
+                                              setState(() {
+                                                if (textNewTag.length > 0)
+                                                  this.tag3 = textNewTag;
+                                              });
+
+                                              Navigator.of(context).pop();
+                                            },
+                                          )
+                                        ],
+                                      ));
+                            },
+                            child: tag3 != '123456789'
+                                ? Text(tag3,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.blue))
+                                : Text("Add Tag",
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.blue))),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
+                      child: TextField(
+                        controller: controllerPostText,
+                        keyboardType: TextInputType.text,
+                        maxLength: 100,
+                        maxLines: 5,
+                        decoration: InputDecoration(
+                            border: new OutlineInputBorder(
+                                borderRadius: new BorderRadius.circular(25.0)),
+                            hintText: 'Your text'),
+                      ),
+                    ),
+                    SizedBox(height: 10.0),
+                    GestureDetector(
+                      onTap: () async {
+                        File file;
+                        try {
+                          file = await ImagePicker.pickImage(
+                              source: ImageSource.gallery,
+                              maxHeight: 200,
+                              maxWidth: 200);
+                        } on PlatformException catch (e) {
+                          print("Image picker issue: " + e.toString());
+                        }
+
+                        if (file != null) {
+                          List<File> imageFile = new List();
+                          imageFile.add(file);
+
+                          if (this.postImageList == null) {
+                            this.postImageList =
+                                new List.from(imageFile, growable: true);
+                          } else {
+                            if (this.postImageList.length > 1) {
+                              return;
+                            }
+
+                            for (int s = 0; s < imageFile.length; s++) {
+                              this.postImageList.add(file);
+                            }
+                          }
+                          setState(() {});
+                        }
+                      },
+                      child: new CircleAvatar(
+                          backgroundColor: Colors.lightBlueAccent,
+                          child: new Icon(Icons.add_a_photo,
+                              color: Colors.white, size: 24.0)),
+                    ),
+                    SizedBox(height: 10.0),
+                    multiImagePickerList(
+                        imageList: this.postImageList,
+                        removeNewImage: (index) {
+                          setState(() {
+                            this.postImageList.removeAt(index);
+                          });
+                        }),
+                    Text(
+                      textWarning,
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          GestureDetector(
+                              onTap: () {
+                                if (this
+                                            .controllerPostText
+                                            .text
+                                            .toString()
+                                            .length ==
+                                        0 &&
+                                    postImageList.length == 0) {
+                                  setState(() {
+                                    this.textWarning = screen13Warning;
+                                  });
+
+                                  return;
+                                } else {
+                                  onPressedCreateButton();
+                                }
+                              },
+                              child: postCreationButton()),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -378,9 +777,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-
-
-
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
@@ -396,6 +792,12 @@ class _ProfileState extends State<Profile> {
             "",
           ),
           backgroundColor: Colors.white,
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showDialogPostCreation();
+          },
+          child: Icon(Icons.add),
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
@@ -489,17 +891,17 @@ class _ProfileState extends State<Profile> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Padding( 
+                      Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Container(
-                           decoration: BoxDecoration(
+                          decoration: BoxDecoration(
                               border: Border.all(
                                 color: Colors.white70,
                               ),
                               borderRadius:
                                   BorderRadius.all(Radius.circular(30))),
-                          child: IconButton( 
-                              icon: Icon( 
+                          child: IconButton(
+                              icon: Icon(
                                 Icons.arrow_back,
                               ),
                               iconSize: 35,
@@ -508,6 +910,9 @@ class _ProfileState extends State<Profile> {
                                 setState(() {
                                   if (indexProfileImage > 0) {
                                     indexProfileImage = indexProfileImage - 1;
+                                  } else {
+                                    indexProfileImage =
+                                        this.profileImages.length - 1;
                                   }
                                 });
                               }),
@@ -534,6 +939,10 @@ class _ProfileState extends State<Profile> {
                                 setState(() {
                                   indexProfileImage = indexProfileImage + 1;
                                 });
+                              } else {
+                                setState(() {
+                                  indexProfileImage = 0;
+                                });
                               }
                             },
                           ),
@@ -547,7 +956,6 @@ class _ProfileState extends State<Profile> {
             Positioned(
               top: 220,
               height: 400,
-            
               width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
                 child: Column(
@@ -555,21 +963,224 @@ class _ProfileState extends State<Profile> {
                     userDetails(name, age, country, region, academicField,
                         aboutMe, numFollowers, numFollowings, context),
                     SizedBox(height: 50.0),
-                    SizedBox(
-                      height: 400,
-                      child: listStoriesProfileScreen(
-                          context,
-                          this.postsId,
-                          this.name,
-                          this.profileImages,
-                          this.postsCreationTime,
-                          this.postsCreationCountry,
-                          this.postsCreationRegion,
-                          this.postsCreationSubRegion,
-                          this.postsTags,
-                          this.postsText,
-                          this.postsImages),
-                    ),
+                    this.postsId.length > 0
+                        ? SizedBox(
+                            height: 400,
+                            child: Container(
+                              decoration: new BoxDecoration(
+                                color: Colors.white,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 20.0, right: 20.0),
+                                child: Center(
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.vertical,
+                                    itemCount: postsId.length,
+                                    itemBuilder: (context, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 0.0, right: 20.0),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                new Container(
+                                                    width: 40.0,
+                                                    height: 40.0,
+                                                    decoration: new BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        image: new DecorationImage(
+                                                            fit: BoxFit.fill,
+                                                            image: new NetworkImage(
+                                                                this.profileImages[
+                                                                    0])))),
+                                                SizedBox(width: 10),
+                                                Text(
+                                                    name +
+                                                        "\n" +
+                                                        postsCreationCountry[
+                                                            index] +
+                                                        "," +
+                                                        postsCreationRegion[
+                                                            index] +
+                                                        "," +
+                                                        postsCreationSubRegion[
+                                                            index] +
+                                                        "\n" +
+                                                        timestampToTimeGap(
+                                                            postsCreationTime[
+                                                                index]),
+                                                    style: TextStyle(
+                                                        fontSize: 16.0,
+                                                        fontWeight:
+                                                            FontWeight.w800)),
+                                                GestureDetector(
+                                                    onTap: () async {
+                                                      await firebaseMethod
+                                                          .removePost(postsId,
+                                                              postsId[index]);
+                                                      setState(() {});
+
+                                                      //Navigator.of(context).pop();
+                                                    },
+                                                    child: Text(" X ",
+                                                        style: TextStyle(
+                                                            fontSize: 20,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w500))),
+                                              ],
+                                            ),
+                                            SizedBox(height: 10.0),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                postsTags[index][0]
+                                                            .toString() ==
+                                                        '123456789'
+                                                    ? Container()
+                                                    : Text(
+                                                        postsTags[index][0]
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.blue,
+                                                            fontSize: 16.0)),
+                                                SizedBox(width: 20.0),
+                                                postsTags[index][1]
+                                                            .toString() ==
+                                                        '123456789'
+                                                    ? Container()
+                                                    : Text(
+                                                        postsTags[index][1]
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.blue,
+                                                            fontSize: 16.0)),
+                                                SizedBox(width: 20.0),
+                                                postsTags[index][2]
+                                                            .toString() ==
+                                                        '123456789'
+                                                    ? Container()
+                                                    : Text(
+                                                        postsTags[index][2]
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            color: Colors.blue,
+                                                            fontSize: 16.0)),
+                                              ],
+                                            ),
+                                            SizedBox(height: 10.0),
+                                            !postsImages[index]
+                                                    .contains('123456789')
+                                                ? SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.8,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.7,
+                                                    child: CachedNetworkImage(
+                                                      imageUrl:
+                                                          postsImages[index][0],
+                                                      placeholder:
+                                                          (context, url) =>
+                                                              Container(
+                                                        child: Center(
+                                                            child:
+                                                                new CircularProgressIndicator()),
+                                                      ),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          new Icon(Icons.error),
+                                                      fadeInCurve:
+                                                          Curves.easeIn,
+                                                      fadeInDuration: Duration(
+                                                          milliseconds: 1000),
+                                                      fit: BoxFit.fill,
+                                                    ),
+                                                  )
+                                                : Container(),
+                                            SizedBox(height: 10.0),
+                                            postsImages[index].length > 1
+                                                ? SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.8,
+                                                    height:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.7,
+                                                    child: CachedNetworkImage(
+                                                      imageUrl:
+                                                          postsImages[index][1],
+                                                      placeholder:
+                                                          (context, url) =>
+                                                              Container(
+                                                        child: Center(
+                                                            child:
+                                                                new CircularProgressIndicator()),
+                                                      ),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          new Icon(Icons.error),
+                                                      fadeInCurve:
+                                                          Curves.easeIn,
+                                                      fadeInDuration: Duration(
+                                                          milliseconds: 1000),
+                                                      fit: BoxFit.fill,
+                                                    ),
+                                                  )
+                                                : Container(),
+                                            SizedBox(height: 10.0),
+                                            postsText[index].length > 0
+                                                ? SizedBox(
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.8,
+                                                    height: double.parse(
+                                                            postsText[index]
+                                                                .length
+                                                                .toString()) *
+                                                        6.0,
+                                                    child: Text(
+                                                      postsText[index],
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.w300,
+                                                          fontSize: 16),
+                                                      textAlign:
+                                                          TextAlign.justify,
+                                                    ),
+                                                  )
+                                                : Container(),
+                                            SizedBox(height: 20.0),
+                                            Divider(
+                                              thickness: 10,
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(),
                   ],
                 ),
               ),

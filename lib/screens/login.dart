@@ -31,10 +31,8 @@ class Login extends StatelessWidget {
         await firebaseMethods.login();  
         Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
       }
-      else{
-        await firebaseMethods.login();  
-        Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
-        //showSnackBar(screen2WelcomeBody, scaffoldKey);
+      else{  
+        showSnackBar(screen2WelcomeBody, scaffoldKey);
       }
     
   }
@@ -138,7 +136,7 @@ class Login extends StatelessWidget {
              new Row(
                mainAxisAlignment: MainAxisAlignment.center,
                children: [
-                      GestureDetector(
+                     /* GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new Profile() )); 
                       },
@@ -150,7 +148,7 @@ class Login extends StatelessWidget {
                           color: Colors.lightBlue,
                           decoration: TextDecoration.underline,
                         ),
-                      )),
+                      )),*/
                ],
              ),
             //Login option for users who already have an account

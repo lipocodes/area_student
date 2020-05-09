@@ -6,8 +6,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/screens/followers.dart';
 import 'package:areastudent/screens/following.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:areastudent/tools/firebase_methods.dart';
 
 int indexLargeProfileImage = 0;
+ FirebaseMethods firebaseMethod = new FirebaseMethods();
 
 Widget signupInputBox(
     {String labelText,
@@ -57,6 +59,30 @@ Widget signupButton({int whichScreen}) {
     ),
   );
 }
+
+
+
+Widget postCreationButton({int whichScreen}) {
+  return RaisedButton(
+    onPressed: null, //the click event is impolemented in the screen classes
+    padding: const EdgeInsets.all(0.0),
+    child: Container(
+      decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: <Color>[
+              Color(0xFFB3F5FC),
+              Color(0xFF81D4FA),
+              Color(0xFF29B6F6),
+            ],
+          ),
+          borderRadius: BorderRadius.all(Radius.circular(8.0))),
+      padding: const EdgeInsets.fromLTRB(80, 10, 80, 10),
+      child:  Text(screen13CreatePost,
+          style: TextStyle(fontSize: 20, color: Colors.white)),
+    ),
+  );
+}
+
 
 Widget sendVerificationCodeButton({int whichScreen}) {
   return RaisedButton(
@@ -128,33 +154,7 @@ Widget multiImagePickerList(
   );
 }
 
-switchLargeProfileImage(String newProfileImage) {}
 
-Widget largeProfileImage(BuildContext context, List<String> profileImages) {
-  return Container(
-    child: Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        profileImages.length > 0
-            ? SizedBox(
-                //width: MediaQuery.of(context).size.width,
-                //height: MediaQuery.of(context).size.height * 0.6,
-                child: CachedNetworkImage(
-                  imageUrl: profileImages[0],
-                  placeholder: (context, url) => Container(
-                    child: Center(child: new CircularProgressIndicator()),
-                  ),
-                  errorWidget: (context, url, error) => new Icon(Icons.error),
-                  fadeInCurve: Curves.easeIn,
-                  fadeInDuration: Duration(milliseconds: 1000),
-                  fit: BoxFit.fill,
-                ),
-              )
-            : Container(),
-      ],
-    ),
-  );
-}
 
 Widget userDetails(
     String name,
@@ -324,6 +324,14 @@ Widget listStoriesProfileScreen(
                               postsCreationSubRegion[index] + "\n" + timestampToTimeGap(postsCreationTime[index]),
                           style: TextStyle(
                               fontSize: 16.0, fontWeight: FontWeight.w800)),
+                      GestureDetector(
+                        onTap: () async{
+                          await firebaseMethod.removePost(postsId, postsId[index]);
+                      
+                          //Navigator.of(context).pop();
+                        },
+                        child: Text(" X ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500))), 
+                               
                     ],
                   ),
              
@@ -331,27 +339,27 @@ Widget listStoriesProfileScreen(
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      postsTags[index][0].toString() != null
-                          ? Text(postsTags[index][0].toString(),
+                       postsTags[index][0].toString()=='123456789'
+                          ? Container()
+                          : Text(postsTags[index][0].toString(),
                               style:
-                                  TextStyle(color: Colors.blue, fontSize: 16.0))
-                          : Container(),
+                                  TextStyle(color: Colors.blue, fontSize: 16.0)),
                       SizedBox(width: 20.0),
-                      postsTags[index][1].toString() != null
-                          ? Text(postsTags[index][1].toString(),
+                       postsTags[index][1].toString()=='123456789'
+                          ? Container()
+                          : Text(postsTags[index][1].toString(),
                               style:
-                                  TextStyle(color: Colors.blue, fontSize: 16.0))
-                          : Container(),
+                                  TextStyle(color: Colors.blue, fontSize: 16.0)),
                       SizedBox(width: 20.0),
-                      postsTags[index][2].toString() != null
-                          ? Text(postsTags[index][2].toString(),
+                      postsTags[index][2].toString()=='123456789'
+                          ? Container()
+                          : Text(postsTags[index][2].toString(),
                               style:
-                                  TextStyle(color: Colors.blue, fontSize: 16.0))
-                          : Container(),
+                                  TextStyle(color: Colors.blue, fontSize: 16.0)),
                     ],
                   ),
                   SizedBox(height: 10.0),
-                  postsImages[index].length>0
+                  !postsImages[index].contains('123456789')
                       ? SizedBox(
                           width: MediaQuery.of(context).size.width * 0.8,
                           height: MediaQuery.of(context).size.width * 0.7,
@@ -382,23 +390,23 @@ Widget listStoriesProfileScreen(
                             ),
                             errorWidget: (context, url, error) =>
                                 new Icon(Icons.error),
-                            fadeInCurve: Curves.easeIn,
+                            fadeInCurve:  Curves.easeIn,
                             fadeInDuration: Duration(milliseconds: 1000),
                             fit: BoxFit.fill,
                           ),
                         )
                       : Container(),
                   SizedBox(height: 10.0),
-                  SizedBox(
+                  postsText[index].length>0 ? SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
-                    height: 500,
+                    height: double.parse(postsText[index].length.toString()) * 4.0,
                     child: Text( 
                       postsText[index],
                       style:
                           TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
                       textAlign: TextAlign.justify,
                     ),
-                  ),
+                  ) : Container(),
                   SizedBox(height:20.0),
                   Divider(thickness: 10,),
                 ],

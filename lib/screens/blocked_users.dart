@@ -62,10 +62,10 @@ class _BlockedUsersState extends State<BlockedUsers> {
 
   void listBlockedUsers() async {
     this.uid = await inputData();
-    if (this.tempUid == true) { 
+    /*if (this.tempUid == true) { 
       this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
       this.tempUid = true;
-    }
+    }*/
 
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')

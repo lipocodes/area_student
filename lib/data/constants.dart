@@ -32,7 +32,7 @@ const String screen4FirebaseCollectionName = "userData";
 const String screen4FirebaseUserAlreadyExists = "You already have an account!";
 const String screen4NoAccountYet = "You need to create an account before you can log in!";
 const String screen4NoGPSAvailable = "Your GPS isn't working. Your profile is created without your location!";
-const String screen4NoMore3Images = "No more than 3 images please";
+const String screen4NoMore3Images = "No more than 3 images please"; 
 
 const String screen8TitleText = "Phone Validation";
 const String screen8TitleBody = "Phone Number";
@@ -60,4 +60,6 @@ const String screen12Settings = "Settings";
 const String screen12EditProfile = "Edit Profile";
 
 const String screen13DefaultProfileImage = "https://firebasestorage.googleapis.com/v0/b/area-student-d501b.appspot.com/o/userData%2Fimportant%2Fno_image_available.png?alt=media&token=5a1746c8-6376-4d95-8de5-255401c4ebd4";
-
+const String screen13NoMore2Images = "No more than 2 images please"; 
+const String screen13CreatePost = "Create";
+const String screen13Warning = "You can't create a blank post!";
