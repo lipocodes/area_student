@@ -1,4 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:areastudent/data/constants.dart';
+import 'package:areastudent/tools/auth_service.dart';
+import 'package:areastudent/tools/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:share/share.dart';
+import 'blocked_users.dart';
+import 'contact.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:areastudent/tools/firebase_methods.dart';
+import 'followers.dart';
+import 'following.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:areastudent/tools/methods.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'create_post.dart';
 
 class CreatePost extends StatefulWidget {
   @override
@@ -6,6 +28,46 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostState extends State<CreatePost> {
+
+  String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
+    TextEditingController controllerPostText = new TextEditingController();
+    String textWarning = "";
+      List<String> postsId = [];
+       List<File> postImageList = [];
+       FirebaseMethods firebaseMethods = new FirebaseMethods();
+
+    onPressedCreateButton() async {
+    if (this.controllerPostText.text.toString().length == 0 &&
+        postImageList.length == 0) {
+      setState(() {
+        this.textWarning = screen13Warning;
+      });
+
+      return;
+    } else {
+      displayProgressDialog(context);
+
+      await firebaseMethods.createNewPost(this.controllerPostText.text,
+          this.postImageList, this.postsId, this.tag1, this.tag2, this.tag3);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String postId = prefs.getString('postId');
+
+      if (this.postImageList.length > 0) {
+        await firebaseMethods.uploadPostImages(this.postImageList, postId);
+        List<String> imagesUrl = prefs.getStringList('imagesUrl');
+        await firebaseMethod.updatePostsImages(imagesUrl, postId, this.postsId);
+      } else {
+        await firebaseMethod
+            .updatePostsImages(['123456789'], postId, this.postsId);
+      }
+      closeProgressDialog(context);
+ 
+      Navigator.of(context).pop();
+
+      //Navigator.of(context).pop();
+    }
+  }    
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -15,227 +77,260 @@ class _CreatePostState extends State<CreatePost> {
           color: Colors.black, //change your color here
         ),
       ),
-      body: Column(
-          //welcome title & welcome body
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, top: 20.0),
-              child: new Text(
-                screen4Welcome,
-                style:
-                    new TextStyle(fontSize: 26.0, fontWeight: FontWeight.w900),
-              ),
-            ),
-            new SizedBox(
-              height: 20.0,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: 20.0,
-                right: 70.0,
-              ),
-              child: new Text(screen4LetsSetup,
-                  style: new TextStyle(fontSize: 22.0, color: Colors.grey)),
-            ),
-            new SizedBox(height: 30.0),
-            Center(
-              child: Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  new Container(
-                      width: 120.0,
-                      height: 120.0,
-                      decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(
-                              fit: BoxFit.fill,
-                              image:
-                                  new AssetImage("assets/images/avatar.png")))),
-                  GestureDetector(
-                    onTap: onTapProfileImage,
-                    child: new CircleAvatar(
-                        backgroundColor: Colors.lightBlueAccent,
-                        child: new Icon(Icons.add_a_photo,
-                            color: Colors.white, size: 20.0)),
-                  ),
-                ],
-              ),
-            ),
-            multiImagePickerList(
-                imageList: imageList,
-                removeNewImage: (index) {
-                  removeImage(index);
-                }),
-            new SizedBox(
-              height: 10.0,
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
-              child: signupInputBox(
-                  labelText: screen4FirstName,
-                  controller: controllerFirstName,
-                  textInputType: TextInputType.text),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
-              child: signupInputBox(
-                  labelText: screen4LastName,
-                  controller: controllerLastName,
-                  textInputType: TextInputType.text),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
-              child: signupInputBox(
-                  labelText: screen4PhoneNumber,
-                  controller: controllerPhoneNumber,
-                  textInputType: TextInputType.phone),
-            ),
-            SizedBox(
-              width: 500.0,
-              child: Padding(
-                padding:
-                    const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
-                child: RaisedButton(
-                  onPressed: () {
-                    selectDate(context);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 5.0,
-                      bottom: 6.0,
-                    ),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          this.textBirthdate,
-                          style: TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[600]),
-                        )),
-                  ),
-                  textColor: Colors.grey,
-                  color: Colors.grey[100],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
-                    side: BorderSide(color: Colors.black45),
-                  ),
-                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
-              child: Container(
-                decoration: ShapeDecoration(
-                  color: Colors.grey[100],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
-                    side: BorderSide(color: Colors.black45),
-                  ),
-                ),
-                child: SizedBox(
-                  width: 500.0,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: new DropdownButton<String>(
-                        underline: SizedBox(),
-                        iconSize: 2,
-                        hint: new Text(
-                          this.textAcademicField,
-                          textAlign: TextAlign.start,
-                          style: TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.grey[600]),
+      body: SingleChildScrollView(
+              child: Column(
+            //welcome title & welcome body
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height:20.0),
+                 Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                String textNewTag = "";
+                                showDialog(
+                                    context: context,
+                                    builder: (_) => new AlertDialog(
+                                          title: new Text("Add a tag:"),
+                                          //content: new Text("Hey! I'm Coflutter!"),
+                                          content: new TextField(
+                                            //controller: controllerAddTag,
+                                            onChanged: (text) {
+                                              //print("First text field: $text");
+                                              textNewTag = text;
+                                            },
+                                            autofocus: true,
+                                            decoration: new InputDecoration(
+                                                labelText: '', hintText: 'Tag'),
+                                          ),
+                                          actions: <Widget>[
+                                            FlatButton(
+                                              child: Text('Cancel'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            FlatButton(
+                                              child: Text('OK'),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (textNewTag.length > 0)
+                                                    this.tag1 = textNewTag;
+                                                });
+
+                                                Navigator.of(context).pop();
+                                              },
+                                            )
+                                          ],
+                                        ));
+                              },
+                              child: tag1 != '123456789'
+                                  ? Text(tag1,
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.blue))
+                                  : Text("Add Tag",
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.blue))),
+                          GestureDetector(
+                              onTap: () {
+                                String textNewTag = "";
+                                showDialog(
+                                    context: context,
+                                    builder: (_) => new AlertDialog(
+                                          title: new Text("Add a tag:"),
+                                          //content: new Text("Hey! I'm Coflutter!"),
+                                          content: new TextField(
+                                            //controller: controllerAddTag,
+                                            onChanged: (text) {
+                                              //print("First text field: $text");
+                                              textNewTag = text;
+                                            },
+                                            autofocus: true,
+                                            decoration: new InputDecoration(
+                                                labelText: '', hintText: 'Tag'),
+                                          ),
+                                          actions: <Widget>[
+                                            FlatButton(
+                                              child: Text('Cancel'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            FlatButton(
+                                              child: Text('OK'),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (textNewTag.length > 0)
+                                                    this.tag2 = textNewTag;
+                                                });
+
+                                                Navigator.of(context).pop();
+                                              },
+                                            )
+                                          ],
+                                        ));
+                              },
+                              child: tag2 != '123456789'
+                                  ? Text(tag2,
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.blue))
+                                  : Text("Add Tag",
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.blue))),
+                          GestureDetector(
+                              onTap: () {
+                                String textNewTag = "";
+                                showDialog(
+                                    context: context,
+                                    builder: (_) => new AlertDialog(
+                                          title: new Text("Add a tag:"),
+                                          //content: new Text("Hey! I'm Coflutter!"),
+                                          content: new TextField(
+                                            //controller: controllerAddTag,
+                                            onChanged: (text) {
+                                              //print("First text field: $text");
+                                              textNewTag = text;
+                                            },
+                                            autofocus: true,
+                                            decoration: new InputDecoration(
+                                                labelText: '', hintText: 'Tag'),
+                                          ),
+                                          actions: <Widget>[
+                                            FlatButton(
+                                              child: Text('Cancel'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                            FlatButton(
+                                              child: Text('OK'),
+                                              onPressed: () {
+                                                setState(() {
+                                                  if (textNewTag.length > 0)
+                                                    this.tag3 = textNewTag;
+                                                });
+
+                                                Navigator.of(context).pop();
+                                              },
+                                            )
+                                          ],
+                                        ));
+                              },
+                              child: tag3 != '123456789'
+                                  ? Text(tag3,
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.blue))
+                                  : Text("Add Tag",
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.blue))),
+                        ],
+                      ),
+                      SizedBox(height:20.0),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
+                        child: TextField(
+                          controller: controllerPostText,
+                          keyboardType: TextInputType.text,
+                          maxLength: 200,
+                          maxLines: 10,
+                          decoration: InputDecoration(
+                              border: new OutlineInputBorder(
+                                  borderRadius: new BorderRadius.circular(25.0)),
+                              hintText: 'Your text'),
                         ),
-                        items: academicFields.map((String value) {
-                          return new DropdownMenuItem<String>(
-                            value: value,
-                            child: new Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            this.textAcademicField = value;
-                          });
-                        },
                       ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                new Radio(
-                  value: 0,
-                  groupValue: _radioValue,
-                  onChanged: _handleRadioValueChange,
-                ),
-                new Text(screen4Man),
-                new SizedBox(width: 50.0),
-                new Radio(
-                  value: 1,
-                  groupValue: _radioValue,
-                  onChanged: _handleRadioValueChange,
-                ),
-                new Text(screen4Woman),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                  left: 20.0, right: 20.0, top: 10.0, bottom: 10.0),
-              child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: 5,
-                controller: controllerAboutMe,
-                decoration: new InputDecoration(
-                    labelText: 'About',
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.yellow))),
-              ),
-            ),
-            new SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                GestureDetector(
-                    onTap: onPressedSignupButton,
-                    child: signupButton(whichScreen: 4)),
-              ],
-            ),
-            new SizedBox(height: 20.0),
-            new Center(
-              child: new Text(screen4PrivacyPolicy1),
-            ),
-            new Center(
-                child: GestureDetector(
-                    onTap: () {
-                      buttonPrivacyPolicyTapped(context);
-                    },
-                    child: new Text(
-                      screen4PrivacyPolicy2,
-                      style: new TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 16.0,
-                        color: Colors.lightBlue,
-                        decoration: TextDecoration.underline,
+                      SizedBox(height: 2.0),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () async {
+                            File file;
+                            try {
+                              file = await ImagePicker.pickImage(
+                                  source: ImageSource.gallery,
+                                  maxHeight: 200,
+                                  maxWidth: 200);
+                            } on PlatformException catch (e) {
+                              print("Image picker issue: " + e.toString());
+                            }
+
+                            if (file != null) {
+                              List<File> imageFile = new List();
+                              imageFile.add(file);
+
+                              if (this.postImageList == null) {
+                                this.postImageList =
+                                    new List.from(imageFile, growable: true);
+                              } else {
+                                if (this.postImageList.length > 1) {
+                                  return;
+                                }
+
+                                for (int s = 0; s < imageFile.length; s++) {
+                                  this.postImageList.add(file);
+                                }
+                              }
+                              setState(() {});
+                            }
+                          },
+                          child: new CircleAvatar(
+                              backgroundColor: Colors.lightBlueAccent,
+                              child: new Icon(Icons.add_a_photo,
+                                  color: Colors.white, size: 24.0)),
+                        ),
                       ),
-                    ))),
-            new SizedBox(
-              height: 40.0,
-            )
-          ],
-        ),
+                      SizedBox(height: 10.0),
+                      multiImagePickerList(
+                          imageList: this.postImageList,
+                          removeNewImage: (index) {
+                            setState(() {
+                              this.postImageList.removeAt(index);
+                            });
+                          }),
+                      Text(
+                        textWarning,
+                        style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            GestureDetector(
+                                onTap: () {
+                                  if (this
+                                              .controllerPostText
+                                              .text
+                                              .toString()
+                                              .length ==
+                                          0 &&
+                                      postImageList.length == 0) {
+                                    setState(() {
+                                      this.textWarning = screen13Warning;
+                                    });
+
+                                    return;
+                                  } else {
+                                    onPressedCreateButton();
+                                  }
+                                },
+                                child: postCreationButton()),
+                          ],
+                        ),
+                      ),
+            ],
+          ),
+      ),
     );
   }
 }

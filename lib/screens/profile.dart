@@ -19,6 +19,7 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'create_post.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -162,6 +163,17 @@ class _ProfileState extends State<Profile> {
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
 
+
+   this.postsId = []; 
+   this.postsCreatorUid = []; 
+   this.postsCreationCountry=[]; 
+   this.postsCreationRegion=[]; 
+   this.postsCreationSubRegion=[]; 
+   this.postsCreationTime = []; 
+   this.postsText=[];
+   this.postsTags=[];
+   this.postsImages=[];
+
     for (int i = 0; i < snapshot.length; i++) {
       try {
         this.postsId.add(snapshot[i].data['postId'].toString());
@@ -206,6 +218,8 @@ class _ProfileState extends State<Profile> {
       }
     }
 
+      
+
       this.postsId =  this.postsId.reversed.toList();
       this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
       this.postsCreationCountry =  this.postsCreationCountry.reversed.toList();
@@ -213,6 +227,7 @@ class _ProfileState extends State<Profile> {
       this.postsCreationSubRegion =  this.postsCreationSubRegion.reversed.toList(); 
       this.postsCreationTime =   this.postsCreationTime.reversed.toList();
       this.postsText =  this.postsText.reversed.toList();
+      this.postsImages = this.postsImages.reversed.toList(); 
 
 
     setState(() {});
@@ -392,393 +407,18 @@ class _ProfileState extends State<Profile> {
     return true;
   }
 
-  Future pickImage() async {
-    File file;
-    try {
-      file = await ImagePicker.pickImage(
-          source: ImageSource.gallery, maxHeight: 200, maxWidth: 200);
-    } on PlatformException catch (e) {
-      print("Image picker issue: " + e.toString());
-    }
 
-    if (file != null) {
-      List<File> imageFile = new List();
-      imageFile.add(file);
-      //imageList = new List.from(imageFile);
-      if (this.postImageList == null) {
-        this.postImageList = new List.from(imageFile, growable: true);
-      } else {
-        if (this.postImageList.length > 2) {
-          setState(() {
-            this.textWarning = screen13NoMore2Images;
-          });
-          return;
-        } else {
-          setState(() {
-            this.textWarning = screen13NoMore2Images;
-          });
-        }
 
-        for (int s = 0; s < imageFile.length; s++) {
-          this.postImageList.add(file);
-        }
-      }
-      setState(() {});
-    }
-  }
+ double lengthTextBoxPost(int numWords){
+  
+   print("ttttttttttttttttttt=  " + numWords.toString());
+   double d = numWords/5;
+   double necessaryHeight= d*20;
+   return d*10;
+ }
 
-  onPressedCreateButton() async {
-    if (this.controllerPostText.text.toString().length == 0 &&
-        postImageList.length == 0) {
-      setState(() {
-        this.textWarning = screen13Warning;
-      });
 
-      return;
-    } else {
-      displayProgressDialog(context);
 
-      await firebaseMethods.createNewPost(this.controllerPostText.text,
-          this.postImageList, this.postsId, this.tag1, this.tag2, this.tag3);
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String postId = prefs.getString('postId');
-
-      if (this.postImageList.length > 0) {
-        await firebaseMethods.uploadPostImages(this.postImageList, postId);
-        List<String> imagesUrl = prefs.getStringList('imagesUrl');
-        await firebaseMethod.updatePostsImages(imagesUrl, postId, this.postsId);
-      } else {
-        await firebaseMethod
-            .updatePostsImages(['123456789'], postId, this.postsId);
-      }
-      closeProgressDialog(context);
- 
-      Navigator.of(context).pop();
-      Navigator.of(context).pop();
-    }
-  }
-
-  addTag(int indexTag) async {
-    String textNewTag = "";
-    showDialog(
-        context: context,
-        builder: (_) => new AlertDialog(
-              title: new Text("Add a tag:"),
-              //content: new Text("Hey! I'm Coflutter!"),
-              content: new TextField(
-                //controller: controllerAddTag,
-                onChanged: (text) {
-                  //print("First text field: $text");
-                  textNewTag = text;
-                },
-                autofocus: true,
-                decoration: new InputDecoration(labelText: '', hintText: 'Tag'),
-              ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                FlatButton(
-                  child: Text('OK'),
-                  onPressed: () {
-                    setState(() {
-                      if (indexTag == 1 && textNewTag.length > 0) {
-                        this.tag1 = textNewTag;
-                      } else if (indexTag == 2 && textNewTag.length > 0)
-                        this.tag2 = textNewTag;
-                      else if (indexTag == 3 && textNewTag.length > 0)
-                        this.tag3 = textNewTag;
-                    });
-
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            ));
-  }
-
-  Future showDialogPostCreation() async {
-    String textTag1 = "Add Tag", textTag2 = "Add Tag", textTag3 = "Add Tag";
-    showDialog(
-      context: context,
-      builder: (context) {
-        String contentText = "Content of Dialog";
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Text("New Post"),
-                  RaisedButton(
-                    child: Text(
-                      "X",
-                      style: TextStyle(
-                        color: Colors.black,
-                      ),
-                    ),
-                    color: Colors.white,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GestureDetector(
-                            onTap: () {
-                              String textNewTag = "";
-                              showDialog(
-                                  context: context,
-                                  builder: (_) => new AlertDialog(
-                                        title: new Text("Add a tag:"),
-                                        //content: new Text("Hey! I'm Coflutter!"),
-                                        content: new TextField(
-                                          //controller: controllerAddTag,
-                                          onChanged: (text) {
-                                            //print("First text field: $text");
-                                            textNewTag = text;
-                                          },
-                                          autofocus: true,
-                                          decoration: new InputDecoration(
-                                              labelText: '', hintText: 'Tag'),
-                                        ),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          FlatButton(
-                                            child: Text('OK'),
-                                            onPressed: () {
-                                              setState(() {
-                                                if (textNewTag.length > 0)
-                                                  this.tag1 = textNewTag;
-                                              });
-
-                                              Navigator.of(context).pop();
-                                            },
-                                          )
-                                        ],
-                                      ));
-                            },
-                            child: tag1 != '123456789'
-                                ? Text(tag1,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.blue))
-                                : Text("Add Tag",
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.blue))),
-                        GestureDetector(
-                            onTap: () {
-                              String textNewTag = "";
-                              showDialog(
-                                  context: context,
-                                  builder: (_) => new AlertDialog(
-                                        title: new Text("Add a tag:"),
-                                        //content: new Text("Hey! I'm Coflutter!"),
-                                        content: new TextField(
-                                          //controller: controllerAddTag,
-                                          onChanged: (text) {
-                                            //print("First text field: $text");
-                                            textNewTag = text;
-                                          },
-                                          autofocus: true,
-                                          decoration: new InputDecoration(
-                                              labelText: '', hintText: 'Tag'),
-                                        ),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          FlatButton(
-                                            child: Text('OK'),
-                                            onPressed: () {
-                                              setState(() {
-                                                if (textNewTag.length > 0)
-                                                  this.tag2 = textNewTag;
-                                              });
-
-                                              Navigator.of(context).pop();
-                                            },
-                                          )
-                                        ],
-                                      ));
-                            },
-                            child: tag2 != '123456789'
-                                ? Text(tag2,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.blue))
-                                : Text("Add Tag",
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.blue))),
-                        GestureDetector(
-                            onTap: () {
-                              String textNewTag = "";
-                              showDialog(
-                                  context: context,
-                                  builder: (_) => new AlertDialog(
-                                        title: new Text("Add a tag:"),
-                                        //content: new Text("Hey! I'm Coflutter!"),
-                                        content: new TextField(
-                                          //controller: controllerAddTag,
-                                          onChanged: (text) {
-                                            //print("First text field: $text");
-                                            textNewTag = text;
-                                          },
-                                          autofocus: true,
-                                          decoration: new InputDecoration(
-                                              labelText: '', hintText: 'Tag'),
-                                        ),
-                                        actions: <Widget>[
-                                          FlatButton(
-                                            child: Text('Cancel'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          FlatButton(
-                                            child: Text('OK'),
-                                            onPressed: () {
-                                              setState(() {
-                                                if (textNewTag.length > 0)
-                                                  this.tag3 = textNewTag;
-                                              });
-
-                                              Navigator.of(context).pop();
-                                            },
-                                          )
-                                        ],
-                                      ));
-                            },
-                            child: tag3 != '123456789'
-                                ? Text(tag3,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.blue))
-                                : Text("Add Tag",
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.blue))),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
-                      child: TextField(
-                        controller: controllerPostText,
-                        keyboardType: TextInputType.text,
-                        maxLength: 100,
-                        maxLines: 5,
-                        decoration: InputDecoration(
-                            border: new OutlineInputBorder(
-                                borderRadius: new BorderRadius.circular(25.0)),
-                            hintText: 'Your text'),
-                      ),
-                    ),
-                    SizedBox(height: 10.0),
-                    GestureDetector(
-                      onTap: () async {
-                        File file;
-                        try {
-                          file = await ImagePicker.pickImage(
-                              source: ImageSource.gallery,
-                              maxHeight: 200,
-                              maxWidth: 200);
-                        } on PlatformException catch (e) {
-                          print("Image picker issue: " + e.toString());
-                        }
-
-                        if (file != null) {
-                          List<File> imageFile = new List();
-                          imageFile.add(file);
-
-                          if (this.postImageList == null) {
-                            this.postImageList =
-                                new List.from(imageFile, growable: true);
-                          } else {
-                            if (this.postImageList.length > 1) {
-                              return;
-                            }
-
-                            for (int s = 0; s < imageFile.length; s++) {
-                              this.postImageList.add(file);
-                            }
-                          }
-                          setState(() {});
-                        }
-                      },
-                      child: new CircleAvatar(
-                          backgroundColor: Colors.lightBlueAccent,
-                          child: new Icon(Icons.add_a_photo,
-                              color: Colors.white, size: 24.0)),
-                    ),
-                    SizedBox(height: 10.0),
-                    multiImagePickerList(
-                        imageList: this.postImageList,
-                        removeNewImage: (index) {
-                          setState(() {
-                            this.postImageList.removeAt(index);
-                          });
-                        }),
-                    Text(
-                      textWarning,
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500),
-                    ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          GestureDetector(
-                              onTap: () {
-                                if (this
-                                            .controllerPostText
-                                            .text
-                                            .toString()
-                                            .length ==
-                                        0 &&
-                                    postImageList.length == 0) {
-                                  setState(() {
-                                    this.textWarning = screen13Warning;
-                                  });
-
-                                  return;
-                                } else {
-                                  onPressedCreateButton();
-                                }
-                              },
-                              child: postCreationButton()),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   @override
   void initState() {
@@ -810,8 +450,13 @@ class _ProfileState extends State<Profile> {
           backgroundColor: Colors.white,
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            showDialogPostCreation();
+          onPressed: () async{
+            //showDialogPostCreation();
+            var res = await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new CreatePost()));
+           
+            setState(() {
+              retrievePostsCurrentUser();
+            });  
           },
           child: Icon(Icons.add),
         ),
@@ -1003,6 +648,7 @@ class _ProfileState extends State<Profile> {
                                             Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                                               children: [
                                                 new Container(
                                                     width: 40.0,
@@ -1039,9 +685,7 @@ class _ProfileState extends State<Profile> {
                                                       await firebaseMethod
                                                           .removePost(postsId,
                                                               postsId[index]);
-                                                      setState(() {});
-
-                                                      //Navigator.of(context).pop();
+                                                      retrievePostsCurrentUser(); 
                                                     },
                                                     child: Text(" X ",
                                                         style: TextStyle(
@@ -1167,7 +811,7 @@ class _ProfileState extends State<Profile> {
                                                                 .size
                                                                 .width *
                                                             0.8,
-                                                    height: 400,
+                                                    height:  lengthTextBoxPost(postsText[index].length),
                                                     child: Text(
                                                       postsText[index],
                                                       style: TextStyle(
