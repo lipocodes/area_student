@@ -99,10 +99,11 @@ class FirebaseMethods {
       administrativeArea = placeMark.administrativeArea;
       subAdministrativeArea = placeMark.subAdministrativeArea;
       country = placeMark.country;
+    }
 
       String uid = await inputData();
       int now = new DateTime.now().millisecondsSinceEpoch;
-      String postId = uid + '_' + now.toString();
+      String postName = uid + '_' + now.toString();
 
       await firestore
           .collection("posts")
@@ -113,14 +114,14 @@ class FirebaseMethods {
             'creationSubRegion': subAdministrativeArea,
             'creationTime': now.toString(),
             'creatorUid': uid,
-            'postId': postId,
+            'postId': postName,
             'text': postText,
             'tags' : [tag1, tag2, tag3],
           }))
           .whenComplete(() async{
 
            SharedPreferences prefs = await SharedPreferences.getInstance();
-           await prefs.setString('postId', postId);
+           await prefs.setString('postId', postName);
 
            //postsId.add(postId);
            
@@ -130,7 +131,6 @@ class FirebaseMethods {
 
             
           });
-    }
   }
 
 

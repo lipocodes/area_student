@@ -165,18 +165,24 @@ class _ProfileState extends State<Profile> {
     for (int i = 0; i < snapshot.length; i++) {
       try {
         this.postsId.add(snapshot[i].data['postId'].toString());
+        
+
         this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
-        this
-            .postsCreationCountry
-            .add(snapshot[i].data['creationCountry'].toString());
-        this
-            .postsCreationRegion
-            .add(snapshot[i].data['creationRegion'].toString());
-        this
-            .postsCreationSubRegion
-            .add(snapshot[i].data['creationSubRegion'].toString());
+        
+
+        this.postsCreationCountry.add(snapshot[i].data['creationCountry'].toString());
+       
+            
+        this.postsCreationRegion.add(snapshot[i].data['creationRegion'].toString());
+          
+            
+        this.postsCreationSubRegion.add(snapshot[i].data['creationSubRegion'].toString());
+        
+         
         this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
+       
         this.postsText.add(snapshot[i].data['text'].toString());
+     
 
         List<dynamic> str9 = snapshot[i].data['images'];
 
@@ -199,6 +205,16 @@ class _ProfileState extends State<Profile> {
         print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
       }
     }
+
+      this.postsId =  this.postsId.reversed.toList();
+      this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
+      this.postsCreationCountry =  this.postsCreationCountry.reversed.toList();
+      this.postsCreationRegion =  this.postsCreationRegion.reversed.toList(); 
+      this.postsCreationSubRegion =  this.postsCreationSubRegion.reversed.toList(); 
+      this.postsCreationTime =   this.postsCreationTime.reversed.toList();
+      this.postsText =  this.postsText.reversed.toList();
+
+
     setState(() {});
   }
 
@@ -1151,11 +1167,7 @@ class _ProfileState extends State<Profile> {
                                                                 .size
                                                                 .width *
                                                             0.8,
-                                                    height: double.parse(
-                                                            postsText[index]
-                                                                .length
-                                                                .toString()) *
-                                                        6.0,
+                                                    height: 400,
                                                     child: Text(
                                                       postsText[index],
                                                       style: TextStyle(
