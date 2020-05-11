@@ -6,21 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:share/share.dart';
-import 'blocked_users.dart';
-import 'contact.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
-import 'followers.dart';
-import 'following.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'create_post.dart';
+
 
 class CreatePost extends StatefulWidget {
   @override
@@ -28,7 +18,7 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostState extends State<CreatePost> {
-
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
     TextEditingController controllerPostText = new TextEditingController();
     String textWarning = "";
@@ -64,7 +54,7 @@ class _CreatePostState extends State<CreatePost> {
  
       Navigator.of(context).pop();
 
-      //Navigator.of(context).pop();
+   
     }
   }    
 
@@ -270,6 +260,7 @@ class _CreatePostState extends State<CreatePost> {
                                     new List.from(imageFile, growable: true);
                               } else {
                                 if (this.postImageList.length > 1) {
+                                  showSnackBar("screen17TooMuchImages", scaffoldKey);
                                   return;
                                 }
 

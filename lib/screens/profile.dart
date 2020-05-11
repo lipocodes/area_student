@@ -20,6 +20,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'create_post.dart';
+import 'menu_groups.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -67,6 +68,7 @@ class _ProfileState extends State<Profile> {
   final _formKey = GlobalKey<FormState>();
   String textTag1 = "Add tag";
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
+  int indexBottomBar = 0;
 
   Future<String> inputData() async {
     try {
@@ -163,38 +165,37 @@ class _ProfileState extends State<Profile> {
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
 
-
-   this.postsId = []; 
-   this.postsCreatorUid = []; 
-   this.postsCreationCountry=[]; 
-   this.postsCreationRegion=[]; 
-   this.postsCreationSubRegion=[]; 
-   this.postsCreationTime = []; 
-   this.postsText=[];
-   this.postsTags=[];
-   this.postsImages=[];
+    this.postsId = [];
+    this.postsCreatorUid = [];
+    this.postsCreationCountry = [];
+    this.postsCreationRegion = [];
+    this.postsCreationSubRegion = [];
+    this.postsCreationTime = [];
+    this.postsText = [];
+    this.postsTags = [];
+    this.postsImages = [];
 
     for (int i = 0; i < snapshot.length; i++) {
       try {
         this.postsId.add(snapshot[i].data['postId'].toString());
-        
 
         this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
-        
 
-        this.postsCreationCountry.add(snapshot[i].data['creationCountry'].toString());
-       
-            
-        this.postsCreationRegion.add(snapshot[i].data['creationRegion'].toString());
-          
-            
-        this.postsCreationSubRegion.add(snapshot[i].data['creationSubRegion'].toString());
-        
-         
+        this
+            .postsCreationCountry
+            .add(snapshot[i].data['creationCountry'].toString());
+
+        this
+            .postsCreationRegion
+            .add(snapshot[i].data['creationRegion'].toString());
+
+        this
+            .postsCreationSubRegion
+            .add(snapshot[i].data['creationSubRegion'].toString());
+
         this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
-       
+
         this.postsText.add(snapshot[i].data['text'].toString());
-     
 
         List<dynamic> str9 = snapshot[i].data['images'];
 
@@ -218,17 +219,15 @@ class _ProfileState extends State<Profile> {
       }
     }
 
-      
-
-      this.postsId =  this.postsId.reversed.toList();
-      this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
-      this.postsCreationCountry =  this.postsCreationCountry.reversed.toList();
-      this.postsCreationRegion =  this.postsCreationRegion.reversed.toList(); 
-      this.postsCreationSubRegion =  this.postsCreationSubRegion.reversed.toList(); 
-      this.postsCreationTime =   this.postsCreationTime.reversed.toList();
-      this.postsText =  this.postsText.reversed.toList();
-      this.postsImages = this.postsImages.reversed.toList(); 
-
+    this.postsId = this.postsId.reversed.toList();
+    this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
+    this.postsCreationCountry = this.postsCreationCountry.reversed.toList();
+    this.postsCreationRegion = this.postsCreationRegion.reversed.toList();
+    this.postsCreationSubRegion = this.postsCreationSubRegion.reversed.toList();
+    this.postsCreationTime = this.postsCreationTime.reversed.toList();
+    this.postsTags = this.postsTags.reversed.toList();
+    this.postsText = this.postsText.reversed.toList();
+    this.postsImages = this.postsImages.reversed.toList();
 
     setState(() {});
   }
@@ -407,18 +406,12 @@ class _ProfileState extends State<Profile> {
     return true;
   }
 
-
-
- double lengthTextBoxPost(int numWords){
-  
-   print("ttttttttttttttttttt=  " + numWords.toString());
-   double d = numWords/5;
-   double necessaryHeight= d*20;
-   return d*10;
- }
-
-
-
+  double lengthTextBoxPost(int numWords) {
+    print("ttttttttttttttttttt=  " + numWords.toString());
+    double d = numWords / 5;
+    double necessaryHeight = d * 20;
+    return d * 10;
+  }
 
   @override
   void initState() {
@@ -440,29 +433,60 @@ class _ProfileState extends State<Profile> {
         resizeToAvoidBottomInset: false,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
-          elevation: 0,
-          iconTheme: IconThemeData(
-            color: Colors.black, //change your color here
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          title: new Text(
-            "",
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              new Text(
+                "Profile",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 24),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_none,
+                  size: 40,
+                ),
+                color: Colors.black87,
+                onPressed: () {
+                  showSnackBar(
+                      "In the future - Inbox will be here!", scaffoldKey);
+                },
+              ),
+            ],
           ),
           backgroundColor: Colors.white,
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () async{
+          onPressed: () async {
             //showDialogPostCreation();
-            var res = await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) =>  new CreatePost()));
-           
+            var res = await Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new CreatePost()));
+
             setState(() {
               retrievePostsCurrentUser();
-            });  
+            });
           },
           child: Icon(Icons.add),
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: 0, // this will be set when a new tab is tapped
+          currentIndex: 0,
+          onTap: (int index) {
+            setState(() {
+              this.indexBottomBar = index;
+            });
+
+            if (this.indexBottomBar == 1) {
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new MenuGroups()));
+            }
+          },
           items: [
             BottomNavigationBarItem(
               icon: new Icon(Icons.perm_identity, size: 30.0),
@@ -648,7 +672,8 @@ class _ProfileState extends State<Profile> {
                                             Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
                                               children: [
                                                 new Container(
                                                     width: 40.0,
@@ -685,7 +710,7 @@ class _ProfileState extends State<Profile> {
                                                       await firebaseMethod
                                                           .removePost(postsId,
                                                               postsId[index]);
-                                                      retrievePostsCurrentUser(); 
+                                                      retrievePostsCurrentUser();
                                                     },
                                                     child: Text(" X ",
                                                         style: TextStyle(
@@ -811,7 +836,9 @@ class _ProfileState extends State<Profile> {
                                                                 .size
                                                                 .width *
                                                             0.8,
-                                                    height:  lengthTextBoxPost(postsText[index].length),
+                                                    height: lengthTextBoxPost(
+                                                        postsText[index]
+                                                            .length),
                                                     child: Text(
                                                       postsText[index],
                                                       style: TextStyle(

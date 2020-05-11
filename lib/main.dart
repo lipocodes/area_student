@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:areastudent/screens/login.dart';
-import 'package:areastudent/screens/profile.dart';
-import 'package:areastudent/tools/auth_service.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:areastudent/screens/create_post.dart';
+import 'package:areastudent/screens/menu_groups.dart';
 
 //void main() => runApp(MyApp());
 
@@ -32,7 +30,7 @@ class MyApp extends StatelessWidget {
      
       //home: new AuthService().hanldeAuth(),
       home: Login(),
-      //home: CreatePost(),
+      //home: MenuGroups(),
       
     );
   }

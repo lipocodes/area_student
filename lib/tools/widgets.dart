@@ -112,7 +112,7 @@ Widget multiImagePickerList(
     child: imageList == null || imageList.length == 0
         ? new Container()
         : new SizedBox(
-            height: 150.0,
+            height: 80.0,
             child: new ListView.builder(
                 itemCount: imageList.length,
                 scrollDirection: Axis.horizontal,
@@ -122,18 +122,18 @@ Widget multiImagePickerList(
                     child: new Stack(
                       children: <Widget>[
                         new Container(
-                          width: 100.0,
-                          height: 100.0,
+                          width: 80.0,
+                          height: 80.0,
                           decoration: new BoxDecoration(
                               color: Colors.grey.withAlpha(100),
                               borderRadius: new BorderRadius.all(
-                                  new Radius.circular(15.0)),
+                                  new Radius.circular(40.0)),
                               image: new DecorationImage(
                                   fit: BoxFit.cover,
                                   image: new FileImage(imageList[index]))),
                         ),
                         new Padding(
-                          padding: const EdgeInsets.all(5.0),
+                          padding: const EdgeInsets.all(0.0),
                           child: new CircleAvatar(
                             backgroundColor: Colors.red[600],
                             child: new IconButton(
@@ -166,107 +166,109 @@ Widget userDetails(
     int numFollowers,
     int numFollowings,
     BuildContext context) {
-  return Container(
-    color: Colors.grey[200],
-    child: SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10.0),
-                child: Text(
-                  name,
-                  style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+  return SingleChildScrollView(
+      child: Container(
+      color: Colors.grey[200],
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Text(
+                    name,
+                    style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 20.0),
-                child: Text(
-                  age,
-                  style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+                Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: Text(
+                    age,
+                    style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 10.0,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Icon(Icons.location_on),
-                    country!=null? Text(country + ",",
-                        style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w400)) : Text("NA"),
-                    region!=null? Text(region,
-                        style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w400))  :Text(""),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(Icons.school),
-                    Text(academicField,
-                        style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w400)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.0),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: 100,
-            child: Text(
-              aboutMe,
-              style: TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
-              textAlign: TextAlign.justify,
+              ],
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(new CupertinoPageRoute(
-                      builder: (BuildContext context) => new Followers()));
-                },
-                child: Text("      " + numFollowers.toString() + "\nFollowers",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+            SizedBox(
+              height: 10.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(Icons.location_on),
+                      country!=null? Text(country + ",",
+                          style: TextStyle(
+                              fontSize: 16.0, fontWeight: FontWeight.w400)) : Text("NA"),
+                      region!=null? Text(region,
+                          style: TextStyle(
+                              fontSize: 16.0, fontWeight: FontWeight.w400))  :Text(""),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Icon(Icons.school),
+                      Text(academicField,
+                          style: TextStyle(
+                              fontSize: 16.0, fontWeight: FontWeight.w400)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 10.0),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 100,
+              child: Text(
+                aboutMe,
+                style: TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
+                textAlign: TextAlign.justify,
               ),
-              SizedBox(width: 20.0),
-              Container(
-                width: 2,
-                height: 50,
-                color: Colors.grey,
-              ),
-              SizedBox(width: 20.0),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(new CupertinoPageRoute(
-                      builder: (BuildContext context) => new Followings()));
-                },
-                child: Text("      " + numFollowings.toString() + "\nFollowing",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-              ),
-            ],
-          ),
-        ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(new CupertinoPageRoute(
+                        builder: (BuildContext context) => new Followers()));
+                  },
+                  child: Text("      " + numFollowers.toString() + "\nFollowers",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                ),
+                SizedBox(width: 20.0),
+                Container(
+                  width: 2,
+                  height: 50,
+                  color: Colors.grey,
+                ),
+                SizedBox(width: 20.0),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(new CupertinoPageRoute(
+                        builder: (BuildContext context) => new Followings()));
+                  },
+                  child: Text("      " + numFollowings.toString() + "\nFollowing",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     ),
   );

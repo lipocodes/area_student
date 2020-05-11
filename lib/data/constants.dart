@@ -63,3 +63,5 @@ const String screen13DefaultProfileImage = "https://firebasestorage.googleapis.c
 const String screen13NoMore2Images = "No more than 2 images please"; 
 const String screen13CreatePost = "Create";
 const String screen13Warning = "You can't create a blank post!";
+
+const screen17TooMuchImages = "No more than 2 images please!";
