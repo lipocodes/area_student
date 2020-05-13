@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'profile.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/tools/methods.dart';
+import 'group.dart';
 
 class MenuGroups extends StatefulWidget {
   @override
@@ -20,6 +22,7 @@ class _MenuGroupsState extends State<MenuGroups> {
   List<String> iconGroup = [];
   List<List<String>> postsGroup = [];
   List<List<String>> membersGroup = [];
+  
 
   Future<String> inputData() async {
     try {
@@ -50,14 +53,28 @@ class _MenuGroupsState extends State<MenuGroups> {
 
       str1 = snapshot[i].data['posts'];
       str2 = [];
+     
       for (int i = 0; i < str1.length; i++) {
-        str2.add(str1[i].toString());
+        bool isThisNewPost =  await numberNewPosts(str1[i].toString());
+        if(isThisNewPost==true)  str2.add(str1[i].toString());
       }
       postsGroup.add(str2);
-
-      setState(() {});
+     
+      //await numberNewPosts();
+       setState(() {
+         
+       });
+     
     }
   }
+
+
+   Future<bool> numberNewPosts(String namePost) async{
+    
+      
+   }
+
+
 
   @override
   void initState() {
@@ -145,48 +162,57 @@ class _MenuGroupsState extends State<MenuGroups> {
                 itemCount: nameGroup.length,
                 itemBuilder: (context, index) {
                   return Card(
-                    child: ListTile(
-                      leading: SizedBox(
-                        width: 100,
-                        height: 100,
-                        child: Image.network(
-                          iconGroup[index],
-                          fit: BoxFit.fill,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(new CupertinoPageRoute(
+                            builder: (BuildContext context) =>
+                                new Group(nameGroup[index])));
+                      },
+                      child: ListTile(
+                        leading: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: Image.network(
+                            iconGroup[index],
+                            fit: BoxFit.fill,
+                          ),
                         ),
-                      ),
-                      title: Text(nameGroup[index],
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w800)),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 2.0),
-                        child: Column(
-                          children: [
-                            Text(descriptionGroup[index],
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.w500)),
-                            SizedBox(height: 15.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  postsGroup[index].length.toString() +
-                                      " New Posts",
+                        title: Text(nameGroup[index],
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w800)),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 2.0),
+                          child: Column(
+                            children: [
+                              Text(descriptionGroup[index],
                                   style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                Text(
-                                  membersGroup[index].length.toString() +
-                                      " Members",
-                                  style: TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                              ],
-                            ),
-                          ],
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                              SizedBox(height: 15.0),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    postsGroup[index].length.toString() +
+                                        " New Posts",
+                                    style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    membersGroup[index].length.toString() +
+                                        " Members",
+                                    style: TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

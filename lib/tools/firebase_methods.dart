@@ -14,6 +14,7 @@ class FirebaseMethods {
   FirebaseAuth auth = FirebaseAuth.instance;
   final dbRef = FirebaseDatabase.instance.reference();
   GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+  
 
 
   removePost(List<String> postsId, String postId) async{

@@ -1,0 +1,400 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'profile.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:areastudent/tools/methods.dart';
+import 'package:areastudent/tools/widgets.dart';
+
+class Group extends StatefulWidget {
+  String nameGroup = "";
+  Group(this.nameGroup);
+
+  @override
+  _GroupState createState() => _GroupState();
+}
+
+class _GroupState extends State<Group> {
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
+  ScrollController _scrollController = new ScrollController();
+
+  int indexBottomBar = 0;
+  List<String> postsName = [];
+  List<String> membersGroup = [];
+  List<String> creationTime = [];
+  List<String> creatorName = [];
+  List<List<String>> images = [];
+  List<String> profileImage = [];
+  List<String> text = [];
+
+  bool isFollowedByMe = false;
+
+  Future<String> inputData() async {
+    try {
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      String uid = user.uid.toString();
+      return uid;
+    } catch (e) {
+      return "";
+    }
+  }
+
+  Future retrievePostsNames() async {
+    String uid = await inputData();
+    final QuerySnapshot result = await Firestore.instance
+        .collection('groups')
+        .where('name', isEqualTo: widget.nameGroup)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+
+    List<dynamic> str1 = snapshot[0].data['posts'];
+    List<String> str2 = [];
+    for (int i = 0; i < str1.length; i++) {
+      str2.add(str1[i].toString());
+    }
+    this.postsName = str2;
+    //this.postsName = this.postsName.reversed.toList();
+
+    str1 = snapshot[0].data['members'];
+    str2 = [];
+    for (int i = 0; i < str1.length; i++) {
+      str2.add(str1[i].toString());
+    }
+    this.membersGroup = str2;
+
+    //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb= " + this.postsName.toString());
+  }
+
+  Future retrievePostsContents() async {
+
+    //save in local memory the time of my last visit
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int timeNow = new DateTime.now().millisecondsSinceEpoch;
+    String whichGroup = widget.nameGroup;
+    await prefs.setInt(whichGroup, timeNow);
+
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('postsGroups')
+        //.where('id', isEqualTo: postsName[0])
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+
+    for (int i = 0; i < snapshot.length; i++) {
+      if (postsName.contains(snapshot[i].data['id'])) {
+        creationTime.add(snapshot[i].data['creationTime']);
+        creatorName.add(snapshot[i].data['creatorName']);
+        profileImage.add(snapshot[i].data['profileImage']);
+        text.add(snapshot[i].data['text']);
+        List<dynamic> str1 = snapshot[i].data['images'];
+        List<String> str2 = [];
+        for (int j = 0; j < str1.length; j++) {
+          str2.add(str1[j]);
+        }
+        this.images.add(str2);
+      }
+    }
+
+    this.creationTime = this.creationTime.reversed.toList();
+    this.creatorName = this.creatorName.reversed.toList();
+    this.profileImage = this.profileImage.reversed.toList();
+    this.text = this.text.reversed.toList();
+    this.images = this.images.reversed.toList();
+
+    setState(() {});
+  }
+
+  Future addMeMembersGroup() async {
+    try {
+      String uid = await inputData();
+      if (!this.membersGroup.contains(uid)) {
+        this.membersGroup.add(uid);
+        await Firestore.instance
+            .collection("groups")
+            .document(widget.nameGroup)
+            .updateData({'members': this.membersGroup});
+        setState(() {});
+      }
+    } catch (e) {
+      print("eeeeeeeeeeeeeeeeeeeeee addMeMembersGroup");
+    }
+  }
+
+  Future removeMeMembersGroup() async {
+    try {
+      String uid = await inputData();
+      if (this.membersGroup.contains(uid)) {
+        this.membersGroup.remove(uid);
+        await Firestore.instance
+            .collection("groups")
+            .document(widget.nameGroup)
+            .updateData({'members': this.membersGroup});
+        setState(() {});
+      }
+    } catch (e) {
+      print("eeeeeeeeeeeeeeeeeeeeeeee removeMeMembersGroup()");
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    this.retrievePostsNames().whenComplete(() {
+      this.retrievePostsContents().whenComplete(() {});
+    });
+
+    
+    _scrollController.addListener(() {
+      var triggerFetchMoreSize =
+          0.9 * _scrollController.position.maxScrollExtent;
+
+      if (_scrollController.position.pixels > triggerFetchMoreSize) {}
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //if (this.postsName.length == 0) return Container();
+    //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa= " + this.postsName.length.toString());
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            new Text(
+              widget.nameGroup,
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.notifications_none,
+                size: 40,
+              ),
+              color: Colors.black87,
+              onPressed: () {
+                showSnackBar(
+                    "In the future - Inbox will be here!", scaffoldKey);
+              },
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {},
+        child: Icon(Icons.add),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 1, // this will be set when a new tab is tapped
+        onTap: (int index) {
+          setState(() {
+            this.indexBottomBar = index;
+          });
+          if (this.indexBottomBar == 0) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Profile()));
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.perm_identity, size: 30.0),
+            title: new Text('Profile'),
+          ),
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.group, size: 30.0),
+            title: new Text('Groups'),
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border, size: 30.0),
+              title: Text('Meet')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline, size: 30.0),
+              title: Text('Chats'))
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 40.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RaisedButton(
+                  onPressed: () {
+                    this.addMeMembersGroup();
+                  }, //the click event is impolemented in the screen classes
+                  padding: const EdgeInsets.all(0.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                         
+                        gradient: LinearGradient(
+                          colors: <Color>[
+                            Color(0xFFB3F5FC),
+                            Color(0xFF81D4FA),
+                            Color(0xFF29B6F6),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(8.0),
+                        )),
+                    padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
+                    child: new Text('Follow',
+                        style: TextStyle(fontSize: 20, color: Colors.white)),
+                  ),
+                ),
+                SizedBox(width: 20.0),
+                RaisedButton(
+                  onPressed: () {
+                    this.removeMeMembersGroup();
+                  }, //the click event is impolemented in the screen classes
+                  padding: const EdgeInsets.all(0.0),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                        color: Colors.white60,
+                        borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                    padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
+                    child: new Text('Unfollow',
+                        style: TextStyle(fontSize: 20, color: Colors.black38)),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 30.0),
+            Column(
+              children: [
+                ListView.builder(
+                    controller: _scrollController,
+                    shrinkWrap: true,
+                    //scrollDirection: Axis.vertical,
+                    itemCount: postsName.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Card(
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  this.profileImage[index].length != 0
+                                      ? new Container(
+                                          width: 50.0,
+                                          height: 50.0,
+                                          decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                  fit: BoxFit.fill,
+                                                  image: new NetworkImage(
+                                                      profileImage[index]))))
+                                      : Container(),
+                                  this.creationTime[index].length != 0
+                                      ? Text(
+                                          creatorName[index] +
+                                              "\n" +
+                                              timestampToTimeGap(
+                                                  creationTime[index]),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w700))
+                                      : Container(),
+                                  GestureDetector(
+                                      onTap: () {
+                                        print("Creator Name=" +
+                                            creatorName[index].toString());
+                                      },
+                                      child: Icon(Icons.chat_bubble_outline)),
+                                ],
+                              ),
+                              SizedBox(height: 20.0),
+                              this.text[index].length != 0
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        text[index],
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    )
+                                  : Container(),
+                              this.images[index].length > 0 &&
+                                      this.images[index][0].length != 0
+                                  ? SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.8,
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              4,
+                                      child: CachedNetworkImage(
+                                        imageUrl: images[index][0],
+                                        placeholder: (context, url) =>
+                                            Container(
+                                          child: Center(
+                                              child:
+                                                  new CircularProgressIndicator()),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            new Icon(Icons.error),
+                                        fadeInCurve: Curves.easeIn,
+                                        fadeInDuration:
+                                            Duration(milliseconds: 1000),
+                                        fit: BoxFit.fill,
+                                      ),
+                                    )
+                                  : Container(),
+                              this.images[index].length > 1 &&
+                                      this.images[index][1].length != 0
+                                  ? SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.8,
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              4,
+                                      child: CachedNetworkImage(
+                                        imageUrl: images[index][1],
+                                        placeholder: (context, url) =>
+                                            Container(
+                                          child: Center(
+                                              child:
+                                                  new CircularProgressIndicator()),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            new Icon(Icons.error),
+                                        fadeInCurve: Curves.easeIn,
+                                        fadeInDuration:
+                                            Duration(milliseconds: 1000),
+                                        fit: BoxFit.fill,
+                                      ),
+                                    )
+                                  : Container(),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
