@@ -22,7 +22,6 @@ class _MenuGroupsState extends State<MenuGroups> {
   List<String> iconGroup = [];
   List<List<String>> postsGroup = [];
   List<List<String>> membersGroup = [];
-  
 
   Future<String> inputData() async {
     try {
@@ -45,36 +44,39 @@ class _MenuGroupsState extends State<MenuGroups> {
       iconGroup.add(snapshot[i].data['icon']);
 
       List<dynamic> str1 = snapshot[i].data['members'];
+      List<dynamic> str11 = snapshot[i].data['postsCreationTime'];
+    
       List<String> str2 = [];
+      List<String> str22 = [];
       for (int i = 0; i < str1.length; i++) {
         str2.add(str1[i].toString());
       }
       membersGroup.add(str2);
 
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String whichGroup = snapshot[i].data['name'].toString();
+      int lastVisitGroup =  prefs.getInt(whichGroup);
+  
+
       str1 = snapshot[i].data['posts'];
       str2 = [];
-     
-      for (int i = 0; i < str1.length; i++) {
-        bool isThisNewPost =  await numberNewPosts(str1[i].toString());
-        if(isThisNewPost==true)  str2.add(str1[i].toString());
+      for(int i=0; i<str11.length; i++){
+        str22.add(str11[i].toString());
       }
+      for (int i = 0; i < str1.length; i++) {    
+        if(int.parse(str22[i]) > lastVisitGroup){
+            str2.add(str1[i].toString());
+        }
+      
+       
+        
+      }
+      
       postsGroup.add(str2);
-     
-      //await numberNewPosts();
-       setState(() {
-         
-       });
-     
+
+      setState(() {});
     }
   }
-
-
-   Future<bool> numberNewPosts(String namePost) async{
-    
-      
-   }
-
-
 
   @override
   void initState() {
@@ -163,10 +165,16 @@ class _MenuGroupsState extends State<MenuGroups> {
                 itemBuilder: (context, index) {
                   return Card(
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(new CupertinoPageRoute(
+                      onTap: () async{
+                        await Navigator.of(context).push(new CupertinoPageRoute(
                             builder: (BuildContext context) =>
                                 new Group(nameGroup[index])));
+                        this.descriptionGroup = [];
+                        this.iconGroup = [];
+                        this.membersGroup = [];
+                        this.nameGroup = [];
+                        this.postsGroup = [];
+                        this.retrieveMenuData();  
                       },
                       child: ListTile(
                         leading: SizedBox(

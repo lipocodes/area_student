@@ -29,6 +29,7 @@ class _GroupState extends State<Group> {
   List<List<String>> images = [];
   List<String> profileImage = [];
   List<String> text = [];
+  String textFollowButton = "Follow";
 
   bool isFollowedByMe = false;
 
@@ -64,15 +65,17 @@ class _GroupState extends State<Group> {
       str2.add(str1[i].toString());
     }
     this.membersGroup = str2;
+    if(this.membersGroup.contains(uid))  this.textFollowButton = "Unfollow";
+    else this.textFollowButton = "Follow";
 
-    //print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb= " + this.postsName.toString());
+
   }
 
   Future retrievePostsContents() async {
 
     //save in local memory the time of my last visit
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int timeNow = new DateTime.now().millisecondsSinceEpoch;
+    int timeNow = new DateTime.now().millisecondsSinceEpoch + 2*60*1000;
     String whichGroup = widget.nameGroup;
     await prefs.setInt(whichGroup, timeNow);
 
@@ -107,7 +110,7 @@ class _GroupState extends State<Group> {
     setState(() {});
   }
 
-  Future addMeMembersGroup() async {
+  Future addMeMembersGroup() async {  
     try {
       String uid = await inputData();
       if (!this.membersGroup.contains(uid)) {
@@ -116,6 +119,7 @@ class _GroupState extends State<Group> {
             .collection("groups")
             .document(widget.nameGroup)
             .updateData({'members': this.membersGroup});
+        this.textFollowButton = "Unfollow";
         setState(() {});
       }
     } catch (e) {
@@ -132,6 +136,7 @@ class _GroupState extends State<Group> {
             .collection("groups")
             .document(widget.nameGroup)
             .updateData({'members': this.membersGroup});
+        this.textFollowButton = "Follow";    
         setState(() {});
       }
     } catch (e) {
@@ -237,7 +242,8 @@ class _GroupState extends State<Group> {
               children: [
                 RaisedButton(
                   onPressed: () {
-                    this.addMeMembersGroup();
+                    if(this.textFollowButton=="Follow")  this.addMeMembersGroup();
+                    else this.removeMeMembersGroup();
                   }, //the click event is impolemented in the screen classes
                   padding: const EdgeInsets.all(0.0),
                   child: Container(
@@ -254,25 +260,11 @@ class _GroupState extends State<Group> {
                           Radius.circular(8.0),
                         )),
                     padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
-                    child: new Text('Follow',
+                    child: new Text(textFollowButton,
                         style: TextStyle(fontSize: 20, color: Colors.white)),
                   ),
                 ),
-                SizedBox(width: 20.0),
-                RaisedButton(
-                  onPressed: () {
-                    this.removeMeMembersGroup();
-                  }, //the click event is impolemented in the screen classes
-                  padding: const EdgeInsets.all(0.0),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                        color: Colors.white60,
-                        borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                    padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
-                    child: new Text('Unfollow',
-                        style: TextStyle(fontSize: 20, color: Colors.black38)),
-                  ),
-                ),
+          
               ],
             ),
             SizedBox(height: 30.0),
