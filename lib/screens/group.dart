@@ -1,3 +1,4 @@
+import 'package:areastudent/screens/create_post.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:areastudent/tools/widgets.dart';
+import 'create_post_group.dart';
 
 class Group extends StatefulWidget {
   String nameGroup = "";
@@ -20,12 +22,13 @@ class Group extends StatefulWidget {
 class _GroupState extends State<Group> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   ScrollController _scrollController = new ScrollController();
-
+  String uid = "";
   int indexBottomBar = 0;
   List<String> postsName = [];
   List<String> membersGroup = [];
   List<String> creationTime = [];
   List<String> creatorName = [];
+  List<String> creatorUid = [];
   List<List<String>> images = [];
   List<String> profileImage = [];
   List<String> text = [];
@@ -44,7 +47,7 @@ class _GroupState extends State<Group> {
   }
 
   Future retrievePostsNames() async {
-    String uid = await inputData();
+    uid = await inputData();
     final QuerySnapshot result = await Firestore.instance
         .collection('groups')
         .where('name', isEqualTo: widget.nameGroup)
@@ -65,20 +68,25 @@ class _GroupState extends State<Group> {
       str2.add(str1[i].toString());
     }
     this.membersGroup = str2;
-    if(this.membersGroup.contains(uid))  this.textFollowButton = "Unfollow";
-    else this.textFollowButton = "Follow";
-
-
+    if (this.membersGroup.contains(uid))
+      this.textFollowButton = "Unfollow";
+    else
+      this.textFollowButton = "Follow";
   }
 
   Future retrievePostsContents() async {
+    this.creationTime = [];
+    this.creatorName = [];
+    this.creatorUid = [];
+    this.profileImage = [];
+    this.text = [];
+    this.images = [];
 
     //save in local memory the time of my last visit
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int timeNow = new DateTime.now().millisecondsSinceEpoch + 2*60*1000;
+    int timeNow = new DateTime.now().millisecondsSinceEpoch + 2 * 60 * 1000;
     String whichGroup = widget.nameGroup;
     await prefs.setInt(whichGroup, timeNow);
-
 
     final QuerySnapshot result = await Firestore.instance
         .collection('postsGroups')
@@ -87,9 +95,10 @@ class _GroupState extends State<Group> {
     final List<DocumentSnapshot> snapshot = result.documents;
 
     for (int i = 0; i < snapshot.length; i++) {
-      if (postsName.contains(snapshot[i].data['id'])) {
+      if (postsName.contains(snapshot[i].data['postId'])) {
         creationTime.add(snapshot[i].data['creationTime']);
         creatorName.add(snapshot[i].data['creatorName']);
+        creatorUid.add(snapshot[i].data['creatorUid']);
         profileImage.add(snapshot[i].data['profileImage']);
         text.add(snapshot[i].data['text']);
         List<dynamic> str1 = snapshot[i].data['images'];
@@ -101,8 +110,10 @@ class _GroupState extends State<Group> {
       }
     }
 
+    this.postsName = this.postsName.reversed.toList();
     this.creationTime = this.creationTime.reversed.toList();
     this.creatorName = this.creatorName.reversed.toList();
+    this.creatorUid = this.creatorUid.reversed.toList();
     this.profileImage = this.profileImage.reversed.toList();
     this.text = this.text.reversed.toList();
     this.images = this.images.reversed.toList();
@@ -110,7 +121,7 @@ class _GroupState extends State<Group> {
     setState(() {});
   }
 
-  Future addMeMembersGroup() async {  
+  Future addMeMembersGroup() async {
     try {
       String uid = await inputData();
       if (!this.membersGroup.contains(uid)) {
@@ -136,7 +147,7 @@ class _GroupState extends State<Group> {
             .collection("groups")
             .document(widget.nameGroup)
             .updateData({'members': this.membersGroup});
-        this.textFollowButton = "Follow";    
+        this.textFollowButton = "Follow";
         setState(() {});
       }
     } catch (e) {
@@ -153,7 +164,6 @@ class _GroupState extends State<Group> {
       this.retrievePostsContents().whenComplete(() {});
     });
 
-    
     _scrollController.addListener(() {
       var triggerFetchMoreSize =
           0.9 * _scrollController.position.maxScrollExtent;
@@ -165,7 +175,7 @@ class _GroupState extends State<Group> {
   @override
   Widget build(BuildContext context) {
     //if (this.postsName.length == 0) return Container();
-    //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa= " + this.postsName.length.toString());
+    //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa= " + this.profileImage.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -199,7 +209,14 @@ class _GroupState extends State<Group> {
         backgroundColor: Colors.white,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {},
+        onPressed: () async {
+          await Navigator.of(context).push(new CupertinoPageRoute(
+              builder: (BuildContext context) =>
+                  new CreatePostGroup(widget.nameGroup)));
+          this.retrievePostsNames().whenComplete(() {
+            this.retrievePostsContents().whenComplete(() {});
+          });
+        },
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -242,13 +259,14 @@ class _GroupState extends State<Group> {
               children: [
                 RaisedButton(
                   onPressed: () {
-                    if(this.textFollowButton=="Follow")  this.addMeMembersGroup();
-                    else this.removeMeMembersGroup();
+                    if (this.textFollowButton == "Follow")
+                      this.addMeMembersGroup();
+                    else
+                      this.removeMeMembersGroup();
                   }, //the click event is impolemented in the screen classes
                   padding: const EdgeInsets.all(0.0),
                   child: Container(
                     decoration: const BoxDecoration(
-                         
                         gradient: LinearGradient(
                           colors: <Color>[
                             Color(0xFFB3F5FC),
@@ -264,7 +282,6 @@ class _GroupState extends State<Group> {
                         style: TextStyle(fontSize: 20, color: Colors.white)),
                   ),
                 ),
-          
               ],
             ),
             SizedBox(height: 30.0),
@@ -281,6 +298,19 @@ class _GroupState extends State<Group> {
                         child: Card(
                           child: Column(
                             children: [
+                              this.creatorUid[index] == this.uid ?
+                              GestureDetector(
+                                  onTap: () async {
+                                   
+                                    await firebaseMethod.removePostGroup(
+                                        this.postsName[index], widget.nameGroup);
+                                    await retrievePostsNames();
+                                    await retrievePostsContents();
+                                  },
+                                  child: Text(" X ",
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w500))): Container(),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,

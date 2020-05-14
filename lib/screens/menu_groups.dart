@@ -64,9 +64,10 @@ class _MenuGroupsState extends State<MenuGroups> {
         str22.add(str11[i].toString());
       }
       for (int i = 0; i < str1.length; i++) {    
-        if(int.parse(str22[i]) > lastVisitGroup){
+        //if(int.parse(str22[i]) > lastVisitGroup){
+          //print("ttttttttttttttttttttt= " + str22[i].toString() +  " " + lastVisitGroup.toString());
             str2.add(str1[i].toString());
-        }
+        //}
       
        
         

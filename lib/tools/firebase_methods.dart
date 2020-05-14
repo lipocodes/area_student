@@ -14,15 +14,38 @@ class FirebaseMethods {
   FirebaseAuth auth = FirebaseAuth.instance;
   final dbRef = FirebaseDatabase.instance.reference();
   GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
-  
 
-
-  removePost(List<String> postsId, String postId) async{
-     String uid = await inputData();
+  removePost(List<String> postsId, String postId) async {
+    String uid = await inputData();
     await firestore.collection("posts").document(postId).delete();
     postsId.remove(postId);
-    await firestore.collection("userData").document(uid).updateData({'posts': postsId});
-     
+    await firestore
+        .collection("userData")
+        .document(uid)
+        .updateData({'posts': postsId});
+  }
+
+  removePostGroup(String postName, String nameGroup) async { 
+    List<String> postsId = [];
+    String uid = await inputData();
+    await firestore.collection("postsGroups").document(postName).delete();
+
+    final QuerySnapshot result = await firestore
+        .collection("groups")
+        .where('name', isEqualTo: nameGroup)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+
+    List<dynamic> str1 = snapshot[0].data['posts'];
+    for (int i = 0; i < str1.length; i++) {
+      postsId.add(str1[i].toString());
+    }
+
+    postsId.remove(postName);
+    await firestore
+        .collection("groups")
+        .document(nameGroup)
+        .updateData({'posts': postsId});
   }
 
   login() async {
@@ -72,12 +95,14 @@ class FirebaseMethods {
     return uid;
   }
 
-
-
-
-
-
-  Future createNewPost(String postText, List<File> postImageList, List<String> postId, String tag1, String tag2, String tag3, ) async {
+  Future createNewPost(
+    String postText,
+    List<File> postImageList,
+    List<String> postId,
+    String tag1,
+    String tag2,
+    String tag3,
+  ) async {
     List postsId = postId;
     var location = Location();
     bool enabled = await location.serviceEnabled();
@@ -102,41 +127,113 @@ class FirebaseMethods {
       country = placeMark.country;
     }
 
-      String uid = await inputData();
-      int now = new DateTime.now().millisecondsSinceEpoch;
-      String postName = uid + '_' + now.toString();
+    String uid = await inputData();
+    int now = new DateTime.now().millisecondsSinceEpoch;
+    String postName = uid + '_' + now.toString();
+
+    await firestore
+        .collection("posts")
+        .document(uid + '_' + now.toString())
+        .setData(({
+          'creationCountry': country,
+          'creationRegion': administrativeArea,
+          'creationSubRegion': subAdministrativeArea,
+          'creationTime': now.toString(),
+          'creatorUid': uid,
+          'postId': postName,
+          'text': postText,
+          'tags': [tag1, tag2, tag3],
+        }))
+        .whenComplete(() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('postId', postName);
+
+      //postsId.add(postId);
 
       await firestore
-          .collection("posts")
-          .document(uid + '_' + now.toString())
-          .setData(({
-            'creationCountry': country,
-            'creationRegion': administrativeArea,
-            'creationSubRegion': subAdministrativeArea,
-            'creationTime': now.toString(),
-            'creatorUid': uid,
-            'postId': postName,
-            'text': postText,
-            'tags' : [tag1, tag2, tag3],
-          }))
-          .whenComplete(() async{
-
-           SharedPreferences prefs = await SharedPreferences.getInstance();
-           await prefs.setString('postId', postName);
-
-           //postsId.add(postId);
-           
-           await firestore
           .collection("userData")
-          .document(uid).updateData({'posts': postsId}); 
-
-            
-          });
+          .document(uid)
+          .updateData({'posts': postsId});
+    });
   }
 
+  Future createNewPostGroup(
+    String postText,
+    List<File> postImageList,
+    List<String> postId,
+    String tag1,
+    String tag2,
+    String tag3,
+  ) async {
+    List postsId = postId;
+    var location = Location();
+    bool enabled = await location.serviceEnabled();
+    String latitude,
+        longitude,
+        locality,
+        administrativeArea,
+        subAdministrativeArea,
+        country;
+    Placemark placeMark;
 
+    if (enabled == true) {
+      Position position = await Geolocator().getCurrentPosition(
+          /*desiredAccuracy: LocationAccuracy.high*/);
+      List<Placemark> newPlace = await Geolocator()
+          .placemarkFromCoordinates(position.latitude, position.longitude);
 
-    Future<List<String>> uploadPostImages(List<File> imageList, String postId) async {
+      placeMark = newPlace[0];
+      locality = placeMark.locality;
+      administrativeArea = placeMark.administrativeArea;
+      subAdministrativeArea = placeMark.subAdministrativeArea;
+      country = placeMark.country;
+    }
+
+    String uid = await inputData();
+    final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    String profileImage = snapshot[0].data['profileImages'][0].toString();
+    String creatorName = snapshot[0].data['firstName'].toString() +
+        "  " +
+        snapshot[0].data['lastName'].toString();
+
+    int now = new DateTime.now().millisecondsSinceEpoch;
+    String postName = uid + '_' + now.toString();
+
+    await firestore
+        .collection("postsGroups")
+        .document(uid + '_' + now.toString())
+        .setData(({
+          'creatorUid'  :uid,
+          'creatorName': creatorName,
+          'profileImage': profileImage,
+          'creationCountry': country,
+          'creationRegion': administrativeArea,
+          'creationSubRegion': subAdministrativeArea,
+          'creationTime': now.toString(),
+          'creatorUid': uid,
+          'postId': postName,
+          'text': postText,
+          'tags': [tag1, tag2, tag3],
+        }))
+        .whenComplete(() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('postId', postName);
+
+      //postsId.add(postId);
+
+      await firestore
+          .collection("userData")
+          .document(uid)
+          .updateData({'posts': postsId});
+    });
+  }
+
+  Future<List<String>> uploadPostImages(
+      List<File> imageList, String postId) async {
     List<String> imagesUrl = new List();
     String uid = await inputData();
 
@@ -154,19 +251,43 @@ class FirebaseMethods {
         imagesUrl.add(downloadUrl);
       }
       SharedPreferences prefs = await SharedPreferences.getInstance();
-           await prefs.setStringList('imagesUrl', imagesUrl);
+      await prefs.setStringList('imagesUrl', imagesUrl);
 
-     
       return imagesUrl;
     } on PlatformException catch (e) {
       return imagesUrl;
     }
   }
 
+  Future<List<String>> uploadPostGroupImages(
+      List<File> imageList, String postId) async {
+    List<String> imagesUrl = new List();
+    String uid = await inputData();
 
+    try {
+      for (int s = 0; s < imageList.length; s++) {
+        StorageReference storageReference = FirebaseStorage.instance
+            .ref()
+            .child("postsGroups")
+            .child(postId)
+            .child(postId + ".$s.jpg");
+        StorageUploadTask uploadTask = storageReference.putFile(imageList[s]);
+        await uploadTask.onComplete;
+        print('File Uploaded');
+        String downloadUrl = await storageReference.getDownloadURL();
+        imagesUrl.add(downloadUrl);
+      }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('imagesUrl', imagesUrl);
 
-   
-  Future<bool> updatePostsImages(List<String> data, String postId, List<String> postsId) async {
+      return imagesUrl;
+    } on PlatformException catch (e) {
+      return imagesUrl;
+    }
+  }
+
+  Future<bool> updatePostsImages(
+      List<String> data, String postId, List<String> postsId) async {
     bool msg;
     String uid = await inputData();
 
@@ -176,19 +297,56 @@ class FirebaseMethods {
           .document(postId)
           .updateData({'images': data}).whenComplete(() {
         msg = true;
-                      });
+      });
 
-        postsId.add(postId);
-        await firestore.collection("userData").document(uid).updateData({'posts': postsId});              
-      
+      postsId.add(postId);
+      await firestore
+          .collection("userData")
+          .document(uid)
+          .updateData({'posts': postsId});
+
       return msg;
     } on PlatformException catch (e) {
       return false;
     }
   }
 
+  Future<bool> updatePostsGroupsImages(String nameGroup, List<String> data,
+      String postId, List<String> postsId) async {
+    bool msg;
+    String uid = await inputData();
+    List<String> postsId = [];
+    try {
+      await firestore
+          .collection("postsGroups")
+          .document(postId)
+          .updateData({'images': data}).whenComplete(() {
+        msg = true;
+      });
 
+      final QuerySnapshot result = await firestore
+          .collection("groups")
+          .where('name', isEqualTo: nameGroup)
+          .getDocuments();
+      final List<DocumentSnapshot> snapshot = result.documents;
 
+      List<dynamic> str1 = snapshot[0].data['posts'];
+      for (int i = 0; i < str1.length; i++) {
+        postsId.add(str1[i].toString());
+      }
+
+      postsId.add(postId);
+
+      await firestore
+          .collection("groups")
+          .document(nameGroup)
+          .updateData({'posts': postsId});
+
+      return msg;
+    } on PlatformException catch (e) {
+      return false;
+    }
+  }
 
   Future<void> createUserAccount({
     String firstName,
@@ -249,11 +407,6 @@ class FirebaseMethods {
     bool yes_no = prefs.getBool('existAccount');
     return yes_no;
   }
-
-
-
-
-
 
   Future<List<String>> uploadProductImages({List<File> imageList}) async {
     List<String> imagesUrl = new List();
