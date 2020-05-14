@@ -382,6 +382,7 @@ class _GroupState extends State<Group> {
                                       ),
                                     )
                                   : Container(),
+                                  SizedBox(height:10),
                               this.images[index].length > 1 &&
                                       this.images[index][1].length != 0
                                   ? SizedBox(
