@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:areastudent/screens/login.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:areastudent/screens/menu_groups.dart';
+import 'package:areastudent/screens/chat_screen.dart';
+
+
 
 //void main() => runApp(MyApp());
 
@@ -29,8 +31,8 @@ class MyApp extends StatelessWidget {
       ),
      
       //home: new AuthService().hanldeAuth(),
-      home: Login(),
-      //home: MenuGroups(),
+      //home: Login(),
+      home: ChatScreen(),
       
     );
   }

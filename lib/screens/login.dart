@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'signup.dart';
 import 'profile.dart';
+import 'chat_screen.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:shared_preferences/shared_preferences.dart';
