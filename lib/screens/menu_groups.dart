@@ -169,7 +169,7 @@ class _MenuGroupsState extends State<MenuGroups> {
                       onTap: () async{
                         await Navigator.of(context).push(new CupertinoPageRoute(
                             builder: (BuildContext context) =>
-                                new Group(nameGroup[index])));
+                                new Group(nameGroup[index], iconGroup[index])));
                         this.descriptionGroup = [];
                         this.iconGroup = [];
                         this.membersGroup = [];

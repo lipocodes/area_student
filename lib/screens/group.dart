@@ -10,10 +10,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'create_post_group.dart';
+import 'chat_screen.dart';
 
 class Group extends StatefulWidget {
   String nameGroup = "";
-  Group(this.nameGroup);
+  String iconGroup = "";
+  Group(this.nameGroup, this.iconGroup);
 
   @override
   _GroupState createState() => _GroupState();
@@ -298,19 +300,20 @@ class _GroupState extends State<Group> {
                         child: Card(
                           child: Column(
                             children: [
-                              this.creatorUid[index] == this.uid ?
-                              GestureDetector(
-                                  onTap: () async {
-                                   
-                                    await firebaseMethod.removePostGroup(
-                                        this.postsName[index], widget.nameGroup);
-                                    await retrievePostsNames();
-                                    await retrievePostsContents();
-                                  },
-                                  child: Text(" X ",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w500))): Container(),
+                              this.creatorUid[index] == this.uid
+                                  ? GestureDetector(
+                                      onTap: () async {
+                                        await firebaseMethod.removePostGroup(
+                                            this.postsName[index],
+                                            widget.nameGroup);
+                                        await retrievePostsNames();
+                                        await retrievePostsContents();
+                                      },
+                                      child: Text(" X ",
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w500)))
+                                  : Container(),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
@@ -337,9 +340,14 @@ class _GroupState extends State<Group> {
                                               fontWeight: FontWeight.w700))
                                       : Container(),
                                   GestureDetector(
-                                      onTap: () {
-                                        print("Creator Name=" +
-                                            creatorName[index].toString());
+                                      onTap: () async {
+                                       
+                                        await Navigator.of(context).push(
+                                            new CupertinoPageRoute(
+                                                builder: (BuildContext
+                                                        context) =>
+                                                    new ChatScreen(
+                                                        creatorUid[index].toString(), creatorName[index].toString(), text[index].toString(), widget.iconGroup, profileImage[index].toString())));
                                       },
                                       child: Icon(Icons.chat_bubble_outline)),
                                 ],
@@ -382,7 +390,7 @@ class _GroupState extends State<Group> {
                                       ),
                                     )
                                   : Container(),
-                                  SizedBox(height:10),
+                              SizedBox(height: 10),
                               this.images[index].length > 1 &&
                                       this.images[index][1].length != 0
                                   ? SizedBox(

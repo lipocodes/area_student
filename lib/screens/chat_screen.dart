@@ -1,3 +1,4 @@
+import 'package:areastudent/tools/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +9,13 @@ FirebaseUser loggedInUser;
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
+  String creatorUid;
+  String recipientName;
+  String textPost;
+  String iconGroup;
+  String profileImagePostCreator;
+  ChatScreen(this.creatorUid, this.recipientName, this.textPost, this.iconGroup,
+      this.profileImagePostCreator);
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -36,29 +44,47 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Colors.black, //change your color here
+        ),
         leading: null,
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(Icons.close),
-              onPressed: () {
-                _auth.signOut();
-                Navigator.pop(context);
-              }),
-        ],
-        title: Text('⚡️Chat'),
-        backgroundColor: Colors.lightBlueAccent,
+        actions: <Widget>[],
+        title: Text(
+          widget.recipientName,
+          style: TextStyle(color: Colors.black),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            MessagesStream(),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    color: Colors.black12),
+                child: ListTile(
+                  leading: Image.network(
+                    widget.iconGroup,
+                  ),
+                  title: Text(
+                    widget.textPost,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
+            widget.creatorUid.length != 0
+                ? MessagesStream(
+                    widget.creatorUid, widget.profileImagePostCreator)
+                : Container(),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
@@ -73,18 +99,25 @@ class _ChatScreenState extends State<ChatScreen> {
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      messageTextController.clear();
-                      _firestore.collection('messages').add({
-                        'text': messageText,
-                        'sender': loggedInUser.email,
-                      });
-                    },
-                    child: Text(
-                      'Send',
-                      style: kSendButtonTextStyle,
+       
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_forward,
                     ),
+                    iconSize: 50,
+                    color: Colors.black,
+                    splashColor: Colors.blueAccent,
+                    onPressed: () {
+                        
+                      _firestore.collection('messages').add({
+                        'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+                        'recipientUid': widget.creatorUid,
+                        'senderName'  :loggedInUser.displayName,
+                        'senderUid'  : loggedInUser.uid,
+                        'text' : messageTextController.text,
+                      });
+                      messageTextController.clear();
+                    },
                   ),
                 ],
               ),
@@ -97,6 +130,9 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessagesStream extends StatelessWidget {
+  String creatorUid;
+  String profileImagePostCreator;
+  MessagesStream(this.creatorUid, this.profileImagePostCreator);
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -113,17 +149,29 @@ class MessagesStream extends StatelessWidget {
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
           final messageText = message.data['text'];
-          final messageSender = message.data['sender'];
+          final messageSender = message.data['senderName'];
+          final senderUid = message.data['senderUid'];
+          final recipientUid = message.data['recipientUid'];
+          final creationTime = message.data['creationTime'];
+          final currentUser = loggedInUser.uid;
 
-          final currentUser = loggedInUser.email;
+          bool yesNo = false;
 
-          final messageBubble = MessageBubble(
-            sender: messageSender,
-            text: messageText,
-            isMe: currentUser == messageSender,
-          );
+          if (creatorUid == senderUid && loggedInUser.uid == recipientUid)
+            yesNo = true;
+          else if (creatorUid == recipientUid && loggedInUser.uid == senderUid)
+            yesNo = true;
+          if (yesNo == true) {
+            final messageBubble = MessageBubble(
+              sender: messageSender,
+              text: messageText,
+              isMe: currentUser == senderUid,
+              profileImagePostCreator: profileImagePostCreator,
+              creationTime: creationTime,
+            );
 
-          messageBubbles.add(messageBubble);
+            messageBubbles.add(messageBubble);
+          }
         }
         return Expanded(
           child: ListView(
@@ -138,11 +186,18 @@ class MessagesStream extends StatelessWidget {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.sender, this.text, this.isMe});
+  MessageBubble(
+      {this.sender,
+      this.text,
+      this.isMe,
+      this.profileImagePostCreator,
+      this.creationTime});
 
   final String sender;
   final String text;
   final bool isMe;
+  final String profileImagePostCreator;
+  final String creationTime;
 
   @override
   Widget build(BuildContext context) {
@@ -152,23 +207,36 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment:
             isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            sender,
-            style: TextStyle(
-              fontSize: 12.0,
-              color: Colors.black54,
-            ),
-          ),
+          profileImagePostCreator.length == 0
+              ? CircleAvatar(
+                  radius: 30.0,
+                  backgroundImage:
+                      NetworkImage('https://via.placeholder.com/150'),
+                  backgroundColor: Colors.transparent,
+                )
+              : isMe
+                  ? CircleAvatar(
+                      radius: 30.0,
+                      backgroundImage: NetworkImage(loggedInUser.photoUrl),
+                      backgroundColor: Colors.transparent,
+                    )
+                  : CircleAvatar(
+                      radius: 30.0,
+                      backgroundImage: NetworkImage(profileImagePostCreator),
+                      backgroundColor: Colors.transparent,
+                    ),
           Material(
             borderRadius: isMe
                 ? BorderRadius.only(
                     topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0),
                     bottomLeft: Radius.circular(30.0),
                     bottomRight: Radius.circular(30.0))
                 : BorderRadius.only(
                     bottomLeft: Radius.circular(30.0),
                     bottomRight: Radius.circular(30.0),
                     topRight: Radius.circular(30.0),
+                    topLeft: Radius.circular(30.0),
                   ),
             elevation: 5.0,
             color: isMe ? Colors.lightBlueAccent : Colors.white,
@@ -181,6 +249,13 @@ class MessageBubble extends StatelessWidget {
                   fontSize: 15.0,
                 ),
               ),
+            ),
+          ),
+          Text(
+            timestampToTimeGap(creationTime),
+            style: TextStyle(
+              fontSize: 12.0,
+              color: Colors.black54,
             ),
           ),
         ],
