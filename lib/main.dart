@@ -34,8 +34,8 @@ class MyApp extends StatelessWidget {
       ),
      
       //home: new AuthService().hanldeAuth(),
-      home: Login(),
-      //home: MenuGroups(),
+      //home: Login(),
+      home: MenuGroups(),
       
     );
   }

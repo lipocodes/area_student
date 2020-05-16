@@ -13,8 +13,6 @@ final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
 
 class ChatScreen extends StatefulWidget {
-  
-
   static const String id = 'chat_screen';
   String creatorUid;
   String recipientName;
@@ -32,8 +30,10 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<Notification> notifications = [];
   final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  //final _firestore = Firestore.instance;
   String messageText;
+
+
+  
 
   @override
   void initState() {
@@ -43,20 +43,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
     firebaseMessaging.requestNotificationPermissions();
 
-    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
-      print('onMessage: $message');
-  
-      
+    firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) {
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaa= " + message.toString() );
       return;
     }, onResume: (Map<String, dynamic> message) {
-      print('onResume: $message');
-       Navigator.of(context).push(new CupertinoPageRoute(
-        builder: (BuildContext context) => new ChatScreen('M0B7RtHW6zYOwkPhcqoHdigwEEs2', 'Mishel Nisimov', 'aaaaaa aaaaaaa', 'https://www.frk.co.il/wp-content/uploads/2018/10/jobs1.png', 'https://www.frk.co.il/wp-content/uploads/2018/10/jobs1.png')));
-      //Navigator.of(context).pushNamed(message['screen']);
+       print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbb= " + message.toString());
+       final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "Main Navigator");
+       navigatorKey.currentState.push(CupertinoPageRoute(builder: (context)=>ChatScreen('','','','','')));
       return;
     }, onLaunch: (Map<String, dynamic> message) {
-      print('onLaunch: $message');
-      //Navigator.of(context).pushNamed(message['screen']);
+      print("cccccccccccccccccccccccccccccc= " + message.toString());
+     
       return;
     });
 
@@ -73,8 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-
-    Future<String> inputData() async {
+  Future<String> inputData() async {
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
     final String uid = user.uid.toString();
     return uid;
@@ -94,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset:false,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.black, //change your color here
