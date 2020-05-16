@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/cupertino.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
@@ -44,11 +45,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
     firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
       print('onMessage: $message');
-     print('onMessage: $message');
-      //Navigator.of(context).pushNamed(message['screen']);
+  
+      
       return;
     }, onResume: (Map<String, dynamic> message) {
       print('onResume: $message');
+       Navigator.of(context).push(new CupertinoPageRoute(
+        builder: (BuildContext context) => new ChatScreen('M0B7RtHW6zYOwkPhcqoHdigwEEs2', 'Mishel Nisimov', 'aaaaaa aaaaaaa', 'https://www.frk.co.il/wp-content/uploads/2018/10/jobs1.png', 'https://www.frk.co.il/wp-content/uploads/2018/10/jobs1.png')));
       //Navigator.of(context).pushNamed(message['screen']);
       return;
     }, onLaunch: (Map<String, dynamic> message) {
