@@ -3,11 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/data/constants.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
+import 'package:fluttertoast/fluttertoast.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
 
 class ChatScreen extends StatefulWidget {
+  
+
   static const String id = 'chat_screen';
   String creatorUid;
   String recipientName;
@@ -21,6 +27,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final List<Notification> notifications = [];
   final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   //final _firestore = Firestore.instance;
@@ -31,6 +39,42 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
 
     getCurrentUser();
+
+    firebaseMessaging.requestNotificationPermissions();
+
+    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+      print('onMessage: $message');
+     print('onMessage: $message');
+      //Navigator.of(context).pushNamed(message['screen']);
+      return;
+    }, onResume: (Map<String, dynamic> message) {
+      print('onResume: $message');
+      //Navigator.of(context).pushNamed(message['screen']);
+      return;
+    }, onLaunch: (Map<String, dynamic> message) {
+      print('onLaunch: $message');
+      //Navigator.of(context).pushNamed(message['screen']);
+      return;
+    });
+
+    firebaseMessaging.getToken().then((token) {
+      inputData().then((uid) {
+        print('token: $token');
+        Firestore.instance
+            .collection('userData')
+            .document(uid)
+            .updateData({'pushToken': token});
+      }).catchError((err) {
+        Fluttertoast.showToast(msg: err.message.toString());
+      });
+    });
+  }
+
+
+    Future<String> inputData() async {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    final String uid = user.uid.toString();
+    return uid;
   }
 
   void getCurrentUser() async {
@@ -47,6 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:false,
       appBar: AppBar(
         iconTheme: IconThemeData(
           color: Colors.black, //change your color here
@@ -99,7 +144,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       decoration: kMessageTextFieldDecoration,
                     ),
                   ),
-       
                   IconButton(
                     icon: Icon(
                       Icons.arrow_forward,
@@ -108,13 +152,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: Colors.black,
                     splashColor: Colors.blueAccent,
                     onPressed: () {
-                        
                       _firestore.collection('messages').add({
-                        'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+                        'creationTime': new DateTime.now()
+                            .millisecondsSinceEpoch
+                            .toString(),
                         'recipientUid': widget.creatorUid,
-                        'senderName'  :loggedInUser.displayName,
-                        'senderUid'  : loggedInUser.uid,
-                        'text' : messageTextController.text,
+                        'senderName': loggedInUser.displayName,
+                        'senderUid': loggedInUser.uid,
+                        'text': messageTextController.text,
                       });
                       messageTextController.clear();
                     },
@@ -175,7 +220,7 @@ class MessagesStream extends StatelessWidget {
         }
         return Expanded(
           child: ListView(
-            reverse: true,
+            reverse: false,
             padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             children: messageBubbles,
           ),
