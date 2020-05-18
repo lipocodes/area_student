@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
+import 'package:areastudent/screens/chat_screen.dart';
 
 
 
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       routes: {
         '/login' :(context) => Login(),
+        '/chat_screen' : (context) => ChatScreen('M0B7RtHW6zYOwkPhcqoHdigwEEs2','Mishel Nisimov','aaaaa aaaaaa','https://www.frk.co.il/wp-content/uploads/2018/10/jobs1.png','https://firebasestorage.googleapis.com/v0/b/area-student-d501b.appspot.com/o/userData%2FM0B7RtHW6zYOwkPhcqoHdigwEEs2%2FM0B7RtHW6zYOwkPhcqoHdigwEEs2.0.jpg?alt=media&token=f49fdb42-f54c-40f9-b13b-df87232c6c04'),
       },
       theme: ThemeData(
    
@@ -34,8 +36,8 @@ class MyApp extends StatelessWidget {
       ),
      
       //home: new AuthService().hanldeAuth(),
-      //home: Login(),
-      home: MenuGroups(),
+      home: Login(),
+      //home: MenuGroups(),
       
     );
   }
