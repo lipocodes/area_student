@@ -1,3 +1,5 @@
+//import 'dart:html';
+
 import 'package:areastudent/screens/menu_groups.dart';
 import 'package:flutter/material.dart';
 import 'package:areastudent/screens/login.dart';
@@ -6,17 +8,31 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:areastudent/screens/chat_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 
+
+
+ /* void checkPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+        Permission.microphone,
+        Permission.storage,
+      ].request();
+  }*/
 
 //void main() => runApp(MyApp());
 
 void main() async{
+
+
+  
  // await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, de]);
  Crashlytics.instance.enableInDevMode = true;
   // Pass all uncaught errors from the framework to Crashlytics.
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
   runApp(MyApp());
+
+    //checkPermissions();
 }
 
 class MyApp extends StatelessWidget {

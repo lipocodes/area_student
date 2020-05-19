@@ -24,6 +24,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:open_file/open_file.dart';
 import 'package:areastudent/screens/images_in_large.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
@@ -155,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void startVoiceRecording() async {
     bool hasPermissions = await AudioRecorder.hasPermissions;
-    showSnackBar(hasPermissions.toString(), scaffoldKey);
+    //showSnackBar(hasPermissions.toString(), scaffoldKey);
     if (hasPermissions == false) return;
 
     bool isRecording = await AudioRecorder.isRecording;
@@ -271,11 +272,20 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  void checkPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+        Permission.microphone,
+        Permission.storage,
+      ].request();
+  }
+
   @override
   void initState() {
     super.initState();
 
     getCurrentUser();
+
+   checkPermissions();
 
     firebaseMessaging.requestNotificationPermissions();
 
