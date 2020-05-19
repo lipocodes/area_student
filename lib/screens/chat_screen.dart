@@ -628,11 +628,11 @@ class MessageBubble extends StatelessWidget {
               ),
             )
           ] else if (tempRecording.length > 0) ...[
-            SizedBox(width: 280, height: 100, child: LocalAudio(tempRecording)),
+            SizedBox(width: 280, height: 50, child: LocalAudio(tempRecording)),
           ] else if (attachedVoiceRecording.length > 0) ...[
             SizedBox(
                 width: 280,
-                height: 100,
+                height: 50,
                 child: LocalAudio(attachedVoiceRecording)),
           ] else if (tempAttachment.length > 0) ...[
             Material(
