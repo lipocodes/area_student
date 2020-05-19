@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:areastudent/tools/widgets.dart';
@@ -22,7 +23,7 @@ import 'package:areastudent/tools/local_audio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:open_file/open_file.dart';
-
+import 'package:areastudent/screens/images_in_large.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
@@ -61,7 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
   double recorderWidth = 50.0;
   double recorderHeight = 50.0;
   double recorderBorderRadius = 20.0;
-  
+
   bool keyboardIsVisible() {
     return !(MediaQuery.of(context).viewInsets.bottom == 0.0);
   }
@@ -154,6 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void startVoiceRecording() async {
     bool hasPermissions = await AudioRecorder.hasPermissions;
+    showSnackBar(hasPermissions.toString(), scaffoldKey);
     if (hasPermissions == false) return;
 
     bool isRecording = await AudioRecorder.isRecording;
@@ -302,7 +304,6 @@ class _ChatScreenState extends State<ChatScreen> {
         Fluttertoast.showToast(msg: err.message.toString());
       });
     });
-    
   }
 
   Future<String> inputData() async {
@@ -426,7 +427,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
-            keyboardIsVisible()==true? SizedBox(height:250): Container(),
+            keyboardIsVisible() == true ? SizedBox(height: 250) : Container(),
           ],
         ),
       ),
@@ -435,14 +436,26 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessagesStream extends StatelessWidget {
+  ScrollController controllerListView = ScrollController();
   String creatorUid;
   String profileImagePostCreator;
   MessagesStream(this.creatorUid, this.profileImagePostCreator);
   @override
   Widget build(BuildContext context) {
+    Timer(
+        Duration(milliseconds: 1000),
+        () => controllerListView
+            .jumpTo(controllerListView.position.maxScrollExtent));
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('messages').orderBy('creationTime', descending: false).snapshots(),
+      stream: _firestore
+          .collection('messages')
+          .orderBy('creationTime', descending: false)
+          .snapshots(),
       builder: (context, snapshot) {
+        Timer(
+            Duration(milliseconds: 1000),
+            () => controllerListView
+                .jumpTo(controllerListView.position.maxScrollExtent));
         if (!snapshot.hasData) {
           return Center(
             child: CircularProgressIndicator(
@@ -455,9 +468,12 @@ class MessagesStream extends StatelessWidget {
         for (var message in messages) {
           final messageText = message.data['text'];
           final messageAttachedImage = message.data['attachedAttachedImage'];
-          if(messageAttachedImage.toString().contains('https'))  tempAttachedImage = null;
-          final messageAttachedVoiceRecording =  message.data['attachedVoiceRecording'];
-          if(messageAttachedVoiceRecording.toString().contains('https')) tempRecording = "";
+          if (messageAttachedImage.toString().contains('https'))
+            tempAttachedImage = null;
+          final messageAttachedVoiceRecording =
+              message.data['attachedVoiceRecording'];
+          if (messageAttachedVoiceRecording.toString().contains('https'))
+            tempRecording = "";
           final messageAttachedFile = message.data['attachedFile'];
           final messageSender = message.data['senderName'];
           final senderUid = message.data['senderUid'];
@@ -482,13 +498,14 @@ class MessagesStream extends StatelessWidget {
               profileImagePostCreator: profileImagePostCreator,
               creationTime: creationTime,
             );
-   
+
             messageBubbles.add(messageBubble);
           }
         }
-   
+
         return Expanded(
           child: ListView(
+            controller: controllerListView,
             reverse: false,
             padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             children: messageBubbles,
@@ -521,7 +538,6 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
       padding: EdgeInsets.all(10.0),
       child: Column(
@@ -573,43 +589,42 @@ class MessageBubble extends StatelessWidget {
                 ),
               ),
             ),
-          ] else if (tempAttachedImage!=null) ...[
-            SizedBox(
-              width:200,
-              height: 200,
-              child: Image.asset(tempAttachedImage.path),
-            )
-          ] 
-          else if (attachedImage.length > 0 ) ...[
+          ] else if (tempAttachedImage != null) ...[
             SizedBox(
               width: 200,
               height: 200,
-              child: CachedNetworkImage(
-                imageUrl: attachedImage,
-                placeholder: (context, url) => Container(
-                  child: Center(child: new CircularProgressIndicator()),
+              child: Image.asset(tempAttachedImage.path),
+            )
+          ] else if (attachedImage.length > 0) ...[
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(new CupertinoPageRoute(
+                    builder: (BuildContext context) =>
+                        new ImageInLarge(attachedImage)));
+              },
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CachedNetworkImage(
+                  imageUrl: attachedImage,
+                  placeholder: (context, url) => Container(
+                    child: Center(child: new CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => new Icon(Icons.error),
+                  fadeInCurve: Curves.easeIn,
+                  fadeInDuration: Duration(milliseconds: 1000),
+                  fit: BoxFit.fill,
                 ),
-                errorWidget: (context, url, error) => new Icon(Icons.error),
-                fadeInCurve: Curves.easeIn,
-                fadeInDuration: Duration(milliseconds: 1000),
-                fit: BoxFit.fill,
               ),
             )
-          ]  
-          else if (tempRecording.length > 0) ... [
-            SizedBox(
-              width:280,
-              height:100,
-              child: LocalAudio(tempRecording)
-              ),
+          ] else if (tempRecording.length > 0) ...[
+            SizedBox(width: 280, height: 100, child: LocalAudio(tempRecording)),
           ] else if (attachedVoiceRecording.length > 0) ...[
             SizedBox(
-              width:280,
-              height:100,
-              child: LocalAudio(attachedVoiceRecording)
-              ),
-          ] 
-          else if (tempAttachment.length > 0) ...[
+                width: 280,
+                height: 100,
+                child: LocalAudio(attachedVoiceRecording)),
+          ] else if (tempAttachment.length > 0) ...[
             Material(
               elevation: 5.0,
               borderRadius: isMe
@@ -625,26 +640,24 @@ class MessageBubble extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                  GestureDetector(
-                    onTap: () async {
-                      OpenFile.open(tempAttachment);
-                      
-                    },
-                    child: Text(
-                      "Attached File",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.blue),
-                    ),
-                  ),
-                ]),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () async {
+                          OpenFile.open(tempAttachment);
+                        },
+                        child: Text(
+                          "Attached File",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.blue),
+                        ),
+                      ),
+                    ]),
               ),
             ),
-          ]
-          else if(attachedFile.length>0) ... [
+          ] else if (attachedFile.length > 0) ...[
             Material(
               elevation: 5.0,
               borderRadius: isMe
@@ -660,29 +673,28 @@ class MessageBubble extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                  GestureDetector(
-                    onTap: () async {
-                      if (await canLaunch(attachedFile) == true) {
-                        await launch(attachedFile);
-                      } else {
-                        throw 'Could not launch $tempAttachment';
-                      }
-                    },
-                    child: Text(
-                      "Attached File" ,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.blue),
-                    ),
-                  ),
-                ]),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () async {
+                          if (await canLaunch(attachedFile) == true) {
+                            await launch(attachedFile);
+                          } else {
+                            throw 'Could not launch $tempAttachment';
+                          }
+                        },
+                        child: Text(
+                          "Attached File",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.blue),
+                        ),
+                      ),
+                    ]),
               ),
             ),
-          ]
-          ,
+          ],
           Text(
             timestampToTimeGap(creationTime),
             style: TextStyle(

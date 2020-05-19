@@ -21,7 +21,7 @@ import 'package:areastudent/tools/methods.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'create_post.dart';
 import 'menu_groups.dart';
-
+import 'package:areastudent/screens/images_in_large.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -774,24 +774,40 @@ class _ProfileState extends State<Profile> {
                                                                 .size
                                                                 .width *
                                                             0.7,
-                                                    child: CachedNetworkImage(
-                                                      imageUrl:
-                                                          postsImages[index][0],
-                                                      placeholder:
-                                                          (context, url) =>
-                                                              Container(
-                                                        child: Center(
-                                                            child:
-                                                                new CircularProgressIndicator()),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.of(context).push(
+                                                            new CupertinoPageRoute(
+                                                                builder: (BuildContext
+                                                                        context) =>
+                                                                    new ImageInLarge(
+                                                                      postsImages[
+                                                                          index][0],
+                                                                    )));
+                                                      },
+                                                      child: CachedNetworkImage(
+                                                        imageUrl:
+                                                            postsImages[index]
+                                                                [0],
+                                                        placeholder:
+                                                            (context, url) =>
+                                                                Container(
+                                                          child: Center(
+                                                              child:
+                                                                  new CircularProgressIndicator()),
+                                                        ),
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            new Icon(
+                                                                Icons.error),
+                                                        fadeInCurve:
+                                                            Curves.easeIn,
+                                                        fadeInDuration:
+                                                            Duration(
+                                                                milliseconds:
+                                                                    1000),
+                                                        fit: BoxFit.fill,
                                                       ),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          new Icon(Icons.error),
-                                                      fadeInCurve:
-                                                          Curves.easeIn,
-                                                      fadeInDuration: Duration(
-                                                          milliseconds: 1000),
-                                                      fit: BoxFit.fill,
                                                     ),
                                                   )
                                                 : Container(),
@@ -808,24 +824,40 @@ class _ProfileState extends State<Profile> {
                                                                 .size
                                                                 .width *
                                                             0.7,
-                                                    child: CachedNetworkImage(
-                                                      imageUrl:
-                                                          postsImages[index][1],
-                                                      placeholder:
-                                                          (context, url) =>
-                                                              Container(
-                                                        child: Center(
-                                                            child:
-                                                                new CircularProgressIndicator()),
+                                                    child: GestureDetector(
+                                                      onTap: () {
+                                                        Navigator.of(context).push(
+                                                            new CupertinoPageRoute(
+                                                                builder: (BuildContext
+                                                                        context) =>
+                                                                    new ImageInLarge(
+                                                                      postsImages[
+                                                                          index][1],
+                                                                    )));
+                                                      },
+                                                      child: CachedNetworkImage(
+                                                        imageUrl:
+                                                            postsImages[index]
+                                                                [1],
+                                                        placeholder:
+                                                            (context, url) =>
+                                                                Container(
+                                                          child: Center(
+                                                              child:
+                                                                  new CircularProgressIndicator()),
+                                                        ),
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            new Icon(
+                                                                Icons.error),
+                                                        fadeInCurve:
+                                                            Curves.easeIn,
+                                                        fadeInDuration:
+                                                            Duration(
+                                                                milliseconds:
+                                                                    1000),
+                                                        fit: BoxFit.fill,
                                                       ),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          new Icon(Icons.error),
-                                                      fadeInCurve:
-                                                          Curves.easeIn,
-                                                      fadeInDuration: Duration(
-                                                          milliseconds: 1000),
-                                                      fit: BoxFit.fill,
                                                     ),
                                                   )
                                                 : Container(),

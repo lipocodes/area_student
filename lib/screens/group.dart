@@ -11,6 +11,7 @@ import 'package:areastudent/tools/methods.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'create_post_group.dart';
 import 'chat_screen.dart';
+import 'package:areastudent/screens/images_in_large.dart';
 
 class Group extends StatefulWidget {
   String nameGroup = "";
@@ -341,13 +342,20 @@ class _GroupState extends State<Group> {
                                       : Container(),
                                   GestureDetector(
                                       onTap: () async {
-                                       
                                         await Navigator.of(context).push(
                                             new CupertinoPageRoute(
-                                                builder: (BuildContext
-                                                        context) =>
-                                                    new ChatScreen(
-                                                        creatorUid[index].toString(), creatorName[index].toString(), text[index].toString(), widget.iconGroup, profileImage[index].toString())));
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        new ChatScreen(
+                                                            creatorUid[index]
+                                                                .toString(),
+                                                            creatorName[index]
+                                                                .toString(),
+                                                            text[index]
+                                                                .toString(),
+                                                            widget.iconGroup,
+                                                            profileImage[index]
+                                                                .toString())));
                                       },
                                       child: Icon(Icons.chat_bubble_outline)),
                                 ],
@@ -373,20 +381,31 @@ class _GroupState extends State<Group> {
                                       height:
                                           MediaQuery.of(context).size.height /
                                               4,
-                                      child: CachedNetworkImage(
-                                        imageUrl: images[index][0],
-                                        placeholder: (context, url) =>
-                                            Container(
-                                          child: Center(
-                                              child:
-                                                  new CircularProgressIndicator()),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              new CupertinoPageRoute(
+                                                  builder:
+                                                      (BuildContext context) =>
+                                                          new ImageInLarge(
+                                                              images[index]
+                                                                  [0])));
+                                        },
+                                        child: CachedNetworkImage(
+                                          imageUrl: images[index][0],
+                                          placeholder: (context, url) =>
+                                              Container(
+                                            child: Center(
+                                                child:
+                                                    new CircularProgressIndicator()),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              new Icon(Icons.error),
+                                          fadeInCurve: Curves.easeIn,
+                                          fadeInDuration:
+                                              Duration(milliseconds: 1000),
+                                          fit: BoxFit.fill,
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            new Icon(Icons.error),
-                                        fadeInCurve: Curves.easeIn,
-                                        fadeInDuration:
-                                            Duration(milliseconds: 1000),
-                                        fit: BoxFit.fill,
                                       ),
                                     )
                                   : Container(),
@@ -399,20 +418,31 @@ class _GroupState extends State<Group> {
                                       height:
                                           MediaQuery.of(context).size.height /
                                               4,
-                                      child: CachedNetworkImage(
-                                        imageUrl: images[index][1],
-                                        placeholder: (context, url) =>
-                                            Container(
-                                          child: Center(
-                                              child:
-                                                  new CircularProgressIndicator()),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                                Navigator.of(context).push(
+                                              new CupertinoPageRoute(
+                                                  builder:
+                                                      (BuildContext context) =>
+                                                          new ImageInLarge(
+                                                              images[index]
+                                                                  [1])));
+                                        },
+                                        child: CachedNetworkImage(
+                                          imageUrl: images[index][1],
+                                          placeholder: (context, url) =>
+                                              Container(
+                                            child: Center(
+                                                child:
+                                                    new CircularProgressIndicator()),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              new Icon(Icons.error),
+                                          fadeInCurve: Curves.easeIn,
+                                          fadeInDuration:
+                                              Duration(milliseconds: 1000),
+                                          fit: BoxFit.fill,
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            new Icon(Icons.error),
-                                        fadeInCurve: Curves.easeIn,
-                                        fadeInDuration:
-                                            Duration(milliseconds: 1000),
-                                        fit: BoxFit.fill,
                                       ),
                                     )
                                   : Container(),
