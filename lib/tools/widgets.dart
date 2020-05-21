@@ -179,14 +179,14 @@ Widget userDetails(
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: Text(
-                    name,
+                    name!=null? name: "",
                     style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 20.0),
                   child: Text(
-                    age,
+                    age!=null? age:"",
                     style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -219,7 +219,7 @@ Widget userDetails(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Icon(Icons.school),
-                      Text(academicField,
+                      Text(academicField!=null? academicField: "",
                           style: TextStyle(
                               fontSize: 16.0, fontWeight: FontWeight.w400)),
                     ],
@@ -232,12 +232,12 @@ Widget userDetails(
               width: MediaQuery.of(context).size.width * 0.8,
               height: 100,
               child: Text(
-                aboutMe,
+                aboutMe!=null? aboutMe: "",
                 style: TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
                 textAlign: TextAlign.justify,
               ),
             ),
-            Row(
+            if(numFollowers>0) ... [ Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
@@ -268,7 +268,7 @@ Widget userDetails(
               ],
             ),
           ],
-        ),
+          ]),
       ),
     ),
   );

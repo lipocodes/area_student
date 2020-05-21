@@ -68,7 +68,7 @@ const String screen13Warning = "You can't create a blank post!";
 
 const screen17TooMuchImages = "No more than 2 images please!";
 
-
+const screen19FollowButton = "Follow";
 
 
 const kSendButtonTextStyle = TextStyle(

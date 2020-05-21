@@ -1,0 +1,423 @@
+import 'package:areastudent/screens/chat_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:areastudent/tools/methods.dart';
+import 'package:flutter/cupertino.dart';
+import 'menu_groups.dart';
+import 'profile.dart';
+import 'package:areastudent/tools/widgets.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:areastudent/tools/widgets.dart';
+import 'package:areastudent/data/constants.dart';
+
+class Meet extends StatefulWidget {
+  @override
+  _MeetState createState() => _MeetState();
+}
+
+class _MeetState extends State<Meet> {
+  final scaffoldKey = new GlobalKey<ScaffoldState>();
+  int indexBottomBar = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: scaffoldKey,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            new Text(
+              "Meet",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.notifications_none,
+                size: 40,
+              ),
+              color: Colors.black87,
+              onPressed: () {
+                showSnackBar(
+                    "In the future - Inbox will be here!", scaffoldKey);
+              },
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 3,
+        onTap: (int index) {
+          setState(() {
+            this.indexBottomBar = index;
+          });
+
+          if (this.indexBottomBar == 0) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Profile()));
+          } else if (this.indexBottomBar == 1) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new MenuGroups()));
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.perm_identity, size: 30.0),
+            title: new Text('Profile'),
+          ),
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.group, size: 30.0),
+            title: new Text('Groups'),
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border, size: 30.0),
+              title: Text('Meet')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline, size: 30.0),
+              title: Text('Chats'))
+        ],
+      ),
+      body: Column(children: [
+        searchUserBox(),
+        PersonalCard(),
+      ]),
+    );
+  }
+}
+
+class PersonalCard extends StatefulWidget {
+  @override
+  _PersonalCardState createState() => _PersonalCardState();
+}
+
+class _PersonalCardState extends State<PersonalCard> {
+  String uid,
+      name,
+      gender,
+      country,
+      region,
+      subregion,
+      locality,
+      academicField,
+      aboutMe;
+  int age, indexProfileImage = 0;
+  List<String> profileImages;
+  String textFollowButton = "Follow";
+
+  followThisUser() async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: this.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+ 
+    List<dynamic> str1 = snapshot[0].data['followers'];
+    List<String> followers = [];
+    for (int i = 0; i < str1.length; i++) {
+      followers.add(str1[i].toString());
+    }
+
+    followers.add(this.uid);
+    try {
+      String uid = await inputData();
+      await Firestore.instance
+          .collection("userData")
+          .document(this.uid)
+          .updateData({'followers': followers});
+
+      setState(() {
+        this.textFollowButton = "Unfollow";
+      });
+    } catch (e) {
+      print("eeeeeeeeeeeeeeeeeeeeee followThisUser");
+    }
+  }
+
+  unfollowThisUser() async {
+    final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: this.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+
+    List<dynamic> str1 = snapshot[0].data['followers'];
+    List<String> followers = [];
+    for (int i = 0; i < str1.length; i++) {
+      followers.add(str1[i].toString());
+    }
+    followers.remove(this.uid);
+    try {
+      String uid = await inputData();
+      await Firestore.instance
+          .collection("userData")
+          .document(this.uid)
+          .updateData({'followers': followers});
+      setState(() {
+        this.textFollowButton = "Follow";
+      });
+    } catch (e) {
+      print("eeeeeeeeeeeeeeeeeeeeee followThisUser");
+    }
+  }
+
+  retrieveUserData() async {
+    //this.uid = await inputData();
+    this.uid = "AvcNcYj0yWRxnPZaQXj88oelrLB3";
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+
+    try {
+      List<dynamic> str1 = snapshot[0].data['profileImages'];
+      List<String> str2 = [];
+      for (int i = 0; i < str1.length; i++) {
+        str2.add(str1[i].toString());
+      }
+      this.profileImages = str2;
+
+      this.name =
+          snapshot[0].data['firstName'] + "  " + snapshot[0].data['lastName'];
+      this.gender = snapshot[0].data['gender'];
+      this.country = snapshot[0].data['country'];
+      this.region = snapshot[0].data['region'];
+      this.subregion = snapshot[0].data['subRegion'];
+      this.locality = snapshot[0].data['locality'];
+      this.academicField = snapshot[0].data['academicField'];
+      this.aboutMe = snapshot[0].data['aboutMe'];
+
+      var now = new DateTime.now();
+      var formatter = new DateFormat('yyyy');
+      int yearNow = int.parse(formatter.format(now));
+      String birthDate = snapshot[0].data['birthDate'];
+      int yearBirthDate = int.parse(birthDate.substring(birthDate.length - 4));
+      this.age = yearNow - yearBirthDate;
+
+      setState(() {});
+    } catch (e) {
+      print("eeeeeeeeeeeeeeeeeeeeee= " + e.toString());
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    this.retrieveUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (this.uid == null || this.uid.length == 0) return Container();
+
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Positioned(
+              child: Container(
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  child: Row(
+                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      profileImages != null && profileImages.length > 0
+                          ? SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height,
+                              child: CachedNetworkImage(
+                                imageUrl: profileImages[indexProfileImage],
+                                placeholder: (context, url) => Container(
+                                  child: Center(
+                                      child: new CircularProgressIndicator()),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    new Icon(Icons.error),
+                                fadeInCurve: Curves.easeIn,
+                                fadeInDuration: Duration(milliseconds: 1000),
+                                fit: BoxFit.fill,
+                              ),
+                            )
+                          : Container(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 110,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white70,
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(30))),
+                      child: IconButton(
+                          icon: Icon(
+                            Icons.arrow_back,
+                          ),
+                          iconSize: 35,
+                          color: Colors.white,
+                          onPressed: () {
+                            setState(() {
+                              if (indexProfileImage > 0) {
+                                indexProfileImage = indexProfileImage - 1;
+                              } else {
+                                indexProfileImage =
+                                    this.profileImages.length - 1;
+                              }
+                            });
+                          }),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.white70,
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(30))),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_forward,
+                        ),
+                        iconSize: 35,
+                        color: Colors.white,
+                        onPressed: () {
+                          if (indexProfileImage <
+                              this.profileImages.length - 1) {
+                            setState(() {
+                              indexProfileImage = indexProfileImage + 1;
+                            });
+                          } else {
+                            setState(() {
+                              indexProfileImage = 0;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        userDetails(this.name, this.age.toString(), this.country, this.region,
+            this.academicField, this.aboutMe, -1, -1, context),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            RaisedButton(
+              onPressed: () {
+                if (this.textFollowButton == "Follow")
+                  this.followThisUser();
+                else
+                  this.unfollowThisUser();
+              }, //the click event is impolemented in the screen classes
+              padding: const EdgeInsets.all(0.0),
+              child: Container(
+                decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: <Color>[
+                        Color(0xFFB3F5FC),
+                        Color(0xFF81D4FA),
+                        Color(0xFF29B6F6),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(8.0),
+                    )),
+                padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
+                child: new Text(this.textFollowButton,
+                    style: TextStyle(fontSize: 20, color: Colors.white)),
+              ),
+            ),
+            GestureDetector(
+                onTap: () async {
+                  await Navigator.of(context).push(new CupertinoPageRoute(
+                      builder: (BuildContext context) => new ChatScreen(
+                          this.uid,
+                          name,
+                          " ",
+                          " ",
+                          this.profileImages[0].toString())));
+                },
+                child: Icon(Icons.chat_bubble_outline, size: 45)),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+Future<String> inputData() async {
+  try {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    String uid = user.uid.toString();
+    return uid;
+  } catch (e) {
+    return "";
+  }
+}
+
+Widget searchUserBox() {
+  TextEditingController controllerSearchName = new TextEditingController();
+  void searchUsers() {
+    print("ggggggggggggggg= " + controllerSearchName.text);
+  }
+
+  return Padding(
+    padding: const EdgeInsets.all(15.0),
+    child: TextField(
+      onChanged: (e) {
+        searchUsers();
+      },
+      decoration: new InputDecoration(
+        prefixIcon: Icon(Icons.search),
+        labelText: 'Search name ..',
+        fillColor: Colors.grey[100],
+        filled: true,
+        contentPadding: EdgeInsets.only(
+          top: 10.0,
+          left: 10.0,
+          bottom: 10.0,
+        ),
+        border: new OutlineInputBorder(
+          borderRadius: new BorderRadius.circular(10.0),
+        ),
+      ),
+      controller: controllerSearchName,
+      keyboardType: TextInputType.text,
+      style: new TextStyle(
+        fontSize: 14.0,
+        fontFamily: "Poppins",
+        color: Colors.grey[600],
+      ),
+    ),
+  );
+}

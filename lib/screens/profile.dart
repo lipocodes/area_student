@@ -21,6 +21,7 @@ import 'package:areastudent/tools/methods.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'create_post.dart';
 import 'menu_groups.dart';
+import 'meet.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 
 class Profile extends StatefulWidget {
@@ -110,7 +111,7 @@ class _ProfileState extends State<Profile> {
       this.gender = snapshot[0].data['gender'];
       this.country = snapshot[0].data['country'];
       this.region = snapshot[0].data['region'];
-      this.subregion = snapshot[0].data['region'];
+      this.subregion = snapshot[0].data['subRegion'];
       this.locality = snapshot[0].data['locality'];
       this.academicField = snapshot[0].data['academicField'];
 
@@ -486,6 +487,10 @@ class _ProfileState extends State<Profile> {
             if (this.indexBottomBar == 1) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new MenuGroups()));
+            }
+            else if (this.indexBottomBar == 3) {
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Meet()));
             }
           },
           items: [

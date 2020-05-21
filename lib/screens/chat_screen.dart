@@ -25,6 +25,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:open_file/open_file.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
@@ -33,6 +34,8 @@ bool isRecordingNow = false;
 String tempRecording = "";
 File tempAttachedImage;
 String tempAttachment = "";
+FocusNode focusTextField = new FocusNode();
+bool isTextFieldFocus = false;
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -60,9 +63,9 @@ class _ChatScreenState extends State<ChatScreen> {
   StorageReference storageReference;
   StorageUploadTask uploadTask;
 
-  double recorderWidth = 50.0;
-  double recorderHeight = 50.0;
-  double recorderBorderRadius = 20.0;
+  double recorderWidth = 40.0;
+  double recorderHeight = 40.0;
+  double recorderBorderRadius = 15.0;
 
   bool keyboardIsVisible() {
     return !(MediaQuery.of(context).viewInsets.bottom == 0.0);
@@ -139,7 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         child: IconButton(
           icon: Icon(Icons.keyboard_voice),
-          iconSize: 30,
+          iconSize: 25,
           color: Colors.black,
           onPressed: (() {}),
         ),
@@ -230,6 +233,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'attachedVoiceRecording': "",
       'attachedFile': "",
     });
+    
 
     storageReference = FirebaseStorage.instance
         .ref()
@@ -274,9 +278,30 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void checkPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
-        Permission.microphone,
-        Permission.storage,
-      ].request();
+      Permission.microphone,
+      Permission.storage,
+    ].request();
+  }
+
+  void onFocusChange() {
+    //debugPrint("Focus: " + focusTextField.hasFocus.toString());
+    try {
+      setState(() {
+        if (focusTextField.hasFocus.toString() == "true")
+          isTextFieldFocus = true;
+        else
+          isTextFieldFocus = false;
+      });
+    } catch (e) {}
+  }
+
+
+
+  writeInSharedPrefs() async{
+   final prefs = await SharedPreferences.getInstance();
+   await prefs.setBool('isNotification', true);
+   bool isNotification = await prefs.getBool('isNotification');
+   print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh= " + isNotification.toString());
   }
 
   @override
@@ -285,7 +310,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
     getCurrentUser();
 
-   checkPermissions();
+    checkPermissions();
+
+    messageTextController.addListener(onFocusChange);
 
     firebaseMessaging.requestNotificationPermissions();
 
@@ -294,6 +321,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }, onResume: (Map<String, dynamic> message) {
       print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbb= " + message.toString());
+      writeInSharedPrefs();
       //navService.pushNamed('/chat_screen');
 
       return;
@@ -361,15 +389,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
                     color: Colors.black12),
-                child: ListTile(
-                  leading: Image.network(
-                    widget.iconGroup,
+                child: widget.iconGroup.length>10 ? ListTile(
+                   leading:  Image.network(
+                     widget.iconGroup
                   ),
-                  title: Text(
-                    widget.textPost,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                  ),
-                ),
+                ): Container(),
               ),
             ),
             widget.creatorUid.length != 0
@@ -381,63 +405,78 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Expanded(
+                  buttonRecordVoice(),
+                  SizedBox(width: 20.0),
+                  SizedBox(
+                    width: 180.0,
                     child: TextField(
+                      minLines: 1,
+                      maxLines: 5,
                       controller: messageTextController,
+                      focusNode: focusTextField,
                       onChanged: (value) {
                         messageText = value;
                         //keyboardIsVisible();
                       },
-                      decoration: kMessageTextFieldDecoration,
+                      decoration:
+                          new InputDecoration.collapsed(hintText: 'Type ...'),
                     ),
                   ),
-                  buttonRecordVoice(),
-                  IconButton(
-                    icon: Icon(
-                      Icons.image,
+                  SizedBox(
+                    width: 30.0,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.image,
+                      ),
+                      iconSize: 20,
+                      onPressed: () {
+                        attachImage();
+                      },
                     ),
-                    iconSize: 25,
-                    onPressed: () {
-                      attachImage();
-                    },
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.attachment,
+                  SizedBox(
+                    width: 30.0,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.attachment,
+                      ),
+                      iconSize: 20,
+                      onPressed: () {
+                        attachFile();
+                      },
                     ),
-                    iconSize: 25,
-                    onPressed: () {
-                      attachFile();
-                    },
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.arrow_forward,
+                  SizedBox(
+                    width: 40.0,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_forward,
+                      ),
+                      iconSize: 40,
+                      color: Colors.black,
+                      splashColor: Colors.blueAccent,
+                      onPressed: () {
+                        if (messageTextController.text.length == 0) return;
+                        _firestore.collection('messages').add({
+                          'creationTime': new DateTime.now()
+                              .millisecondsSinceEpoch
+                              .toString(),
+                          'recipientUid': widget.creatorUid,
+                          'senderName': loggedInUser.displayName,
+                          'senderUid': loggedInUser.uid,
+                          'text': messageTextController.text,
+                          'attachedAttachedImage': "",
+                          'attachedVoiceRecording': "",
+                          'attachedFile': "",
+                        });
+                        messageTextController.clear();
+                      },
                     ),
-                    iconSize: 50,
-                    color: Colors.black,
-                    splashColor: Colors.blueAccent,
-                    onPressed: () {
-                      if (messageTextController.text.length == 0) return;
-                      _firestore.collection('messages').add({
-                        'creationTime': new DateTime.now()
-                            .millisecondsSinceEpoch
-                            .toString(),
-                        'recipientUid': widget.creatorUid,
-                        'senderName': loggedInUser.displayName,
-                        'senderUid': loggedInUser.uid,
-                        'text': messageTextController.text,
-                        'attachedAttachedImage': "",
-                        'attachedVoiceRecording': "",
-                        'attachedFile': "",
-                      });
-                      messageTextController.clear();
-                    },
                   ),
                 ],
               ),
             ),
-            keyboardIsVisible() == true ? SizedBox(height: 250) : Container(),
+           
           ],
         ),
       ),
@@ -545,9 +584,11 @@ class MessageBubble extends StatelessWidget {
   final bool isMe;
   final String profileImagePostCreator;
   final String creationTime;
+  final controllerTextField = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    isTextFieldFocus = false;
     return Padding(
       padding: EdgeInsets.all(10.0),
       child: Column(

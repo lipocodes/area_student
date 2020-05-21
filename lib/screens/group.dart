@@ -11,6 +11,7 @@ import 'package:areastudent/tools/methods.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'create_post_group.dart';
 import 'chat_screen.dart';
+import 'meet.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 
 class Group extends StatefulWidget {
@@ -160,6 +161,7 @@ class _GroupState extends State<Group> {
 
   @override
   void initState() {
+     print("ggggggggggggggggggggggggggggggggg");
     // TODO: implement initState
     super.initState();
 
@@ -177,8 +179,8 @@ class _GroupState extends State<Group> {
 
   @override
   Widget build(BuildContext context) {
-    //if (this.postsName.length == 0) return Container();
-    //print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaa= " + this.profileImage.toString());
+    
+   
 
     return Scaffold(
       appBar: AppBar(
@@ -222,37 +224,42 @@ class _GroupState extends State<Group> {
         },
         child: Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 1, // this will be set when a new tab is tapped
-        onTap: (int index) {
-          setState(() {
-            this.indexBottomBar = index;
-          });
-          if (this.indexBottomBar == 0) {
-            Navigator.of(context).push(new CupertinoPageRoute(
-                builder: (BuildContext context) => new Profile()));
-          }
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: new Icon(Icons.perm_identity, size: 30.0),
-            title: new Text('Profile'),
-          ),
-          BottomNavigationBarItem(
-            icon: new Icon(Icons.group, size: 30.0),
-            title: new Text('Groups'),
-          ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border, size: 30.0),
-              title: Text('Meet')),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline, size: 30.0),
-              title: Text('Chats'))
-        ],
-      ),
+         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: 1,
+          onTap: (int index) {
+            setState(() {
+              this.indexBottomBar = index;
+            });
+
+            if (this.indexBottomBar == 0) {
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Profile()));
+            }
+            else if (this.indexBottomBar == 3) {
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Meet()));
+            }
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: new Icon(Icons.perm_identity, size: 30.0),
+              title: new Text('Profile'),
+            ),
+            BottomNavigationBarItem(
+              icon: new Icon(Icons.group, size: 30.0),
+              title: new Text('Groups'),
+            ),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.favorite_border, size: 30.0),
+                title: Text('Meet')),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_outline, size: 30.0),
+                title: Text('Chats'))
+          ],
+        ),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -310,7 +317,7 @@ class _GroupState extends State<Group> {
                                         await retrievePostsNames();
                                         await retrievePostsContents();
                                       },
-                                      child: Text(" X ",
+                                      child:  Text(" X ",
                                           style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w500)))
@@ -357,7 +364,7 @@ class _GroupState extends State<Group> {
                                                             profileImage[index]
                                                                 .toString())));
                                       },
-                                      child: Icon(Icons.chat_bubble_outline)),
+                                      child:  this.creatorUid[index] != this.uid?  Icon(Icons.chat_bubble_outline):Container()),
                                 ],
                               ),
                               SizedBox(height: 20.0),
