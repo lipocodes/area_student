@@ -1,4 +1,5 @@
 import 'package:areastudent/data/constants.dart';
+import 'package:areastudent/screens/chat_screen.dart';
 import 'package:areastudent/tools/auth_service.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:flutter/material.dart';
@@ -490,7 +491,7 @@ class _ProfileState extends State<Profile> {
             }
             else if (this.indexBottomBar == 3) {
               Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet()));
+                  builder: (BuildContext context) => new Meet(loggedInUser.uid)));
             }
           },
           items: [

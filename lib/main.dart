@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login' :(context) => Login(),
         '/chat_screen' : (context) => ChatScreen('M0B7RtHW6zYOwkPhcqoHdigwEEs2','Mishel Nisimov','aaaaa aaaaaa','https://www.frk.co.il/wp-content/uploads/2018/10/jobs1.png','https://firebasestorage.googleapis.com/v0/b/area-student-d501b.appspot.com/o/userData%2FM0B7RtHW6zYOwkPhcqoHdigwEEs2%2FM0B7RtHW6zYOwkPhcqoHdigwEEs2.0.jpg?alt=media&token=f49fdb42-f54c-40f9-b13b-df87232c6c04'),
-
+        '/meet' :  (context) => Meet(""),
       },
       theme: ThemeData(
    
@@ -54,8 +54,8 @@ class MyApp extends StatelessWidget {
       ),
      
       //home: new AuthService().hanldeAuth(),
-      home: Login(),
-      //home: Meet(),
+      //home: Login(),
+      home: Meet(""),
       
     );
   }

@@ -238,7 +238,7 @@ class _GroupState extends State<Group> {
             }
             else if (this.indexBottomBar == 3) {
               Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet()));
+                  builder: (BuildContext context) => new Meet(loggedInUser.uid)));
             }
           },
           items: [

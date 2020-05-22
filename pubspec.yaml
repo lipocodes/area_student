@@ -51,7 +51,7 @@ dependencies:
   audioplayers:
   file_picker:
   open_file:  
-  true_time:
+  flutter_typeahead:
  
   
   

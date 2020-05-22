@@ -11,8 +11,13 @@ import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:areastudent/data/constants.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+String targetUidd;
 
 class Meet extends StatefulWidget {
+  String targetUid;
+  Meet(this.targetUid);
   @override
   _MeetState createState() => _MeetState();
 }
@@ -20,6 +25,13 @@ class Meet extends StatefulWidget {
 class _MeetState extends State<Meet> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   int indexBottomBar = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    targetUidd = widget.targetUid;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +103,7 @@ class _MeetState extends State<Meet> {
         ],
       ),
       body: Column(children: [
-        searchUserBox(),
+        searchUserBox(context),
         PersonalCard(),
       ]),
     );
@@ -123,7 +135,7 @@ class _PersonalCardState extends State<PersonalCard> {
         .where('uid', isEqualTo: this.uid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
- 
+
     List<dynamic> str1 = snapshot[0].data['followers'];
     List<String> followers = [];
     for (int i = 0; i < str1.length; i++) {
@@ -176,6 +188,12 @@ class _PersonalCardState extends State<PersonalCard> {
   retrieveUserData() async {
     //this.uid = await inputData();
     this.uid = "AvcNcYj0yWRxnPZaQXj88oelrLB3";
+
+    if (targetUidd.length > 10) {
+      this.uid = targetUidd;
+    } else {
+      this.uid = "AvcNcYj0yWRxnPZaQXj88oelrLB3";
+    }
 
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
@@ -385,13 +403,153 @@ Future<String> inputData() async {
   }
 }
 
-Widget searchUserBox() {
+Widget searchUserBox(context) {
   TextEditingController controllerSearchName = new TextEditingController();
-  void searchUsers() {
-    print("ggggggggggggggg= " + controllerSearchName.text);
+  String str1;
+  List<String> uid1 = [];
+  List<String> profileImage1 = [];
+  List<String> name1 = [];
+  List<String> uid2 = [];
+  List<String> profileImage2 = [];
+  List<String> name2 = [];
+  List<String> uid3 = [];
+  List<String> profileImage3 = [];
+  List<String> name3 = [];
+  List suggestions = [];
+
+  Future<List> searchUsers() async {
+    String searchText = controllerSearchName.text;
+    if (searchText.length > 1 &&
+        searchText.substring(searchText.length - 1) == " ") {
+      var input = controllerSearchName.text;
+      var str = input.split(" ");
+
+      if (str.length == 2) {
+        uid1 = [];
+        profileImage1 = [];
+        name1 = [];
+        //search for the input word in user firstName
+        final QuerySnapshot result = await Firestore.instance
+            .collection('userData')
+            .where("firstName", isEqualTo: str[0])
+            .getDocuments();
+        final List<DocumentSnapshot> snapshot = result.documents;
+
+        for (int i = 0; i < snapshot.length; i++) {
+          uid1.add(snapshot[i].data['uid'].toString());
+          profileImage1.add(snapshot[i].data['profileImages'][0].toString());
+          name1.add(snapshot[i].data['firstName'].toString() +
+              "  " +
+              snapshot[i].data['lastName'].toString());
+        }
+
+        print("1st proposal is:  " + uid1.toString());
+      } else if (str.length == 3) {
+        uid2 = [];
+        profileImage2 = [];
+        name2 = [];
+        final QuerySnapshot result = await Firestore.instance
+            .collection('userData')
+            .where("lastName", isEqualTo: str[1])
+            .getDocuments();
+        final List<DocumentSnapshot> snapshot = result.documents;
+
+        String str1;
+
+        for (int i = 0; i < snapshot.length; i++) {
+          uid2.add(snapshot[i].data['uid'].toString());
+          profileImage2.add(snapshot[i].data['profileImages'][0].toString());
+          name2.add(snapshot[i].data['firstName'].toString() +
+              "  " +
+              snapshot[i].data['lastName'].toString());
+        }
+
+        print("2nd proposal is:  " + uid2.toString());
+
+        uid3 = [];
+        profileImage3 = [];
+        name3 = [];
+        if (uid1.length > uid2.length) {
+          for (int i = 0; i < uid2.length; i++) {
+            if (uid1.contains(uid2[i])) {
+              uid3.add(uid2[i]);
+              profileImage3.add(profileImage2[i]);
+              name3.add(name2[i]);
+            }
+          }
+        } else {
+          for (int i = 0; i < uid1.length; i++) {
+            if (uid2.contains(uid1[i])) {
+              uid3.add(uid1[i]);
+              profileImage3.add(profileImage1[i]);
+              name3.add(name1[i]);
+            }
+          }
+        }
+        print("Combined propsal is: " + uid3.toString());
+      }
+
+      if (uid3.length > 0) {
+        suggestions = [];
+
+        for (int i = 0; i < uid3.length; i++) {
+          var temp = {
+            'uid': '${uid3[i]}',
+            'profileImage': '${profileImage3[0]}',
+            'name': '${name3[i]}'
+          };
+          suggestions.add(temp);
+        }
+        return suggestions;
+      } else {
+        suggestions = [];
+
+        for (int i = 0; i < uid1.length; i++) {
+          var temp = {
+            'uid': '${uid1[i]}',
+            'profileImage': '${profileImage1[0]}',
+            'name': '${name1[i]}'
+          };
+          suggestions.add(temp);
+        }
+        return suggestions;
+      }
+    } else {
+      var temp = [];
+      return temp;
+    }
   }
 
-  return Padding(
+  return TypeAheadField(
+    textFieldConfiguration: TextFieldConfiguration(
+        controller: controllerSearchName,
+        autofocus: false,
+        style: DefaultTextStyle.of(context).style.copyWith(
+              fontStyle: FontStyle.italic,
+              fontSize: 18,
+              color: Colors.black,
+            ),
+        decoration: InputDecoration(border: OutlineInputBorder())),
+    suggestionsCallback: (pattern) async {
+      print(pattern.toString());
+      //return await BackendService.getSuggestions(pattern);
+      return searchUsers();
+    },
+    itemBuilder: (context, suggestion) {
+      return ListTile(
+        //leading: Icon(Icons.shopping_cart),
+        //title: Text(suggestion['profileImage']),
+        subtitle: Text(suggestion['name']),
+      );
+    },
+    onSuggestionSelected: (suggestion) {
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => new Meet(suggestion['uid']),
+      ));
+    },
+  );
+
+  /*return Padding(
     padding: const EdgeInsets.all(15.0),
     child: TextField(
       onChanged: (e) {
@@ -419,5 +577,5 @@ Widget searchUserBox() {
         color: Colors.grey[600],
       ),
     ),
-  );
+  );*/
 }
