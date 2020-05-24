@@ -72,11 +72,13 @@ class _ProfileState extends State<Profile> {
   String textTag1 = "Add tag";
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
   int indexBottomBar = 0;
+ 
 
   Future<String> inputData() async {
     try {
       final FirebaseUser user = await FirebaseAuth.instance.currentUser();
       String uid = user.uid.toString();
+      this.uid = uid;
       return uid;
     } catch (e) {
       this.tempUid = true;
@@ -489,9 +491,9 @@ class _ProfileState extends State<Profile> {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new MenuGroups()));
             }
-            else if (this.indexBottomBar == 3) {
+            else if (this.indexBottomBar == 3) { 
               Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet(loggedInUser.uid)));
+                  builder: (BuildContext context) => new Meet(uid)));
             }
           },
           items: [

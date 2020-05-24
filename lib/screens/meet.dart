@@ -9,11 +9,12 @@ import 'package:areastudent/tools/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:areastudent/tools/widgets.dart';
-import 'package:areastudent/data/constants.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'contact.dart';
 
 String targetUidd;
+String myUid;
+String textBlockUser = "";
 
 class Meet extends StatefulWidget {
   String targetUid;
@@ -25,12 +26,20 @@ class Meet extends StatefulWidget {
 class _MeetState extends State<Meet> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   int indexBottomBar = 0;
+  String uid;
+
+  getMyUid() async {
+    String uid = await inputData();
+    myUid = uid;
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     targetUidd = widget.targetUid;
+
+    getMyUid();
   }
 
   @override
@@ -128,7 +137,7 @@ class _PersonalCardState extends State<PersonalCard> {
   int age, indexProfileImage = 0;
   List<String> profileImages;
   String textFollowButton = "Follow";
-
+  String textBlockUser = "";
   followThisUser() async {
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
@@ -347,50 +356,177 @@ class _PersonalCardState extends State<PersonalCard> {
         ),
         userDetails(this.name, this.age.toString(), this.country, this.region,
             this.academicField, this.aboutMe, -1, -1, context),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            RaisedButton(
-              onPressed: () {
-                if (this.textFollowButton == "Follow")
-                  this.followThisUser();
-                else
-                  this.unfollowThisUser();
-              }, //the click event is impolemented in the screen classes
-              padding: const EdgeInsets.all(0.0),
-              child: Container(
-                decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: <Color>[
-                        Color(0xFFB3F5FC),
-                        Color(0xFF81D4FA),
-                        Color(0xFF29B6F6),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(8.0),
-                    )),
-                padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
-                child: new Text(this.textFollowButton,
-                    style: TextStyle(fontSize: 20, color: Colors.white)),
+        if (myUid != targetUidd) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              RaisedButton(
+                onPressed: () {
+                  if (this.textFollowButton == "Follow")
+                    this.followThisUser();
+                  else
+                    this.unfollowThisUser();
+                }, //the click event is impolemented in the screen classes
+                padding: const EdgeInsets.all(0.0),
+                child: Container(
+                  decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: <Color>[
+                          Color(0xFFB3F5FC),
+                          Color(0xFF81D4FA),
+                          Color(0xFF29B6F6),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(8.0),
+                      )),
+                  padding: const EdgeInsets.fromLTRB(30, 12, 30, 12),
+                  child: new Text(this.textFollowButton,
+                      style: TextStyle(fontSize: 20, color: Colors.white)),
+                ),
               ),
-            ),
-            GestureDetector(
-                onTap: () async {
-                  await Navigator.of(context).push(new CupertinoPageRoute(
-                      builder: (BuildContext context) => new ChatScreen(
-                          this.uid,
-                          name,
-                          " ",
-                          " ",
-                          this.profileImages[0].toString())));
-                },
-                child: Icon(Icons.chat_bubble_outline, size: 45)),
-          ],
-        ),
+              GestureDetector(
+                  onTap: () async {
+                    await Navigator.of(context).push(new CupertinoPageRoute(
+                        builder: (BuildContext context) => new ChatScreen(
+                            this.uid,
+                            name,
+                            " ",
+                            " ",
+                            this.profileImages[0].toString())));
+                  },
+                  child: Icon(Icons.chat_bubble_outline, size: 45)),
+              GestureDetector(
+                  onTap: () async {
+                    showDialogSettings(context);
+                  },
+                  child: Icon(Icons.settings, size: 45)),
+            ],
+          ),
+        ],
       ],
     );
   }
+}
+
+showDialogSettings(context) async {
+  bool yesNo = await checkIsUserBlocked(targetUidd);
+  if (yesNo == true)
+    textBlockUser = "Unblock User";
+  else
+    textBlockUser = "Block User";
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: SizedBox(
+          height: 100,
+          child: Column(
+            children: [
+              FlatButton(
+                child: Text(textBlockUser),
+                onPressed: () {
+                  if (textBlockUser == "Block User")
+                    blockUser(targetUidd, true);
+                  else
+                    blockUser(targetUidd, false);
+                  Navigator.of(context).pop();
+                },
+              ),
+              FlatButton(
+                child: Text('Report User'),
+                onPressed: () {
+                  Navigator.of(context).push(new CupertinoPageRoute(
+                      builder: (BuildContext context) => new Contact()));
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Future<bool> checkIsUserBlocked(String uidBlockedUser) async {
+  String uid = await inputData();
+  final QuerySnapshot result = await Firestore.instance
+      .collection('userData')
+      .where('uid', isEqualTo: uid)
+      .getDocuments();
+  final List<DocumentSnapshot> snapshot = result.documents;
+
+  List<dynamic> str1 = snapshot[0].data['blockedUsers'];
+  List<String> str2 = [];
+  for (int i = 0; i < str1.length; i++) {
+    str2.add(str1[i].toString());
+  }
+  if (str2.contains(uidBlockedUser))
+    return true;
+  else
+    return false;
+}
+
+blockUser(String uidBlockedUser, bool op) async {
+  String uid = await inputData();
+  final QuerySnapshot result = await Firestore.instance
+      .collection('userData')
+      .where('uid', isEqualTo: uid)
+      .getDocuments();
+  final List<DocumentSnapshot> snapshot = result.documents;
+
+  List<dynamic> str1 = snapshot[0].data['blockedUsers'];
+  List<String> str2 = [];
+  for (int i = 0; i < str1.length; i++) {
+    str2.add(str1[i].toString());
+  }
+  if (op == true) {
+    str2.add(targetUidd);
+    textBlockUser = "Unblock User";
+  } else {
+    str2.remove(targetUidd);
+    textBlockUser = "Block User";
+  }
+
+  await Firestore.instance
+      .collection("userData")
+      .document(uid)
+      .updateData({'blockedUsers': str2});
+
+
+
+final QuerySnapshot result2 = await Firestore.instance
+      .collection('userData')
+      .where('uid', isEqualTo: targetUidd)
+      .getDocuments();
+  final List<DocumentSnapshot> snapshot1 = result.documents;
+
+
+  
+
+  str1 = snapshot[0].data['blockedBy'];
+  if(str1==null)  str1 = [];
+
+  str2 = [];
+  for (int i = 0; i < str1.length; i++) {
+    str2.add(str1[i].toString());
+  }
+  if (op == true) {
+    str2.add(uid);
+  } else {
+    str2.remove(uid);
+   
+  }
+
+  
+
+  await Firestore.instance
+      .collection("userData")
+      .document(targetUidd)
+      .updateData({'blockedBy': str2});
+
+
+
 }
 
 Future<String> inputData() async {
@@ -417,11 +553,31 @@ Widget searchUserBox(context) {
   List<String> name3 = [];
   List suggestions = [];
 
+  String convertUpperCase(query) {
+    String str = query.toString();
+
+    for (var i = 0; i < str.length; i++) {
+      if (i == 0 || (i > 0 && (str.substring(i - 1, i)) == " ")) {
+        str = str.substring(0, i) +
+            str.substring(i, i + 1).toUpperCase() +
+            str.substring(i + 1);
+      } else {
+        str = str.substring(0, i) +
+            str.substring(i, i + 1).toLowerCase() +
+            str.substring(i + 1);
+      }
+    }
+
+    return str;
+  }
+
   Future<List> searchUsers() async {
     String searchText = controllerSearchName.text;
+    searchText = convertUpperCase(searchText);
+
     if (searchText.length > 1 &&
         searchText.substring(searchText.length - 1) == " ") {
-      var input = controllerSearchName.text;
+      var input = searchText;
       var str = input.split(" ");
 
       if (str.length == 2) {
@@ -531,7 +687,7 @@ Widget searchUserBox(context) {
             ),
         decoration: InputDecoration(border: OutlineInputBorder())),
     suggestionsCallback: (pattern) async {
-      print(pattern.toString());
+      //print(pattern.toString());
       //return await BackendService.getSuggestions(pattern);
       return searchUsers();
     },

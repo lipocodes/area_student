@@ -17,7 +17,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:audio_recorder/audio_recorder.dart';
+//import 'package:audio_recorder/audio_recorder.dart';
 import 'package:audioplayers/audio_cache.dart';
 import 'package:areastudent/tools/local_audio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -26,6 +26,7 @@ import 'package:open_file/open_file.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 
 final _firestore = Firestore.instance;
 FirebaseUser loggedInUser;
@@ -66,6 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
   double recorderWidth = 40.0;
   double recorderHeight = 40.0;
   double recorderBorderRadius = 15.0;
+  var recorder;
 
   bool keyboardIsVisible() {
     return !(MediaQuery.of(context).viewInsets.bottom == 0.0);
@@ -153,18 +155,20 @@ class _ChatScreenState extends State<ChatScreen> {
   void startRecording(directoryPath) async {
     int now = DateTime.now().millisecondsSinceEpoch;
     File f = File(directoryPath + "/" + now.toString() + ".wav");
-    await AudioRecorder.start(
-        path: f.path, audioOutputFormat: AudioOutputFormat.WAV);
+    /*await AudioRecorder.start(
+        path: f.path, audioOutputFormat: AudioOutputFormat.WAV);*/
+
+    this.recorder = FlutterAudioRecorder(f.path,
+        audioFormat: AudioFormat.AAC); // or AudioFormat.WAV
+    try{
+    await recorder.initialized;
+
+    await this.recorder.start();
+    var recording = await recorder.current(channel: 0);
+    } catch(e) {print("wwwwwwwwwwwwwwwwwwwwwwwwwwwww= " + e.toString());}
   }
 
   void startVoiceRecording() async {
-    bool hasPermissions = await AudioRecorder.hasPermissions;
-    //showSnackBar(hasPermissions.toString(), scaffoldKey);
-    if (hasPermissions == false) return;
-
-    bool isRecording = await AudioRecorder.isRecording;
-    if (isRecording == true) return;
-
     try {
       Directory appDocDirectory = await getApplicationDocumentsDirectory();
       new Directory(appDocDirectory.path + '/' + 'voiceRecording')
@@ -178,18 +182,14 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void stopVoiceRecording() async {
-    // Check permissions before starting
-    bool hasPermissions = await AudioRecorder.hasPermissions;
-
-    if (hasPermissions == false) return;
-
-    bool isRecording = await AudioRecorder.isRecording;
-    if (isRecording == false) return;
-
-    Recording recording = await AudioRecorder.stop();
-
+   var result;
+    try{
+    result = await recorder.stop();
+    }
+    catch(e) {print("qqqqqqqqqqqqqqqqqqqqqqqqq= " + e.toString());}
+    //print("vvvvvvvvvvvvvvvvvvvvvvvvvvvv= " + result.toString());
     String documentId = this._randomString(6);
-    tempRecording = recording.path;
+    tempRecording = result.path;
 
     _firestore.collection('messages').document(documentId).setData({
       'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
@@ -208,7 +208,7 @@ class _ChatScreenState extends State<ChatScreen> {
         .child(loggedInUser.uid)
         .child(new DateTime.now().toString());
     StorageUploadTask uploadTask =
-        storageReference.putFile(File(recording.path));
+        storageReference.putFile(File(tempRecording));
     await uploadTask.onComplete;
     print('File Uploaded');
     storageReference.getDownloadURL().then((fileURL) {
@@ -233,7 +233,6 @@ class _ChatScreenState extends State<ChatScreen> {
       'attachedVoiceRecording': "",
       'attachedFile': "",
     });
-    
 
     storageReference = FirebaseStorage.instance
         .ref()
@@ -270,7 +269,7 @@ class _ChatScreenState extends State<ChatScreen> {
           source: ImageSource.gallery, maxHeight: 200, maxWidth: 200);
       tempAttachedImage = this.attachedImage;
       //showSnackBar("Sending image..", scaffoldKey);
-      this.startUploadImage();
+      //this.startUploadImage();
     } on PlatformException catch (e) {
       print("Image picker issue: " + e.toString());
     }
@@ -295,13 +294,11 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {}
   }
 
-
-
-  writeInSharedPrefs() async{
-   final prefs = await SharedPreferences.getInstance();
-   await prefs.setBool('isNotification', true);
-   bool isNotification = await prefs.getBool('isNotification');
-   print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh= " + isNotification.toString());
+  writeInSharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isNotification', true);
+    bool isNotification = await prefs.getBool('isNotification');
+    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh= " + isNotification.toString());
   }
 
   @override
@@ -389,11 +386,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20.0),
                     color: Colors.black12),
-                child: widget.iconGroup.length>10 ? ListTile(
-                   leading:  Image.network(
-                     widget.iconGroup
-                  ),
-                ): Container(),
+                child: widget.iconGroup.length > 10
+                    ? ListTile(
+                        leading: Image.network(widget.iconGroup),
+                      )
+                    : Container(),
               ),
             ),
             widget.creatorUid.length != 0
@@ -476,7 +473,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 ],
               ),
             ),
-           
           ],
         ),
       ),

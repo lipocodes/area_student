@@ -47,11 +47,11 @@ dependencies:
   permission_handler:
   location:
   fluttertoast:
-  audio_recorder:
   audioplayers:
   file_picker:
   open_file:  
   flutter_typeahead:
+  flutter_audio_recorder:  
  
   
   
