@@ -5,12 +5,14 @@ import 'package:areastudent/tools/methods.dart';
 import 'package:flutter/cupertino.dart';
 import 'menu_groups.dart';
 import 'profile.dart';
+import 'search_options.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'contact.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 String targetUidd;
 String myUid;
@@ -27,6 +29,7 @@ class _MeetState extends State<Meet> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   int indexBottomBar = 0;
   String uid;
+  int myIndex = 0;
 
   getMyUid() async {
     String uid = await inputData();
@@ -60,6 +63,18 @@ class _MeetState extends State<Meet> {
                   color: Colors.black,
                   fontWeight: FontWeight.w900,
                   fontSize: 24),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.settings,
+                size: 40,
+              ),
+              color: Colors.black87,
+              onPressed: () async {
+                await Navigator.of(context).push(new CupertinoPageRoute(
+                    builder: (BuildContext context) => new SearchOptions()));
+                setState(() {});
+              },
             ),
             IconButton(
               icon: Icon(
@@ -138,6 +153,8 @@ class _PersonalCardState extends State<PersonalCard> {
   List<String> profileImages;
   String textFollowButton = "Follow";
   String textBlockUser = "";
+
+  int myIndex = 0;
   followThisUser() async {
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
@@ -195,13 +212,10 @@ class _PersonalCardState extends State<PersonalCard> {
   }
 
   retrieveUserData() async {
-    //this.uid = await inputData();
-    this.uid = "AvcNcYj0yWRxnPZaQXj88oelrLB3";
-
     if (targetUidd.length > 10) {
       this.uid = targetUidd;
     } else {
-      this.uid = "AvcNcYj0yWRxnPZaQXj88oelrLB3";
+      this.uid = "";
     }
 
     final QuerySnapshot result = await Firestore.instance
@@ -241,6 +255,80 @@ class _PersonalCardState extends State<PersonalCard> {
     }
   }
 
+  switchNextMeet(bool op) async {
+    final QuerySnapshot result =
+        await Firestore.instance.collection('userData').getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    List<String> userListUid = [];
+    List<String> userListGender = [];
+    List<String> userListAcademicField = [];
+    List<String> userListLatitude = [];
+    List<String> userListLongitude = [];
+
+    for (int i = 0; i < snapshot.length; i++) {
+      userListUid.add(snapshot[i].data['uid'].toString());
+      userListGender.add(snapshot[i].data['gender'].toString());
+      userListAcademicField.add(snapshot[i].data['academicField'].toString());
+      userListLatitude.add(snapshot[i].data['latitude'].toString());
+      userListLongitude.add(snapshot[i].data['longitude'].toString());
+    }
+
+    //filter the users based on the user's preferences
+    List<String> filteredUserListUid = [];
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String prefGender = prefs.getString('searchSelectedGender') ?? "Both";
+    String prefAcademicField =
+        prefs.getString('searchSelectedAcademicField') ?? "All Fields";
+    int prefDistance = prefs.getInt('searchSelectedDistance') ?? 500;
+    bool neededTestGender = false;
+    bool neededTestAcademicField = false;
+    if (prefGender == "Male" || prefGender == "Female") neededTestGender = true;
+    if (prefAcademicField != "All Fields") neededTestAcademicField = true;
+
+    for (int i = 0; i < userListUid.length; i++) {
+      double distancePoints = await distanceBetweenPoints(
+          userListLatitude[i], userListLongitude[i]);
+
+      if (neededTestGender == true && neededTestAcademicField == true) {
+        if (userListGender[i] == prefGender &&
+            userListAcademicField[i] == prefAcademicField &&
+            distancePoints < prefDistance) {
+          filteredUserListUid.add(userListUid[i]);
+        }
+      } else if (neededTestGender == true) {
+        if (userListGender[i] == prefGender && distancePoints < prefDistance) {
+          filteredUserListUid.add(userListUid[i]);
+        }
+      } else if (neededTestAcademicField == true) {
+        if (userListAcademicField[i] == prefAcademicField &&
+            distancePoints < prefDistance) {
+          filteredUserListUid.add(userListUid[i]);
+        } 
+      }
+      else if (distancePoints < prefDistance) {
+          filteredUserListUid.add(userListUid[i]);
+        }
+      //else{return;}  
+    }
+
+    if (filteredUserListUid.length == 0) return;
+   
+    if (op == false && myIndex > 0) {
+      myIndex = myIndex - 1;
+    } else if (op == false && myIndex == 0) {
+      myIndex = filteredUserListUid.length - 1;
+    } else if (op == true && myIndex == (filteredUserListUid.length - 1)) {
+      myIndex = 0;
+    } else {
+      myIndex = myIndex + 1;
+    }
+       print("ttttttttttttttttt= " + myIndex.toString()); 
+     targetUidd = filteredUserListUid[myIndex];
+   
+    this.retrieveUserData();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -268,7 +356,8 @@ class _PersonalCardState extends State<PersonalCard> {
                               width: MediaQuery.of(context).size.width,
                               height: MediaQuery.of(context).size.height,
                               child: CachedNetworkImage(
-                                imageUrl: profileImages[indexProfileImage],
+                                imageUrl:
+                                    profileImages[/*indexProfileImage*/ 0],
                                 placeholder: (context, url) => Container(
                                   child: Center(
                                       child: new CircularProgressIndicator()),
@@ -306,14 +395,16 @@ class _PersonalCardState extends State<PersonalCard> {
                           iconSize: 35,
                           color: Colors.white,
                           onPressed: () {
-                            setState(() {
+                            switchNextMeet(false);
+                            /*setState(() {
+                              
                               if (indexProfileImage > 0) {
                                 indexProfileImage = indexProfileImage - 1;
                               } else {
                                 indexProfileImage =
                                     this.profileImages.length - 1;
                               }
-                            });
+                            });*/
                           }),
                     ),
                   ),
@@ -335,7 +426,8 @@ class _PersonalCardState extends State<PersonalCard> {
                         iconSize: 35,
                         color: Colors.white,
                         onPressed: () {
-                          if (indexProfileImage <
+                          switchNextMeet(true);
+                          /*if (indexProfileImage <
                               this.profileImages.length - 1) {
                             setState(() {
                               indexProfileImage = indexProfileImage + 1;
@@ -344,7 +436,7 @@ class _PersonalCardState extends State<PersonalCard> {
                             setState(() {
                               indexProfileImage = 0;
                             });
-                          }
+                          }*/
                         },
                       ),
                     ),
@@ -396,11 +488,6 @@ class _PersonalCardState extends State<PersonalCard> {
                             this.profileImages[0].toString())));
                   },
                   child: Icon(Icons.chat_bubble_outline, size: 45)),
-              GestureDetector(
-                  onTap: () async {
-                    showDialogSettings(context);
-                  },
-                  child: Icon(Icons.settings, size: 45)),
             ],
           ),
         ],
@@ -420,7 +507,7 @@ showDialogSettings(context) async {
     builder: (BuildContext context) {
       return AlertDialog(
         content: SizedBox(
-          height: 100,
+          height: 150,
           child: Column(
             children: [
               FlatButton(
@@ -446,6 +533,66 @@ showDialogSettings(context) async {
       );
     },
   );
+}
+
+showDialogSearchOptions(context) {
+  double desiredDistance = 0;
+  showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new SearchOptions()));
+            },
+            child: Row(
+              children: [
+                Text("Search Option",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+              ],
+            ),
+          ),
+          content: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    'Maximum Distance',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  Slider(
+                    value: 0,
+                    onChanged: (newValue) {
+                      desiredDistance = newValue;
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text('OK'),
+              onPressed: () {
+                print("OK");
+              },
+            ),
+            new FlatButton(
+              child: new Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      }).then((value) => Navigator.of(context).pop());
 }
 
 Future<bool> checkIsUserBlocked(String uidBlockedUser) async {
@@ -493,19 +640,14 @@ blockUser(String uidBlockedUser, bool op) async {
       .document(uid)
       .updateData({'blockedUsers': str2});
 
-
-
-final QuerySnapshot result2 = await Firestore.instance
+  final QuerySnapshot result2 = await Firestore.instance
       .collection('userData')
       .where('uid', isEqualTo: targetUidd)
       .getDocuments();
   final List<DocumentSnapshot> snapshot1 = result.documents;
 
-
-  
-
   str1 = snapshot[0].data['blockedBy'];
-  if(str1==null)  str1 = [];
+  if (str1 == null) str1 = [];
 
   str2 = [];
   for (int i = 0; i < str1.length; i++) {
@@ -515,18 +657,12 @@ final QuerySnapshot result2 = await Firestore.instance
     str2.add(uid);
   } else {
     str2.remove(uid);
-   
   }
-
-  
 
   await Firestore.instance
       .collection("userData")
       .document(targetUidd)
       .updateData({'blockedBy': str2});
-
-
-
 }
 
 Future<String> inputData() async {
@@ -552,6 +688,7 @@ Widget searchUserBox(context) {
   List<String> profileImage3 = [];
   List<String> name3 = [];
   List suggestions = [];
+  List<String> str2;
 
   String convertUpperCase(query) {
     String str = query.toString();
@@ -599,6 +736,29 @@ Widget searchUserBox(context) {
               snapshot[i].data['lastName'].toString());
         }
 
+        //check which of these users has blocked me
+        //retrieve list of users who have blocked me
+        String uid = await inputData();
+        final QuerySnapshot result1 = await Firestore.instance
+            .collection('userData')
+            .where('uid', isEqualTo: uid)
+            .getDocuments();
+        final List<DocumentSnapshot> snapshot1 = result1.documents;
+
+        List<dynamic> str1 = snapshot1[0].data['blockedBy'];
+        str2 = [];
+        for (int i = 0; i < str1.length; i++) {
+          str2.add(str1[i].toString()); //list of blockers
+        }
+
+        for (int i = 0; i < uid1.length; i++) {
+          //going over suggestions, filtering blockers
+          if (str2.contains(uid1[i])) {
+            uid1.removeAt(i);
+            name1.remove(i);
+            profileImage1.removeAt(i);
+          }
+        }
         print("1st proposal is:  " + uid1.toString());
       } else if (str.length == 3) {
         uid2 = [];
@@ -642,6 +802,16 @@ Widget searchUserBox(context) {
             }
           }
         }
+
+        for (int i = 0; i < uid3.length; i++) {
+          //going over suggestions, filtering blockers
+          if (str2.contains(uid3[i])) {
+            uid3.removeAt(i);
+            name3.remove(i);
+            profileImage3.removeAt(i);
+          }
+        }
+
         print("Combined propsal is: " + uid3.toString());
       }
 

@@ -288,6 +288,19 @@ Future coordinatesToLocation(String latitude, String longitude) async {
   return country + "," + administrativeArea;
 }
 
+
+
+Future<double> distanceBetweenPoints(String latitude, String longitude) async {
+
+  Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.low); 
+  double myLatitude = position.latitude;
+  double myLongitude = position.longitude;
+  double distanceInMeters = await Geolocator().distanceBetween(myLatitude, myLongitude, double.parse(latitude), double.parse(longitude));
+  print("xxxxxxxxxxxxxxxxxxxxx= " + (distanceInMeters/1000).toString());
+  return distanceInMeters/1000; 
+}
+
+
 String timestampToTimeGap(String timestamp) {
   int timeNow = new DateTime.now().millisecondsSinceEpoch;
   int postCreationMilliseconds = int.parse(timestamp);

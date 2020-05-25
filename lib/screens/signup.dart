@@ -45,6 +45,7 @@ class _SignupState extends State<Signup> {
   String textAcademicField = "Academic Field";
   BuildContext context;
   bool tempUid = false;
+  
 
   List<String> academicFields = [
     'Agriculture',
@@ -278,6 +279,7 @@ class _SignupState extends State<Signup> {
           phoneNumber: controllerPhoneNumber.text);
 
       List<String> blocked = [];
+      List<String> blockedBy = [];
 
       await firebaseMethod.createUserAccount(
         firstName: controllerFirstName.text,
@@ -293,6 +295,7 @@ class _SignupState extends State<Signup> {
         subRegion: subAdministrativeArea,
         locality: locality,
         gender: gender,
+        blockedBy: blockedBy,
         blockedUsers: this.blocked,
         posts: this.posts,
         followers: this.followers,

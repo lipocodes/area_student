@@ -19,6 +19,7 @@ const String screen4AcademicField = "Academic Field";
 const String screen4CountryCity = "Country & City";
 const String screen4Man = "Man";
 const String screen4Woman = "Woman";
+const String screen4Both = "Both";
 const String screen4Signup = "Signup";
 const String screen4NoFirstName = "First Name cannot be empty";
 const String screen4NoLastName = "Last Name cannot be empty";
