@@ -9,7 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
 
 int indexLargeProfileImage = 0;
- FirebaseMethods firebaseMethod = new FirebaseMethods();
+FirebaseMethods firebaseMethod = new FirebaseMethods();
 
 Widget signupInputBox(
     {String labelText,
@@ -60,8 +60,6 @@ Widget signupButton({int whichScreen}) {
   );
 }
 
-
-
 Widget postCreationButton({int whichScreen}) {
   return RaisedButton(
     onPressed: null, //the click event is impolemented in the screen classes
@@ -77,12 +75,11 @@ Widget postCreationButton({int whichScreen}) {
           ),
           borderRadius: BorderRadius.all(Radius.circular(8.0))),
       padding: const EdgeInsets.fromLTRB(80, 10, 80, 10),
-      child:  Text(screen13CreatePost,
+      child: Text(screen13CreatePost,
           style: TextStyle(fontSize: 20, color: Colors.white)),
     ),
   );
 }
-
 
 Widget sendVerificationCodeButton({int whichScreen}) {
   return RaisedButton(
@@ -154,8 +151,6 @@ Widget multiImagePickerList(
   );
 }
 
-
-
 Widget userDetails(
     String name,
     String age,
@@ -167,7 +162,7 @@ Widget userDetails(
     int numFollowings,
     BuildContext context) {
   return SingleChildScrollView(
-      child: Container(
+    child: Container(
       color: Colors.grey[200],
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
@@ -179,15 +174,17 @@ Widget userDetails(
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: Text(
-                    name!=null? name: "",
-                    style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+                    name != null ? name : "",
+                    style:
+                        TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 20.0),
                   child: Text(
-                    age!=null? age:"",
-                    style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
+                    age != null ? age : "",
+                    style:
+                        TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -204,12 +201,16 @@ Widget userDetails(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Icon(Icons.location_on),
-                      country!=null? Text(country + ",",
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.w400)) : Text("NA"),
-                      region!=null? Text(region,
-                          style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.w400))  :Text(""),
+                      country != null
+                          ? Text(country + ",",
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.w400))
+                          : Text("NA"),
+                      region != null
+                          ? Text(region,
+                              style: TextStyle(
+                                  fontSize: 16.0, fontWeight: FontWeight.w400))
+                          : Text(""),
                     ],
                   ),
                 ),
@@ -219,7 +220,7 @@ Widget userDetails(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Icon(Icons.school),
-                      Text(academicField!=null? academicField: "",
+                      Text(academicField != null ? academicField : "",
                           style: TextStyle(
                               fontSize: 16.0, fontWeight: FontWeight.w400)),
                     ],
@@ -232,12 +233,12 @@ Widget userDetails(
               width: MediaQuery.of(context).size.width * 0.8,
               height: 100,
               child: Text(
-                aboutMe!=null? aboutMe: "",
+                aboutMe != null ? aboutMe : "",
                 style: TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
                 textAlign: TextAlign.justify,
               ),
             ),
-            if(numFollowers>0) ... [ Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
@@ -245,7 +246,8 @@ Widget userDetails(
                     Navigator.of(context).push(new CupertinoPageRoute(
                         builder: (BuildContext context) => new Followers()));
                   },
-                  child: Text("      " + numFollowers.toString() + "\nFollowers",
+                  child: Text(
+                      "      " + numFollowers.toString() + "\nFollowers",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                 ),
@@ -261,20 +263,19 @@ Widget userDetails(
                     Navigator.of(context).push(new CupertinoPageRoute(
                         builder: (BuildContext context) => new Followings()));
                   },
-                  child: Text("      " + numFollowings.toString() + "\nFollowing",
+                  child: Text(
+                      "      " + numFollowings.toString() + "\nFollowing",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                 ),
               ],
             ),
           ],
-          ]),
+        ),
       ),
     ),
   );
 }
-
-
 
 Future coordinatesToLocation(String latitude, String longitude) async {
   List<Placemark> newPlace = await Geolocator().placemarkFromCoordinates(
@@ -288,18 +289,16 @@ Future coordinatesToLocation(String latitude, String longitude) async {
   return country + "," + administrativeArea;
 }
 
-
-
 Future<double> distanceBetweenPoints(String latitude, String longitude) async {
-
-  Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.low); 
+  Position position = await Geolocator()
+      .getCurrentPosition(desiredAccuracy: LocationAccuracy.low);
   double myLatitude = position.latitude;
   double myLongitude = position.longitude;
-  double distanceInMeters = await Geolocator().distanceBetween(myLatitude, myLongitude, double.parse(latitude), double.parse(longitude));
-  print("xxxxxxxxxxxxxxxxxxxxx= " + (distanceInMeters/1000).toString());
-  return distanceInMeters/1000; 
+  double distanceInMeters = await Geolocator().distanceBetween(
+      myLatitude, myLongitude, double.parse(latitude), double.parse(longitude));
+  //print("xxxxxxxxxxxxxxxxxxxxx= " + (distanceInMeters / 1000).toString());
+  return distanceInMeters / 1000;
 }
-
 
 String timestampToTimeGap(String timestamp) {
   int timeNow = new DateTime.now().millisecondsSinceEpoch;
@@ -313,7 +312,7 @@ String timestampToTimeGap(String timestamp) {
     int remainder = gap % (60 * 1000);
     gap = gap - remainder;
     return (gap / (60 * 1000)).toString() + " minutes ago";
-  } else if (gap < 24 * 60 * 60 * 1000) {    
+  } else if (gap < 24 * 60 * 60 * 1000) {
     //if less than 24 hours
     int remainder = gap % (60 * 60 * 1000);
     gap = gap - remainder;
@@ -325,5 +324,3 @@ String timestampToTimeGap(String timestamp) {
     return (gap / (24 * 60 * 60 * 1000)).toString() + " days ago";
   }
 }
-
-

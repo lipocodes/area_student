@@ -159,10 +159,6 @@ class _ProfileState extends State<Profile> {
 
   Future<void> retrievePostsCurrentUser() async {
     this.uid = await inputData();
-    /*if (this.tempUid == true) {
-      this.uid = "M0B7RtHW6zYOwkPhcqoHdigwEEs2";
-      this.tempUid = true;
-    }*/
 
     final QuerySnapshot result = await Firestore.instance
         .collection('posts')

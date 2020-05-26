@@ -13,10 +13,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'contact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'package:areastudent/screens/images_in_large.dart';
 
 String targetUidd;
 String myUid;
 String textBlockUser = "";
+List<String> globalProfilelImages = [];
+String globalName;
+List<String> postsCreatorUid = [];
+List<String> postsId = [];
+List<String> postsCreationCountry = [];
+List<String> postsCreationRegion = [];
+List<String> postsCreationSubRegion = [];
+List<String> postsCreationTime = [];
+List<String> postsText = [];
+List<List<String>> postsTags = [];
+List<List<String>> postsImages = [];
+List<File> postImageList = [];
 
 class Meet extends StatefulWidget {
   String targetUid;
@@ -31,6 +45,75 @@ class _MeetState extends State<Meet> {
   String uid;
   int myIndex = 0;
 
+  Future<void> retrievePostsCurrentUser() async {
+    //this.uid = await inputData();
+    this.uid = targetUidd;
+    
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('posts')
+        .where('creatorUid', isEqualTo: this.uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+
+    postsId = [];
+    postsCreatorUid = [];
+    postsCreationCountry = [];
+    postsCreationRegion = [];
+    postsCreationSubRegion = [];
+    postsCreationTime = [];
+    postsText = [];
+    postsTags = [];
+    postsImages = [];
+
+    for (int i = 0; i < snapshot.length; i++) {
+      try {
+        postsId.add(snapshot[i].data['postId'].toString());
+
+        postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
+        postsCreationCountry
+            .add(snapshot[i].data['creationCountry'].toString());
+        postsCreationRegion.add(snapshot[i].data['creationRegion'].toString());
+        postsCreationSubRegion
+            .add(snapshot[i].data['creationSubRegion'].toString());
+        postsCreationTime.add(snapshot[i].data['creationTime'].toString());
+        postsText.add(snapshot[i].data['text'].toString());
+
+        List<dynamic> str9 = snapshot[i].data['images'];
+
+        List<String> str10 = [];
+
+        for (int i = 0; i < str9.length; i++) {
+          str10.add(str9[i].toString());
+        }
+
+        postsImages.add(str10);
+
+        List<dynamic> str11 = snapshot[i].data['tags'];
+
+        List<String> str12 = [];
+        for (int i = 0; i < str11.length; i++) {
+          str12.add(str11[i].toString());
+        }
+        postsTags.add(str12);
+      } catch (e) {
+        print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
+      }
+    }
+
+    postsId = postsId.reversed.toList();
+    postsCreatorUid = postsCreatorUid.reversed.toList();
+    postsCreationCountry = postsCreationCountry.reversed.toList();
+    postsCreationRegion = postsCreationRegion.reversed.toList();
+    postsCreationSubRegion = postsCreationSubRegion.reversed.toList();
+    postsCreationTime = postsCreationTime.reversed.toList();
+    postsTags = postsTags.reversed.toList();
+    postsText = postsText.reversed.toList();
+    postsImages = postsImages.reversed.toList();
+
+    setState(() {});
+  }
+
   getMyUid() async {
     String uid = await inputData();
     myUid = uid;
@@ -43,6 +126,11 @@ class _MeetState extends State<Meet> {
     targetUidd = widget.targetUid;
 
     getMyUid();
+
+    retrievePostsCurrentUser().then((value) {
+       setState(() {});
+    });
+    
   }
 
   @override
@@ -126,10 +214,224 @@ class _MeetState extends State<Meet> {
               title: Text('Chats'))
         ],
       ),
-      body: Column(children: [
-        searchUserBox(context),
-        PersonalCard(),
-      ]),
+      body: SingleChildScrollView(
+        child: Column(children: [
+          searchUserBox(context),
+          PersonalCard(),
+          Posts(),
+        ]),
+      ),
+    );
+  }
+}
+
+class Posts extends StatefulWidget {
+  @override
+  _PostsState createState() => _PostsState();
+}
+
+class _PostsState extends State<Posts> {
+  double lengthTextBoxPost(int numWords) {
+    double d = numWords / 5;
+    double necessaryHeight = d * 20;
+    return d * 10;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (globalName == null || globalProfilelImages == null) return Container();
+
+    return Column(
+      children: [
+        SizedBox(height: 50.0),
+        postsId.length > 0
+            ? SizedBox(
+                height: 400,
+                child: Container(
+                  decoration: new BoxDecoration(
+                    color: Colors.white,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                    child: Center(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemCount: postsId.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding:
+                                const EdgeInsets.only(left: 0.0, right: 20.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    new Container(
+                                        width: 40.0,
+                                        height: 40.0,
+                                        decoration: new BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: new DecorationImage(
+                                                fit: BoxFit.fill,
+                                                image: new NetworkImage(
+                                                    globalProfilelImages[0])))),
+                                    SizedBox(width: 10),
+                                    Text(
+                                        globalName +
+                                            "\n" +
+                                            postsCreationCountry[index] +
+                                            "," +
+                                            postsCreationRegion[index] +
+                                            "," +
+                                            postsCreationSubRegion[index] +
+                                            "\n" +
+                                            timestampToTimeGap(
+                                                postsCreationTime[index]),
+                                        style: TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w800)),
+                                  ],
+                                ),
+                                SizedBox(height: 10.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    postsTags[index][0].toString() ==
+                                            '123456789'
+                                        ? Container()
+                                        : Text(postsTags[index][0].toString(),
+                                            style: TextStyle(
+                                                color: Colors.blue,
+                                                fontSize: 16.0)),
+                                    SizedBox(width: 20.0),
+                                    postsTags[index][1].toString() ==
+                                            '123456789'
+                                        ? Container()
+                                        : Text(postsTags[index][1].toString(),
+                                            style: TextStyle(
+                                                color: Colors.blue,
+                                                fontSize: 16.0)),
+                                    SizedBox(width: 20.0),
+                                    postsTags[index][2].toString() ==
+                                            '123456789'
+                                        ? Container()
+                                        : Text(postsTags[index][2].toString(),
+                                            style: TextStyle(
+                                                color: Colors.blue,
+                                                fontSize: 16.0)),
+                                  ],
+                                ),
+                                SizedBox(height: 10.0),
+                                !postsImages[index].contains('123456789')
+                                    ? SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.7,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                                new CupertinoPageRoute(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        new ImageInLarge(
+                                                          postsImages[index][0],
+                                                        )));
+                                          },
+                                          child: CachedNetworkImage(
+                                            imageUrl: postsImages[index][0],
+                                            placeholder: (context, url) =>
+                                                Container(
+                                              child: Center(
+                                                  child:
+                                                      new CircularProgressIndicator()),
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    new Icon(Icons.error),
+                                            fadeInCurve: Curves.easeIn,
+                                            fadeInDuration:
+                                                Duration(milliseconds: 1000),
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                                SizedBox(height: 10.0),
+                                postsImages[index].length > 1
+                                    ? SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.7,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                                new CupertinoPageRoute(
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        new ImageInLarge(
+                                                          postsImages[index][1],
+                                                        )));
+                                          },
+                                          child: CachedNetworkImage(
+                                            imageUrl: postsImages[index][1],
+                                            placeholder: (context, url) =>
+                                                Container(
+                                              child: Center(
+                                                  child:
+                                                      new CircularProgressIndicator()),
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    new Icon(Icons.error),
+                                            fadeInCurve: Curves.easeIn,
+                                            fadeInDuration:
+                                                Duration(milliseconds: 1000),
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ),
+                                      )
+                                    : Container(),
+                                SizedBox(height: 10.0),
+                                postsText[index].length > 0
+                                    ? SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8,
+                                        height: lengthTextBoxPost(
+                                            postsText[index].length),
+                                        child: Text(
+                                          postsText[index],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w300,
+                                              fontSize: 16),
+                                          textAlign: TextAlign.justify,
+                                        ),
+                                      )
+                                    : Container(),
+                                SizedBox(height: 20.0),
+                                Divider(
+                                  thickness: 10,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
+      ],
     );
   }
 }
@@ -151,6 +453,8 @@ class _PersonalCardState extends State<PersonalCard> {
       aboutMe;
   int age, indexProfileImage = 0;
   List<String> profileImages;
+  int numFollowers;
+  int numFollowing;
   String textFollowButton = "Follow";
   String textBlockUser = "";
 
@@ -231,9 +535,12 @@ class _PersonalCardState extends State<PersonalCard> {
         str2.add(str1[i].toString());
       }
       this.profileImages = str2;
+      globalProfilelImages = this.profileImages;
 
       this.name =
           snapshot[0].data['firstName'] + "  " + snapshot[0].data['lastName'];
+      globalName = this.name;
+    
       this.gender = snapshot[0].data['gender'];
       this.country = snapshot[0].data['country'];
       this.region = snapshot[0].data['region'];
@@ -241,6 +548,10 @@ class _PersonalCardState extends State<PersonalCard> {
       this.locality = snapshot[0].data['locality'];
       this.academicField = snapshot[0].data['academicField'];
       this.aboutMe = snapshot[0].data['aboutMe'];
+      List followers = snapshot[0].data['followers'];
+      this.numFollowers = followers.length;
+      List following = snapshot[0].data['following'];
+      this.numFollowing = following.length;
 
       var now = new DateTime.now();
       var formatter = new DateFormat('yyyy');
@@ -248,8 +559,9 @@ class _PersonalCardState extends State<PersonalCard> {
       String birthDate = snapshot[0].data['birthDate'];
       int yearBirthDate = int.parse(birthDate.substring(birthDate.length - 4));
       this.age = yearNow - yearBirthDate;
-
+        
       setState(() {});
+      
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeee= " + e.toString());
     }
@@ -304,29 +616,34 @@ class _PersonalCardState extends State<PersonalCard> {
         if (userListAcademicField[i] == prefAcademicField &&
             distancePoints < prefDistance) {
           filteredUserListUid.add(userListUid[i]);
-        } 
-      }
-      else if (distancePoints < prefDistance) {
-          filteredUserListUid.add(userListUid[i]);
         }
-      //else{return;}  
+      } else if (distancePoints < prefDistance) {
+        filteredUserListUid.add(userListUid[i]);
+      }
+      //else{return;}
     }
 
     if (filteredUserListUid.length == 0) return;
-   
-    if (op == false && myIndex > 0) {
-      myIndex = myIndex - 1;
-    } else if (op == false && myIndex == 0) {
-      myIndex = filteredUserListUid.length - 1;
-    } else if (op == true && myIndex == (filteredUserListUid.length - 1)) {
-      myIndex = 0;
+
+    int prefMyIndex = prefs.getInt('myIndex') ?? 0;
+
+    if (op == false && prefMyIndex > 0) {
+      prefMyIndex = prefMyIndex - 1;
+    } else if (op == false && prefMyIndex == 0) {
+      prefMyIndex = filteredUserListUid.length - 1;
+    } else if (op == true && prefMyIndex == (filteredUserListUid.length - 1)) {
+      prefMyIndex = 0;
     } else {
-      myIndex = myIndex + 1;
+      prefMyIndex = prefMyIndex + 1;
     }
-       print("ttttttttttttttttt= " + myIndex.toString()); 
-     targetUidd = filteredUserListUid[myIndex];
+
+    targetUidd = filteredUserListUid[prefMyIndex];
    
-    this.retrieveUserData();
+    prefs.setInt('myIndex', prefMyIndex);
+    
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => new Meet(targetUidd)));
+
+     //this.retrieveUserData();
   }
 
   @override
@@ -338,7 +655,10 @@ class _PersonalCardState extends State<PersonalCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (this.uid == null || this.uid.length == 0) return Container();
+    if (this.uid == null ||
+        this.uid.length == 0 ||
+        this.numFollowers == null ||
+        this.numFollowing == null) return Container();
 
     return Column(
       children: [
@@ -356,8 +676,7 @@ class _PersonalCardState extends State<PersonalCard> {
                               width: MediaQuery.of(context).size.width,
                               height: MediaQuery.of(context).size.height,
                               child: CachedNetworkImage(
-                                imageUrl:
-                                    profileImages[/*indexProfileImage*/ 0],
+                                imageUrl: profileImages[indexProfileImage],
                                 placeholder: (context, url) => Container(
                                   child: Center(
                                       child: new CircularProgressIndicator()),
@@ -375,70 +694,117 @@ class _PersonalCardState extends State<PersonalCard> {
                 ),
               ),
             ),
-            Positioned(
-              top: 110,
+
+              Positioned(
+              top: 0,
+              right:0,
+              left:0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white70,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(30))),
-                      child: IconButton(
-                          icon: Icon(
-                            Icons.arrow_back,
-                          ),
-                          iconSize: 35,
-                          color: Colors.white,
-                          onPressed: () {
-                            switchNextMeet(false);
-                            /*setState(() {
-                              
-                              if (indexProfileImage > 0) {
-                                indexProfileImage = indexProfileImage - 1;
-                              } else {
-                                indexProfileImage =
-                                    this.profileImages.length - 1;
-                              }
-                            });*/
-                          }),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.white70,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(30))),
-                      child: IconButton(
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white70,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(30))),
+                    child: IconButton(
                         icon: Icon(
-                          Icons.arrow_forward,
+                          Icons.fast_rewind
                         ),
                         iconSize: 35,
                         color: Colors.white,
                         onPressed: () {
-                          switchNextMeet(true);
-                          /*if (indexProfileImage <
-                              this.profileImages.length - 1) {
-                            setState(() {
-                              indexProfileImage = indexProfileImage + 1;
-                            });
-                          } else {
-                            setState(() {
-                              indexProfileImage = 0;
-                            });
-                          }*/
-                        },
+                          switchNextMeet(false);
+
+                          
+                        }),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white70,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(30))),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.fast_forward,
                       ),
+                      iconSize: 35,
+                      color: Colors.white,
+                      onPressed: () {
+                        switchNextMeet(true);
+                        
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+
+
+            Positioned(
+              bottom: 0,
+               right:0,
+              left:0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white70,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(30))),
+                    child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                        ),
+                        iconSize: 35,
+                        color: Colors.white,
+                        onPressed: () {
+                          //switchNextMeet(false);
+
+                          setState(() {
+                            if (indexProfileImage > 0) {
+                              indexProfileImage = indexProfileImage - 1;
+                            } else {
+                              indexProfileImage =
+                                  this.profileImages.length - 1;
+                            }
+                          });
+                        }),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white70,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(30))),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_forward,
+                      ),
+                      iconSize: 35,
+                      color: Colors.white,
+                      onPressed: () {
+                        //switchNextMeet(true);
+                        setState(() {
+                          if (indexProfileImage ==
+                              this.profileImages.length - 1) {
+                            indexProfileImage = 0;
+                          } else {
+                            indexProfileImage = indexProfileImage + 1;
+                          }
+                        });
+                      },
                     ),
                   ),
                 ],
@@ -446,8 +812,16 @@ class _PersonalCardState extends State<PersonalCard> {
             ),
           ],
         ),
-        userDetails(this.name, this.age.toString(), this.country, this.region,
-            this.academicField, this.aboutMe, -1, -1, context),
+        userDetails(
+            this.name,
+            this.age.toString(),
+            this.country,
+            this.region,
+            this.academicField,
+            this.aboutMe,
+            this.numFollowers,
+            numFollowing,
+            context),
         if (myUid != targetUidd) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -485,7 +859,7 @@ class _PersonalCardState extends State<PersonalCard> {
                             name,
                             " ",
                             " ",
-                            this.profileImages[0].toString())));
+                            this.profileImages[indexProfileImage].toString())));
                   },
                   child: Icon(Icons.chat_bubble_outline, size: 45)),
             ],
@@ -677,6 +1051,7 @@ Future<String> inputData() async {
 
 Widget searchUserBox(context) {
   TextEditingController controllerSearchName = new TextEditingController();
+
   String str1;
   List<String> uid1 = [];
   List<String> profileImage1 = [];
@@ -709,15 +1084,19 @@ Widget searchUserBox(context) {
   }
 
   Future<List> searchUsers() async {
-    String searchText = controllerSearchName.text;
+    String searchText = "";
+    searchText = controllerSearchName.text;
+  
     searchText = convertUpperCase(searchText);
 
     if (searchText.length > 1 &&
-        searchText.substring(searchText.length - 1) == " ") {
+        searchText.substring(searchText.length - 1) == " ") { 
       var input = searchText;
       var str = input.split(" ");
+      //print("ddddddddddddddd= "  + str.toString());
 
       if (str.length == 2) {
+         
         uid1 = [];
         profileImage1 = [];
         name1 = [];
@@ -852,20 +1231,29 @@ Widget searchUserBox(context) {
         autofocus: false,
         style: DefaultTextStyle.of(context).style.copyWith(
               fontStyle: FontStyle.italic,
-              fontSize: 18,
+              fontSize: 16,
               color: Colors.black,
             ),
-        decoration: InputDecoration(border: OutlineInputBorder())),
+        decoration: InputDecoration(
+            hintText: 'Look for someone else...',
+            border: OutlineInputBorder())),
     suggestionsCallback: (pattern) async {
-      //print(pattern.toString());
+     // print(pattern.toString());
       //return await BackendService.getSuggestions(pattern);
       return searchUsers();
     },
     itemBuilder: (context, suggestion) {
       return ListTile(
-        //leading: Icon(Icons.shopping_cart),
-        //title: Text(suggestion['profileImage']),
-        subtitle: Text(suggestion['name']),
+        leading: new Container(
+            width: 40.0,
+            height: 40.0,
+            decoration: new BoxDecoration(
+                shape: BoxShape.circle,
+                image: new DecorationImage(
+                    fit: BoxFit.fill,
+                    image: new NetworkImage(suggestion['profileImage'])))),
+        title: Text(suggestion['name']),
+        //subtitle: Text(suggestion['name']),
       );
     },
     onSuggestionSelected: (suggestion) {
