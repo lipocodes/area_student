@@ -11,7 +11,7 @@ import 'package:areastudent/screens/chat_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:areastudent/screens/meet.dart';
 import 'package:areastudent/screens/search_options.dart';
-
+import 'package:areastudent/screens/chats.dart';
 
 
  /* void checkPermissions() async {
@@ -54,8 +54,9 @@ class MyApp extends StatelessWidget {
       ),
      
       //home: new AuthService().hanldeAuth(),
-      home: Login(),
+      //home: Login(),
       //home: Meet('UXlUwUGhs3dwYp6m7h6k9kJHlOJ3'),
+      home: Chats(),
       
     );
   }
