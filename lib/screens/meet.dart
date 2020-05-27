@@ -15,6 +15,7 @@ import 'contact.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'package:areastudent/screens/images_in_large.dart';
+import 'chats.dart';
 
 String targetUidd;
 String myUid;
@@ -193,6 +194,10 @@ class _MeetState extends State<Meet> {
           } else if (this.indexBottomBar == 1) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new MenuGroups()));
+          }
+          else if (this.indexBottomBar == 4) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Chats()));
           }
         },
         items: [

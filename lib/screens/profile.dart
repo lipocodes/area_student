@@ -23,6 +23,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'create_post.dart';
 import 'menu_groups.dart';
 import 'meet.dart';
+import 'chats.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 
 class Profile extends StatefulWidget {
@@ -490,6 +491,10 @@ class _ProfileState extends State<Profile> {
             else if (this.indexBottomBar == 3) { 
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new Meet(uid)));
+            }
+            else if (this.indexBottomBar == 4) { 
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Chats()));
             }
           },
           items: [

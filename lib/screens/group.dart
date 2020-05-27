@@ -13,6 +13,7 @@ import 'create_post_group.dart';
 import 'chat_screen.dart';
 import 'meet.dart';
 import 'package:areastudent/screens/images_in_large.dart';
+import 'chats.dart';
 
 class Group extends StatefulWidget {
   String nameGroup = "";
@@ -239,6 +240,10 @@ class _GroupState extends State<Group> {
             else if (this.indexBottomBar == 3) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new Meet(loggedInUser.uid)));
+            }
+            else if (this.indexBottomBar == 4) {
+              Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Chats()));
             }
           },
           items: [
