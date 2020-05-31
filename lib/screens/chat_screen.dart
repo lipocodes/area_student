@@ -68,6 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
   double recorderHeight = 40.0;
   double recorderBorderRadius = 15.0;
   var recorder;
+  String documentId;
 
   bool keyboardIsVisible() {
     return !(MediaQuery.of(context).viewInsets.bottom == 0.0);
@@ -76,9 +77,10 @@ class _ChatScreenState extends State<ChatScreen> {
   void attachFile() async {
     String filePath = await FilePicker.getFilePath(type: FileType.any);
     tempAttachment = filePath;
-    String documentId = this._randomString(6);
+    documentId = this._randomString(6);
 
     _firestore.collection('messages').document(documentId).setData({
+      'id'  : documentId,
       'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
       'recipientUid': widget.creatorUid,
       'senderName': loggedInUser.displayName,
@@ -186,12 +188,13 @@ class _ChatScreenState extends State<ChatScreen> {
     try{
     result = await recorder.stop();
     }
-    catch(e) {print("qqqqqqqqqqqqqqqqqqqqqqqqq= " + e.toString());}
+     catch(e) {}
     //print("vvvvvvvvvvvvvvvvvvvvvvvvvvvv= " + result.toString());
     String documentId = this._randomString(6);
     tempRecording = result.path;
 
     _firestore.collection('messages').document(documentId).setData({
+      'id'  : documentId,
       'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
       'recipientUid': widget.creatorUid,
       'senderName': loggedInUser.displayName,
@@ -224,6 +227,7 @@ class _ChatScreenState extends State<ChatScreen> {
     String documentId = this._randomString(6);
 
     _firestore.collection('messages').document(documentId).setData({
+      'id'  : documentId,
       'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
       'recipientUid': widget.creatorUid,
       'senderName': loggedInUser.displayName,
@@ -294,12 +298,14 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {}
   }
 
-  writeInSharedPrefs() async {
+  updateTimeVisitInSharedPrefs() async {
+    int timeNow = new DateTime.now().millisecondsSinceEpoch;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isNotification', true);
-    bool isNotification = await prefs.getBool('isNotification');
-    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh= " + isNotification.toString());
+    await prefs.setInt(widget.creatorUid, timeNow);
+ 
   }
+
+  
 
   @override
   void initState() {
@@ -308,6 +314,9 @@ class _ChatScreenState extends State<ChatScreen> {
     getCurrentUser();
 
     checkPermissions();
+
+    updateTimeVisitInSharedPrefs();
+
 
     messageTextController.addListener(onFocusChange);
 
@@ -318,9 +327,7 @@ class _ChatScreenState extends State<ChatScreen> {
       return;
     }, onResume: (Map<String, dynamic> message) {
       print("bbbbbbbbbbbbbbbbbbbbbbbbbbbbb= " + message.toString());
-      writeInSharedPrefs();
-      //navService.pushNamed('/chat_screen');
-
+      
       return;
     }, onLaunch: (Map<String, dynamic> message) {
       print("cccccccccccccccccccccccccccccc= " + message.toString());
@@ -453,8 +460,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: Colors.black,
                       splashColor: Colors.blueAccent,
                       onPressed: () {
+                        String documentId = this._randomString(6);
                         if (messageTextController.text.length == 0) return;
-                        _firestore.collection('messages').add({
+                        _firestore.collection('messages').document(documentId).setData({
+                          'id'  : documentId,
                           'creationTime': new DateTime.now()
                               .millisecondsSinceEpoch
                               .toString(),

@@ -54,9 +54,9 @@ class MyApp extends StatelessWidget {
       ),
      
       //home: new AuthService().hanldeAuth(),
-      //home: Login(),
+      home: Login(),
       //home: Meet('UXlUwUGhs3dwYp6m7h6k9kJHlOJ3'),
-      home: Chats(),
+      //home: Chats(),
       
     );
   }

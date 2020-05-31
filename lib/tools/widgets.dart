@@ -311,7 +311,7 @@ String timestampToTimeGap(String timestamp) {
     //if less than 60 minutes
     int remainder = gap % (60 * 1000);
     gap = gap - remainder;
-    return (gap / (60 * 1000)).toString() + " minutes ago";
+    return (gap / (60 * 1000)).toString() + " mins ago";
   } else if (gap < 24 * 60 * 60 * 1000) {
     //if less than 24 hours
     int remainder = gap % (60 * 60 * 1000);
