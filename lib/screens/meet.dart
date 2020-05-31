@@ -182,7 +182,7 @@ class _MeetState extends State<Meet> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: 3,
+        currentIndex: 2,
         onTap: (int index) {
           setState(() {
             this.indexBottomBar = index;
@@ -195,7 +195,7 @@ class _MeetState extends State<Meet> {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new MenuGroups()));
           }
-          else if (this.indexBottomBar == 4) {
+          else if (this.indexBottomBar == 3) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Chats()));
           }
@@ -209,8 +209,6 @@ class _MeetState extends State<Meet> {
             icon: new Icon(Icons.group, size: 30.0),
             title: new Text('Groups'),
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
           BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border, size: 30.0),
               title: Text('Meet')),

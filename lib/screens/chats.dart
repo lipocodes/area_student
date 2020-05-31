@@ -471,7 +471,7 @@ class _ChatsState extends State<Chats> {
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: 4,
+          currentIndex: 3,
           onTap: (int index) {
             setState(() {
               this.indexBottomBar = index;
@@ -481,11 +481,10 @@ class _ChatsState extends State<Chats> {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new Profile()));
             }
-
             if (this.indexBottomBar == 1) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new MenuGroups()));
-            } else if (this.indexBottomBar == 3) {
+            } else if (this.indexBottomBar == 2) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new Meet(this.uid)));
             }
@@ -499,8 +498,6 @@ class _ChatsState extends State<Chats> {
               icon: new Icon(Icons.group, size: 30.0),
               title: new Text('Groups'),
             ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
             BottomNavigationBarItem(
                 icon: Icon(Icons.favorite_border, size: 30.0),
                 title: Text('Meet')),
@@ -555,7 +552,7 @@ class _ChatsState extends State<Chats> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: 4,
+        currentIndex: 3,
         onTap: (int index) {
           setState(() {
             this.indexBottomBar = index;
@@ -569,7 +566,7 @@ class _ChatsState extends State<Chats> {
           if (this.indexBottomBar == 1) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new MenuGroups()));
-          } else if (this.indexBottomBar == 3) {
+          } else if (this.indexBottomBar == 2) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Meet(this.uid)));
           }
@@ -583,8 +580,6 @@ class _ChatsState extends State<Chats> {
             icon: new Icon(Icons.group, size: 30.0),
             title: new Text('Groups'),
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
           BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border, size: 30.0),
               title: Text('Meet')),

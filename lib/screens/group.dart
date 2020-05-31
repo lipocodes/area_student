@@ -225,46 +225,43 @@ class _GroupState extends State<Group> {
         },
         child: Icon(Icons.add),
       ),
-         bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: 1,
-          onTap: (int index) {
-            setState(() {
-              this.indexBottomBar = index;
-            });
-
-            if (this.indexBottomBar == 0) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Profile()));
-            }
-            else if (this.indexBottomBar == 3) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet(loggedInUser.uid)));
-            }
-            else if (this.indexBottomBar == 4) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Chats()));
-            }
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.perm_identity, size: 30.0),
-              title: new Text('Profile'),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.group, size: 30.0),
-              title: new Text('Groups'),
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_border, size: 30.0),
-                title: Text('Meet')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_outline, size: 30.0),
-                title: Text('Chats'))
-          ],
-        ),
+        bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 1, // this will be set when a new tab is tapped
+        onTap: (int index) {
+          setState(() {
+            this.indexBottomBar = index;
+          });
+          if (this.indexBottomBar == 0) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Profile()));
+          }
+          else if (this.indexBottomBar == 2) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Meet(this.uid)));
+          }
+          else if (this.indexBottomBar == 3) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Chats()));
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.perm_identity, size: 30.0),
+            title: new Text('Profile'),
+          ),
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.group, size: 30.0),
+            title: new Text('Groups'),
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border, size: 30.0),
+              title: Text('Meet')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline, size: 30.0),
+              title: Text('Chats'))
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [

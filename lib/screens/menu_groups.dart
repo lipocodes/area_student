@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/tools/methods.dart';
 import 'group.dart';
+import 'meet.dart';
+import 'chats.dart';
 
 class MenuGroups extends StatefulWidget {
   @override
@@ -135,6 +137,14 @@ class _MenuGroupsState extends State<MenuGroups> {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Profile()));
           }
+          else if (this.indexBottomBar == 2) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Meet(this.uid)));
+          }
+          else if (this.indexBottomBar == 3) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Chats()));
+          }
         },
         items: [
           BottomNavigationBarItem(
@@ -145,8 +155,6 @@ class _MenuGroupsState extends State<MenuGroups> {
             icon: new Icon(Icons.group, size: 30.0),
             title: new Text('Groups'),
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
           BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border, size: 30.0),
               title: Text('Meet')),
