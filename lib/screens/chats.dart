@@ -189,6 +189,8 @@ class _ChatsState extends State<Chats> {
 
     initiaizeLists();
 
+
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     final QuerySnapshot result1 = await Firestore.instance
@@ -196,6 +198,8 @@ class _ChatsState extends State<Chats> {
         .where('senderUid', isEqualTo: this.uid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot1 = result1.documents;
+
+        
 
     for (int i = 0; i < snapshot1.length; i++) {
       list1MessageId.add(snapshot1[i].data['id']);
@@ -225,6 +229,8 @@ class _ChatsState extends State<Chats> {
       list2File.add(snapshot2[i].data['attachedFile']);
       list2Image.add(snapshot2[i].data['attachedAttachedImage']);
     }
+
+
 
     //merge the 2 lists into a single list
     for (int i = 0; i < list1MessageId.length; i++) {
@@ -345,7 +351,7 @@ class _ChatsState extends State<Chats> {
       mergedListVoice.removeAt(indexMaxCreationTime);
       mergedListFile.removeAt(indexMaxCreationTime);
     }
-
+  
     //At last: unify the read & unread lists so we have a list to build the ListView
     for (int k = 0; k < unreadListPartnerUid.length; k++) {
       listViewContentsPartnerUid.add(unreadListPartnerUid[k]);
@@ -398,8 +404,6 @@ class _ChatsState extends State<Chats> {
       listViewContentsFile.add(readListFile[k]);
     }
 
-    
-
     closeProgressDialog(context);
 
     setState(() {});
@@ -426,6 +430,8 @@ class _ChatsState extends State<Chats> {
   
   @override
   Widget build(BuildContext context) {
+
+   
     bool needReturn = false;
 
     if (listViewContentsPartnerUid == null ||

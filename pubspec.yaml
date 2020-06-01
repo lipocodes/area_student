@@ -51,7 +51,8 @@ dependencies:
   file_picker:
   open_file:  
   flutter_typeahead:
-  flutter_audio_recorder:  
+  flutter_audio_recorder: 
+   
  
   
   

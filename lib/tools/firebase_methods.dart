@@ -143,6 +143,8 @@ class FirebaseMethods {
           'postId': postName,
           'text': postText,
           'tags': [tag1, tag2, tag3],
+          'likes': [],
+          'comments': [],
         }))
         .whenComplete(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -218,6 +220,8 @@ class FirebaseMethods {
           'postId': postName,
           'text': postText,
           'tags': [tag1, tag2, tag3],
+          'likes': [],
+          'comments': [],
         }))
         .whenComplete(() async {
       SharedPreferences prefs = await SharedPreferences.getInstance();

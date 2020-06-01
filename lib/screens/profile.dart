@@ -64,6 +64,8 @@ class _ProfileState extends State<Profile> {
   List<List<String>> postsTags = [];
   List<List<String>> postsImages = [];
   List<File> postImageList = [];
+  List<List<String>> postsLikes = [];
+  List<List<String>> postsComments = [];
   String gender = "";
   String textWarning = "";
   PageController pageController;
@@ -73,7 +75,7 @@ class _ProfileState extends State<Profile> {
   String textTag1 = "Add tag";
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
   int indexBottomBar = 0;
- 
+  
 
   Future<String> inputData() async {
     try {
@@ -176,6 +178,8 @@ class _ProfileState extends State<Profile> {
     this.postsText = [];
     this.postsTags = [];
     this.postsImages = [];
+    this.postsLikes = [];
+    this.postsComments=  [];
 
     for (int i = 0; i < snapshot.length; i++) {
       try {
@@ -210,12 +214,28 @@ class _ProfileState extends State<Profile> {
         this.postsImages.add(str10);
 
         List<dynamic> str11 = snapshot[i].data['tags'];
-
         List<String> str12 = [];
         for (int i = 0; i < str11.length; i++) {
           str12.add(str11[i].toString());
         }
         this.postsTags.add(str12);
+
+        List<dynamic> str13 = snapshot[i].data['likes'];
+        List<String> str14 = [];
+        for (int i = 0; i < str13.length; i++) {
+          str14.add(str13[i].toString());
+        }
+        this.postsLikes.add(str14);
+
+        List<dynamic> str15 = snapshot[i].data['comments'];
+        List<String> str16 = [];
+        for (int i = 0; i < str15.length; i++) {
+          str16.add(str15[i].toString());
+        }
+        this.postsComments.add(str16);
+
+        print("aaaaaaaaaaaaaaaaa= " + this.postsComments.toString());
+
       } catch (e) {
         print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
       }
@@ -230,6 +250,8 @@ class _ProfileState extends State<Profile> {
     this.postsTags = this.postsTags.reversed.toList();
     this.postsText = this.postsText.reversed.toList();
     this.postsImages = this.postsImages.reversed.toList();
+    this.postsLikes = this.postsLikes.reversed.toList();
+    this.postsComments = this.postsComments.reversed.toList();
 
     setState(() {});
   }
@@ -408,11 +430,14 @@ class _ProfileState extends State<Profile> {
     return true;
   }
 
-  double lengthTextBoxPost(int numWords) {
-    print("ttttttttttttttttttt=  " + numWords.toString());
-    double d = numWords / 5;
-    double necessaryHeight = d * 20;
-    return d * 10;
+  double lengthTextBoxPost(int numChars) {
+    print("ttttttttttttttttttt=  " + numChars.toString());
+ 
+    if(numChars<20) return 100.0;
+
+    double numRows = numChars / 20;
+    double necessaryHeight = numRows * 40;
+    return necessaryHeight;
   }
 
   @override
@@ -428,6 +453,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
@@ -487,12 +514,10 @@ class _ProfileState extends State<Profile> {
             if (this.indexBottomBar == 1) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new MenuGroups()));
-            }
-            else if (this.indexBottomBar == 2) { 
+            } else if (this.indexBottomBar == 2) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new Meet(uid)));
-            }
-            else if (this.indexBottomBar == 3) { 
+            } else if (this.indexBottomBar == 3) {
               Navigator.of(context).push(new CupertinoPageRoute(
                   builder: (BuildContext context) => new Chats()));
             }
@@ -658,7 +683,7 @@ class _ProfileState extends State<Profile> {
                     SizedBox(height: 50.0),
                     this.postsId.length > 0
                         ? SizedBox(
-                            height: 400,
+                            height: 600,
                             child: Container(
                               decoration: new BoxDecoration(
                                 color: Colors.white,
@@ -870,7 +895,7 @@ class _ProfileState extends State<Profile> {
                                                 : Container(),
                                             SizedBox(height: 10.0),
                                             postsText[index].length > 0
-                                                ? SizedBox(
+                                                ? Container(
                                                     width:
                                                         MediaQuery.of(context)
                                                                 .size
@@ -879,14 +904,58 @@ class _ProfileState extends State<Profile> {
                                                     height: lengthTextBoxPost(
                                                         postsText[index]
                                                             .length),
-                                                    child: Text(
-                                                      postsText[index],
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w300,
-                                                          fontSize: 16),
-                                                      textAlign:
-                                                          TextAlign.justify,
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                          postsText[index],
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w300,
+                                                              fontSize: 16),
+                                                          textAlign:
+                                                              TextAlign.justify,
+                                                        ),
+                                                        SizedBox(
+                                                          height: 10.0,
+                                                        ),
+                                                        Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            IconButton(
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .thumb_up
+                                                              ),
+                                                              iconSize: 30,
+                                                              color:
+                                                                  Colors.blueAccent,
+                                                              splashColor:
+                                                                  Colors.purple,
+                                                              onPressed: () {},
+                                                            ),
+                                                            this.postsLikes[index].length!=null && this.postsLikes[index].length!=0 ?
+                                                            Text(this.postsLikes[index].length.toString(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)):
+                                                            Text("0",style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)),
+                                                            SizedBox(width:50.0),
+                                                            IconButton(
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .chat_bubble_outline,
+                                                              ),
+                                                              iconSize: 30,
+                                                              color:
+                                                                  Colors.blueAccent,
+                                                              splashColor:
+                                                                  Colors.purple,
+                                                              onPressed: () {},
+                                                            ),
+                                                            this.postsComments[index].length!=null && this.postsComments[index].length!=0?
+                                                            Text(this.postsComments[index].length.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)):
+                                                            Text("0", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)),
+                                                          ],
+                                                        ),
+                                                      ],
                                                     ),
                                                   )
                                                 : Container(),
