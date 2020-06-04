@@ -25,7 +25,7 @@ class FirebaseMethods {
         .updateData({'posts': postsId});
   }
 
-  removePostGroup(String postName, String nameGroup) async { 
+  removePostGroup(String postName, String nameGroup) async {
     List<String> postsId = [];
     String uid = await inputData();
     await firestore.collection("postsGroups").document(postName).delete();
@@ -96,6 +96,7 @@ class FirebaseMethods {
   }
 
   Future createNewPost(
+    String op,
     String postText,
     List<File> postImageList,
     List<String> postId,
@@ -130,10 +131,16 @@ class FirebaseMethods {
     String uid = await inputData();
     int now = new DateTime.now().millisecondsSinceEpoch;
     String postName = uid + '_' + now.toString();
+    String collectionName = "";
+    if (op == "createPost")
+      collectionName = "posts";
+    else if (op == "createCommentPost") collectionName = "commentsPosts";
+
+    String newCommentId = uid + '_' + now.toString();
 
     await firestore
-        .collection("posts")
-        .document(uid + '_' + now.toString())
+        .collection(collectionName)
+        .document(newCommentId)
         .setData(({
           'creationCountry': country,
           'creationRegion': administrativeArea,
@@ -143,6 +150,7 @@ class FirebaseMethods {
           'postId': postName,
           'text': postText,
           'tags': [tag1, tag2, tag3],
+          'images': ['123456789', '123456789'],
           'likes': [],
           'comments': [],
         }))
@@ -150,13 +158,57 @@ class FirebaseMethods {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('postId', postName);
 
-      //postsId.add(postId);
-
+      final QuerySnapshot result = await firestore
+        .collection("userData")
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+     final List<DocumentSnapshot> snapshot = result.documents;
+     List<dynamic> str1 = snapshot[0].data['posts'];
+     List<String> str2 =  [];
+     for(int i=0; i<str1.length ; i++){
+      str2.add(str1[i].toString());
+     }
+     str2.add(postName);     
+          
       await firestore
           .collection("userData")
           .document(uid)
-          .updateData({'posts': postsId});
+          .updateData({'posts': str2});
+
     });
+
+     
+
+  }
+
+  Future<bool> updatePostsComments(String postId, String existingPostId) async {
+    bool msg;
+    String uid = await inputData();
+
+    final QuerySnapshot result = await Firestore.instance
+        .collection('posts')
+        .where('postId', isEqualTo: existingPostId)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    List temp = snapshot[0].data['comments'];
+    List<String> comments = [];
+    for (int i = 0; i < temp.length; i++) {
+      comments.add(temp[i].toString());
+    }
+    comments.add(postId);
+
+    await firestore
+        .collection("posts")
+        .document(existingPostId)
+        .updateData({'comments': comments});
+    return true;
+  }
+
+  Future updateLikeListPost(String postId, List<String> postLikes) async {
+    await firestore
+        .collection("posts")
+        .document(postId)
+        .updateData({'likes': postLikes});
   }
 
   Future createNewPostGroup(
@@ -207,9 +259,9 @@ class FirebaseMethods {
 
     await firestore
         .collection("postsGroups")
-        .document(uid + '_' + now.toString())
+        .document(postName)
         .setData(({
-          'creatorUid'  :uid,
+          'creatorUid': uid,
           'creatorName': creatorName,
           'profileImage': profileImage,
           'creationCountry': country,
@@ -291,17 +343,24 @@ class FirebaseMethods {
   }
 
   Future<bool> updatePostsImages(
-      List<String> data, String postId, List<String> postsId) async {
+      String op, List<String> data, String postId, List<String> postsId) async {
     bool msg;
     String uid = await inputData();
 
     try {
-      await firestore
-          .collection("posts")
-          .document(postId)
-          .updateData({'images': data}).whenComplete(() {
+      if (op == "createPost") {
+        await firestore
+            .collection("posts")
+            .document(postId)
+            .updateData({'images': data}).whenComplete(() {
+          msg = true;
+        });
+      }
+      else if(op == "createCommentPost"){
+        await firestore .collection("commentsPosts").document(postId).updateData({'images': data}).whenComplete(() {
         msg = true;
       });
+      }
 
       postsId.add(postId);
       await firestore

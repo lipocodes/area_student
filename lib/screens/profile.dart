@@ -25,6 +25,7 @@ import 'menu_groups.dart';
 import 'meet.dart';
 import 'chats.dart';
 import 'package:areastudent/screens/images_in_large.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -75,7 +76,6 @@ class _ProfileState extends State<Profile> {
   String textTag1 = "Add tag";
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
   int indexBottomBar = 0;
-  
 
   Future<String> inputData() async {
     try {
@@ -112,14 +112,13 @@ class _ProfileState extends State<Profile> {
         this.profileImages = str2;
       });
 
-      this.name =
-          snapshot[0].data['firstName'] + "  " + snapshot[0].data['lastName'];
-      this.gender = snapshot[0].data['gender'];
-      this.country = snapshot[0].data['country'];
-      this.region = snapshot[0].data['region'];
-      this.subregion = snapshot[0].data['subRegion'];
-      this.locality = snapshot[0].data['locality'];
-      this.academicField = snapshot[0].data['academicField'];
+      this.name =  snapshot[0].data['firstName'].toString() +  "  " + snapshot[0].data['lastName'].toString();   
+      this.gender = snapshot[0].data['gender'].toString();
+      this.country = snapshot[0].data['country'].toString();
+      this.region = snapshot[0].data['region'].toString();
+      this.subregion = snapshot[0].data['subRegion'].toString();
+      this.locality = snapshot[0].data['locality'].toString();
+      this.academicField = snapshot[0].data['academicField'].toString();
 
       var now = new DateTime.now();
       var formatter = new DateFormat('yyyy');
@@ -130,7 +129,7 @@ class _ProfileState extends State<Profile> {
       int age = yearNow - yearBirthDate;
       this.age = age.toString();
 
-      this.aboutMe = snapshot[0].data['aboutMe'];
+      this.aboutMe = snapshot[0].data['aboutMe'].toString();
 
       List<dynamic> str3 = snapshot[0].data['followers'];
       List<String> str4 = [];
@@ -141,19 +140,22 @@ class _ProfileState extends State<Profile> {
       this.numFollowers = str4.length;
 
       List<dynamic> str5 = snapshot[0].data['following'];
-      List<String> str6 = [];
       for (int i = 0; i < str5.length; i++) {
-        str6.add(str5[i].toString());
+        this.listFollowings.add(str5[i].toString());
       }
-      this.listFollowings = str6;
-      this.numFollowings = str6.length;
+      this.numFollowings = this.listFollowings.length;
 
-      List<dynamic> str7 = snapshot[0].data['posts'];
+      List<dynamic> str7 = [];
+      str7.add(snapshot[0].data['posts']);
       List<String> str8 = [];
       for (int i = 0; i < str7.length; i++) {
-        str8.add(str7.toString());
+         this.posts.add(str7[i].toString());
       }
-      this.posts = str8;
+     
+
+
+     
+
       retrievePostsCurrentUser();
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeee= " + e.toString());
@@ -179,66 +181,59 @@ class _ProfileState extends State<Profile> {
     this.postsTags = [];
     this.postsImages = [];
     this.postsLikes = [];
-    this.postsComments=  [];
+    this.postsComments = [];
 
     for (int i = 0; i < snapshot.length; i++) {
-      try {
-        this.postsId.add(snapshot[i].data['postId'].toString());
-
-        this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
-
-        this
-            .postsCreationCountry
-            .add(snapshot[i].data['creationCountry'].toString());
-
-        this
-            .postsCreationRegion
-            .add(snapshot[i].data['creationRegion'].toString());
-
-        this
-            .postsCreationSubRegion
-            .add(snapshot[i].data['creationSubRegion'].toString());
-
-        this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
-
-        this.postsText.add(snapshot[i].data['text'].toString());
-
-        List<dynamic> str9 = snapshot[i].data['images'];
-
-        List<String> str10 = [];
-
-        for (int i = 0; i < str9.length; i++) {
-          str10.add(str9[i].toString());
-        }
-
-        this.postsImages.add(str10);
-
-        List<dynamic> str11 = snapshot[i].data['tags'];
-        List<String> str12 = [];
-        for (int i = 0; i < str11.length; i++) {
-          str12.add(str11[i].toString());
-        }
-        this.postsTags.add(str12);
-
-        List<dynamic> str13 = snapshot[i].data['likes'];
-        List<String> str14 = [];
-        for (int i = 0; i < str13.length; i++) {
-          str14.add(str13[i].toString());
-        }
-        this.postsLikes.add(str14);
-
-        List<dynamic> str15 = snapshot[i].data['comments'];
-        List<String> str16 = [];
-        for (int i = 0; i < str15.length; i++) {
-          str16.add(str15[i].toString());
-        }
-        this.postsComments.add(str16);
-
-        print("aaaaaaaaaaaaaaaaa= " + this.postsComments.toString());
-
-      } catch (e) {
-        print("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
+      this.postsId.add(snapshot[i].data['postId'].toString());
+     
+      this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
+      
+      this.postsCreationCountry.add(snapshot[i].data['creationCountry'].toString());
+     
+      this
+          .postsCreationRegion
+          .add(snapshot[i].data['creationRegion'].toString());
+       
+      this
+          .postsCreationSubRegion
+          .add(snapshot[i].data['creationSubRegion'].toString());
+            
+      this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
+      
+      this.postsText.add(snapshot[i].data['text'].toString());
+       
+     
+      List<dynamic> temp = snapshot[i].data['images'];
+      List<String> str10 = [];
+      for (int i = 0; i < temp.length; i++) {
+        str10.add(temp[i].toString());
       }
+      this.postsImages.add(str10);
+
+
+      
+
+      temp = snapshot[i].data['tags'];
+      List<String> str12 = [];
+      for (int i = 0; i < temp.length; i++) {
+        str12.add(temp[i].toString());
+      }
+      this.postsTags.add(str12);
+
+      temp = snapshot[i].data['likes'];
+      List<String> str14 = [];
+      for (int i = 0; i < temp.length; i++) {
+        str14.add(temp[i].toString());
+      }
+      this.postsLikes.add(str14);
+      
+      temp = [];
+      temp.add(snapshot[i].data['comments']);
+      List<String> str16 = [];
+      for (int i = 0; i < temp.length; i++) {
+        str16.add(temp[i].toString());
+      }
+      this.postsComments.add(str16);
     }
 
     this.postsId = this.postsId.reversed.toList();
@@ -431,12 +426,10 @@ class _ProfileState extends State<Profile> {
   }
 
   double lengthTextBoxPost(int numChars) {
-    print("ttttttttttttttttttt=  " + numChars.toString());
- 
-    if(numChars<20) return 100.0;
+    if (numChars < 20) return 150.0;
 
     double numRows = numChars / 20;
-    double necessaryHeight = numRows * 40;
+    double necessaryHeight = numRows * 50;
     return necessaryHeight;
   }
 
@@ -451,9 +444,37 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  likePost(int index) async {
+    if (didILikeThisPostAlready(index) == false) {
+      postsLikes[index].add(this.uid);
+    } else {
+      postsLikes[index].remove(this.uid);
+    }
+
+    await firebaseMethods.updateLikeListPost(postsId[index], postsLikes[index]);
+
+    setState(() {});
+  }
+
+  bool didILikeThisPostAlready(index) {
+    if (postsLikes[index].contains(this.uid))
+      return true;
+    else
+      return false;
+  }
+
+  createNewPost(String op, String existingPostId) async {
+    var res = await Navigator.of(context).push(new CupertinoPageRoute(
+        builder: (BuildContext context) => new CreatePost(op, existingPostId)));
+
+    setState(() {
+      retrievePostsCurrentUser();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
+   
 
     return WillPopScope(
       onWillPop: _onBackPressed,
@@ -493,13 +514,7 @@ class _ProfileState extends State<Profile> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            //showDialogPostCreation();
-            var res = await Navigator.of(context).push(new CupertinoPageRoute(
-                builder: (BuildContext context) => new CreatePost()));
-
-            setState(() {
-              retrievePostsCurrentUser();
-            });
+            createNewPost("createPost", "");
           },
           child: Icon(Icons.add),
         ),
@@ -672,11 +687,12 @@ class _ProfileState extends State<Profile> {
               ),
             ),
             Positioned(
-              top: 220,
+              top: 200,
               height: 400,
               width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     userDetails(name, age, country, region, academicField,
                         aboutMe, numFollowers, numFollowings, context),
@@ -693,16 +709,16 @@ class _ProfileState extends State<Profile> {
                                     left: 20.0, right: 20.0),
                                 child: Center(
                                   child: ListView.builder(
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: postsId.length,
-                                    itemBuilder: (context, index) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 0.0, right: 20.0),
-                                        child: Column(
-                                          children: [
-                                            Row(
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.vertical,
+                                      itemCount: postsId.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 0.0, right: 20.0),
+                                          child: Column(children: [
+                                           
+                                              Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               mainAxisAlignment:
@@ -717,7 +733,8 @@ class _ProfileState extends State<Profile> {
                                                             fit: BoxFit.fill,
                                                             image: new NetworkImage(
                                                                 this.profileImages[
-                                                                    0])))),
+                                                                        0] ??
+                                                                    null)))),
                                                 SizedBox(width: 10),
                                                 Text(
                                                     name +
@@ -753,8 +770,12 @@ class _ProfileState extends State<Profile> {
                                                                     .w500))),
                                               ],
                                             ),
-                                            SizedBox(height: 10.0),
-                                            Row(
+
+
+
+                                                      SizedBox(height: 10.0),
+
+                                              Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: [
@@ -792,9 +813,11 @@ class _ProfileState extends State<Profile> {
                                                             fontSize: 16.0)),
                                               ],
                                             ),
-                                            SizedBox(height: 10.0),
-                                            !postsImages[index]
-                                                    .contains('123456789')
+
+
+                                                       SizedBox(height: 10.0),
+
+                                                   postsImages[index][0]!='123456789'
                                                 ? SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -843,8 +866,10 @@ class _ProfileState extends State<Profile> {
                                                     ),
                                                   )
                                                 : Container(),
-                                            SizedBox(height: 10.0),
-                                            postsImages[index].length > 1
+                                           
+                                                    SizedBox(height: 10.0),
+
+                                                     postsImages[index][1]!='123456789'
                                                 ? SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -893,8 +918,10 @@ class _ProfileState extends State<Profile> {
                                                     ),
                                                   )
                                                 : Container(),
+
                                             SizedBox(height: 10.0),
-                                            postsText[index].length > 0
+
+                                                  postsText[index]!=null
                                                 ? Container(
                                                     width:
                                                         MediaQuery.of(context)
@@ -920,54 +947,113 @@ class _ProfileState extends State<Profile> {
                                                           height: 10.0,
                                                         ),
                                                         Row(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
                                                           children: [
                                                             IconButton(
-                                                              icon: Icon(
-                                                                Icons
-                                                                    .thumb_up
-                                                              ),
+                                                              icon: Icon(Icons
+                                                                  .thumb_up),
                                                               iconSize: 30,
-                                                              color:
-                                                                  Colors.blueAccent,
+                                                              color: didILikeThisPostAlready(
+                                                                          index) ==
+                                                                      true
+                                                                  ? Colors
+                                                                      .blueAccent
+                                                                  : Colors.grey,
                                                               splashColor:
                                                                   Colors.purple,
-                                                              onPressed: () {},
+                                                              onPressed: () {
+                                                                likePost(index);
+                                                              },
                                                             ),
-                                                            this.postsLikes[index].length!=null && this.postsLikes[index].length!=0 ?
-                                                            Text(this.postsLikes[index].length.toString(),style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)):
-                                                            Text("0",style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)),
-                                                            SizedBox(width:50.0),
+                                                            this.postsLikes[index].length !=
+                                                                        null &&
+                                                                    this.postsLikes[index].length !=
+                                                                        0
+                                                                ? Text(
+                                                                    this
+                                                                        .postsLikes[
+                                                                            index]
+                                                                        .length
+                                                                        .toString(),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w300,
+                                                                        color: Colors
+                                                                            .blueAccent))
+                                                                : Text("0",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w300,
+                                                                        color: Colors
+                                                                            .blueAccent)),
+                                                            SizedBox(
+                                                                width: 50.0),
                                                             IconButton(
                                                               icon: Icon(
                                                                 Icons
                                                                     .chat_bubble_outline,
                                                               ),
                                                               iconSize: 30,
-                                                              color:
-                                                                  Colors.blueAccent,
+                                                              color: Colors
+                                                                  .blueAccent,
                                                               splashColor:
                                                                   Colors.purple,
-                                                              onPressed: () {},
+                                                              onPressed: () {
+                                                                createNewPost(
+                                                                    "createCommentPost",
+                                                                    postsId[index]
+                                                                        .toString());
+                                                              },
                                                             ),
-                                                            this.postsComments[index].length!=null && this.postsComments[index].length!=0?
-                                                            Text(this.postsComments[index].length.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)):
-                                                            Text("0", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300, color:Colors.blueAccent)),
+                                                            this.postsComments[index].length !=
+                                                                        null &&
+                                                                    this.postsComments[index].length !=
+                                                                        0
+                                                                ? Text(
+                                                                    this
+                                                                        .postsComments[
+                                                                            index]
+                                                                        .length
+                                                                        .toString(),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w300,
+                                                                        color: Colors
+                                                                            .blueAccent))
+                                                                : Text("0",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w300,
+                                                                        color: Colors
+                                                                            .blueAccent)),
                                                           ],
                                                         ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                : Container(),
-                                            SizedBox(height: 20.0),
+                                                        SizedBox(height: 20.0),
                                             Divider(
                                               thickness: 10,
                                             ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                : Container(),    
+
+                                          ]),
+                                        );
+                                      }),
                                 ),
                               ),
                             ),
