@@ -26,6 +26,7 @@ import 'meet.dart';
 import 'chats.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'comments_posts.dart';
 
 class Profile extends StatefulWidget {
   @override
@@ -112,7 +113,9 @@ class _ProfileState extends State<Profile> {
         this.profileImages = str2;
       });
 
-      this.name =  snapshot[0].data['firstName'].toString() +  "  " + snapshot[0].data['lastName'].toString();   
+      this.name = snapshot[0].data['firstName'].toString() +
+          "  " +
+          snapshot[0].data['lastName'].toString();
       this.gender = snapshot[0].data['gender'].toString();
       this.country = snapshot[0].data['country'].toString();
       this.region = snapshot[0].data['region'].toString();
@@ -149,12 +152,8 @@ class _ProfileState extends State<Profile> {
       str7.add(snapshot[0].data['posts']);
       List<String> str8 = [];
       for (int i = 0; i < str7.length; i++) {
-         this.posts.add(str7[i].toString());
+        this.posts.add(str7[i].toString());
       }
-     
-
-
-     
 
       retrievePostsCurrentUser();
     } catch (e) {
@@ -185,33 +184,31 @@ class _ProfileState extends State<Profile> {
 
     for (int i = 0; i < snapshot.length; i++) {
       this.postsId.add(snapshot[i].data['postId'].toString());
-     
+
       this.postsCreatorUid.add(snapshot[i].data['creatorUid'].toString());
-      
-      this.postsCreationCountry.add(snapshot[i].data['creationCountry'].toString());
-     
+
+      this
+          .postsCreationCountry
+          .add(snapshot[i].data['creationCountry'].toString());
+
       this
           .postsCreationRegion
           .add(snapshot[i].data['creationRegion'].toString());
-       
+
       this
           .postsCreationSubRegion
           .add(snapshot[i].data['creationSubRegion'].toString());
-            
+
       this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
-      
+
       this.postsText.add(snapshot[i].data['text'].toString());
-       
-     
+
       List<dynamic> temp = snapshot[i].data['images'];
       List<String> str10 = [];
       for (int i = 0; i < temp.length; i++) {
         str10.add(temp[i].toString());
       }
       this.postsImages.add(str10);
-
-
-      
 
       temp = snapshot[i].data['tags'];
       List<String> str12 = [];
@@ -226,15 +223,24 @@ class _ProfileState extends State<Profile> {
         str14.add(temp[i].toString());
       }
       this.postsLikes.add(str14);
-      
-      temp = [];
-      temp.add(snapshot[i].data['comments']);
+
+      temp = snapshot[i].data['comments'];
+
       List<String> str16 = [];
+      bool visitedLoop = false;
+      //this.postsComments = [];
       for (int i = 0; i < temp.length; i++) {
         str16.add(temp[i].toString());
+                          
+        visitedLoop = true;
       }
-      this.postsComments.add(str16);
+      if (visitedLoop == true) {
+        this.postsComments.add(str16);
+      } else {
+        this.postsComments.add([]);
+      }
     }
+    
 
     this.postsId = this.postsId.reversed.toList();
     this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
@@ -474,8 +480,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-   
-
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
@@ -717,8 +721,7 @@ class _ProfileState extends State<Profile> {
                                           padding: const EdgeInsets.only(
                                               left: 0.0, right: 20.0),
                                           child: Column(children: [
-                                           
-                                              Row(
+                                            Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               mainAxisAlignment:
@@ -770,12 +773,8 @@ class _ProfileState extends State<Profile> {
                                                                     .w500))),
                                               ],
                                             ),
-
-
-
-                                                      SizedBox(height: 10.0),
-
-                                              Row(
+                                            SizedBox(height: 10.0),
+                                            Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: [
@@ -813,11 +812,8 @@ class _ProfileState extends State<Profile> {
                                                             fontSize: 16.0)),
                                               ],
                                             ),
-
-
-                                                       SizedBox(height: 10.0),
-
-                                                   postsImages[index][0]!='123456789'
+                                            SizedBox(height: 10.0),
+                                            postsImages[index][0] != '123456789'
                                                 ? SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -866,10 +862,8 @@ class _ProfileState extends State<Profile> {
                                                     ),
                                                   )
                                                 : Container(),
-                                           
-                                                    SizedBox(height: 10.0),
-
-                                                     postsImages[index][1]!='123456789'
+                                            SizedBox(height: 10.0),
+                                            postsImages[index][1] != '123456789'
                                                 ? SizedBox(
                                                     width:
                                                         MediaQuery.of(context)
@@ -918,10 +912,8 @@ class _ProfileState extends State<Profile> {
                                                     ),
                                                   )
                                                 : Container(),
-
                                             SizedBox(height: 10.0),
-
-                                                  postsText[index]!=null
+                                            postsText[index] != null
                                                 ? Container(
                                                     width:
                                                         MediaQuery.of(context)
@@ -1006,11 +998,17 @@ class _ProfileState extends State<Profile> {
                                                                   .blueAccent,
                                                               splashColor:
                                                                   Colors.purple,
-                                                              onPressed: () {
-                                                                createNewPost(
-                                                                    "createCommentPost",
-                                                                    postsId[index]
-                                                                        .toString());
+                                                              onPressed: () async{ 
+                                                                await Navigator.of(
+                                                                        context)
+                                                                    .push(new CupertinoPageRoute(
+                                                                        builder:
+                                                                            (BuildContext context) =>
+                                                                                new CommentsPosts(postsId[index], postsComments[index] )));
+
+                                                                setState(() {
+                                                                  
+                                                                });                
                                                               },
                                                             ),
                                                             this.postsComments[index].length !=
@@ -1042,15 +1040,46 @@ class _ProfileState extends State<Profile> {
                                                                             .blueAccent)),
                                                           ],
                                                         ),
-                                                        SizedBox(height: 20.0),
-                                            Divider(
-                                              thickness: 10,
-                                            ),
+                                                       
+
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            FlatButton(
+                                                              color: Colors
+                                                                  .black26,
+                                                              textColor:
+                                                                  Colors.white,
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(8.0),
+                                                              splashColor: Colors
+                                                                  .blueAccent,
+                                                              onPressed: () {
+                                                                createNewPost(
+                                                                    "createCommentPost",
+                                                                    postsId[index]
+                                                                        .toString());
+                                                              },
+                                                              child: Text(
+                                                                "Comment",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        16.0),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+
+                                                        Divider(
+                                                          thickness: 10,
+                                                        ),
                                                       ],
                                                     ),
                                                   )
-                                                : Container(),    
-
+                                                : Container(),
                                           ]),
                                         );
                                       }),

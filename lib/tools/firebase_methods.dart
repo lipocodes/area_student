@@ -23,7 +23,19 @@ class FirebaseMethods {
         .collection("userData")
         .document(uid)
         .updateData({'posts': postsId});
-  }
+}
+
+
+removeCommentPost (commentId, List<String> commentsId,  String postId) async {
+    String uid = await inputData();
+    await firestore.collection("commentsPosts").document(commentId).delete();
+    commentsId.remove(commentId);
+    await firestore.collection("posts").document(postId).updateData({'comments': commentsId});
+    print("wwwwwwwwwwwwwwww= " + commentId +  " " + commentsId.toString() +  " " + postId);
+}
+        
+
+
 
   removePostGroup(String postName, String nameGroup) async {
     List<String> postsId = [];
@@ -168,8 +180,8 @@ class FirebaseMethods {
      for(int i=0; i<str1.length ; i++){
       str2.add(str1[i].toString());
      }
-     str2.add(postName);     
-          
+     str2.add(postName); 
+            
       await firestore
           .collection("userData")
           .document(uid)
