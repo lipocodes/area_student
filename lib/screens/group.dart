@@ -14,6 +14,9 @@ import 'chat_screen.dart';
 import 'meet.dart';
 import 'package:areastudent/screens/images_in_large.dart';
 import 'chats.dart';
+import 'package:areastudent/tools/firebase_methods.dart';
+import 'comments_posts.dart';
+import 'create_post.dart';
 
 class Group extends StatefulWidget {
   String nameGroup = "";
@@ -27,9 +30,13 @@ class Group extends StatefulWidget {
 class _GroupState extends State<Group> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   ScrollController _scrollController = new ScrollController();
+  FirebaseMethods firebaseMethods = new FirebaseMethods();
   String uid = "";
   int indexBottomBar = 0;
   List<String> postsName = [];
+  List<List<String>> postsLikes = [];
+  List<List<String>> postsComments = [];
+  List<String> postsId = [];
   List<String> membersGroup = [];
   List<String> creationTime = [];
   List<String> creatorName = [];
@@ -80,6 +87,7 @@ class _GroupState extends State<Group> {
   }
 
   Future retrievePostsContents() async {
+    this.postsId = [];
     this.creationTime = [];
     this.creatorName = [];
     this.creatorUid = [];
@@ -101,6 +109,8 @@ class _GroupState extends State<Group> {
 
     for (int i = 0; i < snapshot.length; i++) {
       if (postsName.contains(snapshot[i].data['postId'])) {
+        postsId.add(snapshot[i].data['postId']);
+        
         creationTime.add(snapshot[i].data['creationTime']);
         creatorName.add(snapshot[i].data['creatorName']);
         creatorUid.add(snapshot[i].data['creatorUid']);
@@ -112,6 +122,29 @@ class _GroupState extends State<Group> {
           str2.add(str1[j]);
         }
         this.images.add(str2);
+
+        List temp = snapshot[i].data['likes'];
+        List<String> str14 = [];
+        for (int i = 0; i < temp.length; i++) {
+          str14.add(temp[i].toString());
+        }
+        this.postsLikes.add(str14);
+
+        temp = snapshot[i].data['comments'];
+
+        List<String> str16 = [];
+        bool visitedLoop = false;
+        //this.postsComments = [];
+        for (int i = 0; i < temp.length; i++) {
+          str16.add(temp[i].toString());
+
+          visitedLoop = true;
+        }
+        if (visitedLoop == true) {
+          this.postsComments.add(str16);
+        } else {
+          this.postsComments.add([]);
+        }
       }
     }
 
@@ -122,6 +155,7 @@ class _GroupState extends State<Group> {
     this.profileImage = this.profileImage.reversed.toList();
     this.text = this.text.reversed.toList();
     this.images = this.images.reversed.toList();
+   
 
     setState(() {});
   }
@@ -160,9 +194,41 @@ class _GroupState extends State<Group> {
     }
   }
 
+  likePost(int index) async {
+    if (didILikeThisPostAlready(index) == false) {
+      postsLikes[index].add(this.uid);
+    } else {
+      postsLikes[index].remove(this.uid);
+    }
+   
+    await firebaseMethods.updateLikeListPost(
+        "postsGroups", postsId[index], postsLikes[index]);
+    setState(() {});
+  }
+
+  bool didILikeThisPostAlready(index) {
+    if (postsLikes[index].contains(this.uid))
+      return true;
+    else
+      return false;
+  }
+
+
+
+    createNewPost(String op, String existingPostId) async {
+    var res = await Navigator.of(context).push(new CupertinoPageRoute(
+        builder: (BuildContext context) => new CreatePost(op, existingPostId)));
+
+    setState(() {
+      retrievePostsContents();
+    });
+  }
+
+
+
   @override
   void initState() {
-     print("ggggggggggggggggggggggggggggggggg");
+
     // TODO: implement initState
     super.initState();
 
@@ -180,8 +246,8 @@ class _GroupState extends State<Group> {
 
   @override
   Widget build(BuildContext context) {
-    
-   
+
+    if(this.postsName==null)  return Container();
 
     return Scaffold(
       appBar: AppBar(
@@ -225,7 +291,7 @@ class _GroupState extends State<Group> {
         },
         child: Icon(Icons.add),
       ),
-        bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 1, // this will be set when a new tab is tapped
         onTap: (int index) {
@@ -235,12 +301,10 @@ class _GroupState extends State<Group> {
           if (this.indexBottomBar == 0) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Profile()));
-          }
-          else if (this.indexBottomBar == 2) {
+          } else if (this.indexBottomBar == 2) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Meet(this.uid)));
-          }
-          else if (this.indexBottomBar == 3) {
+          } else if (this.indexBottomBar == 3) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Chats()));
           }
@@ -319,7 +383,7 @@ class _GroupState extends State<Group> {
                                         await retrievePostsNames();
                                         await retrievePostsContents();
                                       },
-                                      child:  Text(" X ",
+                                      child: Text(" X ",
                                           style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w500)))
@@ -366,7 +430,9 @@ class _GroupState extends State<Group> {
                                                             profileImage[index]
                                                                 .toString())));
                                       },
-                                      child:  this.creatorUid[index] != this.uid?  Icon(Icons.chat_bubble_outline):Container()),
+                                      child: this.creatorUid[index] != this.uid
+                                          ? Icon(Icons.chat_bubble_outline)
+                                          : Container()),
                                 ],
                               ),
                               SizedBox(height: 20.0),
@@ -429,7 +495,7 @@ class _GroupState extends State<Group> {
                                               4,
                                       child: GestureDetector(
                                         onTap: () {
-                                                Navigator.of(context).push(
+                                          Navigator.of(context).push(
                                               new CupertinoPageRoute(
                                                   builder:
                                                       (BuildContext context) =>
@@ -455,6 +521,93 @@ class _GroupState extends State<Group> {
                                       ),
                                     )
                                   : Container(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.thumb_up),
+                                    iconSize: 30,
+                                    color:
+                                        didILikeThisPostAlready(index) == true
+                                            ? Colors.blueAccent
+                                            : Colors.grey,
+                                    splashColor: Colors.purple,
+                                    onPressed: () {
+                                      likePost(index);
+                                    },
+                                  ),
+                                  this.postsLikes[index].length != null &&
+                                          this.postsLikes[index].length != 0
+                                      ? Text(
+                                          this
+                                              .postsLikes[index]
+                                              .length
+                                              .toString(),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.blueAccent))
+                                      : Text("0",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.blueAccent)),
+                                  SizedBox(width: 50.0),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.chat_bubble_outline,
+                                    ),
+                                    iconSize: 30,
+                                    color: Colors.blueAccent,
+                                    splashColor: Colors.purple,
+                                    onPressed: () async {
+                                      await Navigator.of(context).push(
+                                          new CupertinoPageRoute(
+                                              builder: (BuildContext context) =>
+                                                  new CommentsPosts("createCommentsPostsGroups",
+                                                      postsId[index],
+                                                      postsComments[index])));
+
+                                      setState(() {});
+                                    },
+                                  ),
+                                  this.postsComments[index].length != null &&
+                                          this.postsComments[index].length != 0
+                                      ? Text(
+                                          this
+                                              .postsComments[index]
+                                              .length
+                                              .toString(),
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.blueAccent))
+                                      : Text("0",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.blueAccent)),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  FlatButton(
+                                    color: Colors.black26,
+                                    textColor: Colors.white,
+                                    padding: EdgeInsets.all(8.0),
+                                    splashColor: Colors.blueAccent,
+                                    onPressed: () {
+                                      createNewPost("createCommentPostGroups",
+                                          postsId[index].toString());
+                                    },
+                                    child: Text(
+                                      "Comment",
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),

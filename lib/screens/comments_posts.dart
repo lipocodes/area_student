@@ -13,9 +13,10 @@ import 'meet.dart';
 import 'chats.dart';
 
 class CommentsPosts extends StatefulWidget {
+  String op = "";
   String postId = "";
   List<String> postsId;
-  CommentsPosts(this.postId, this.postsId);
+  CommentsPosts(this.op, this.postId, this.postsId);
   @override
   _CommentsPostsState createState() => _CommentsPostsState();
 }
@@ -38,22 +39,23 @@ class _CommentsPostsState extends State<CommentsPosts> {
   int indexBottomBar = 0;
   String uid;
 
-    Future<String> inputData() async {
+  Future<String> inputData() async {
     try {
       final FirebaseUser user = await FirebaseAuth.instance.currentUser();
       String uid = user.uid.toString();
       this.uid = uid;
       return uid;
-    } catch (e) {    
+    } catch (e) {
       return "";
     }
   }
 
   retrieveComments() async {
-     this.uid = await inputData();
+    this.uid = await inputData();
 
     final QuerySnapshot result = await Firestore.instance
-        .collection('posts')
+        .collection(
+            widget.op == "createCommentsPostsGroups" ? 'postsGroups' : 'posts')
         .where('postId', isEqualTo: widget.postId)
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
@@ -63,7 +65,6 @@ class _CommentsPostsState extends State<CommentsPosts> {
     for (int i = 0; i < list1.length; i++) {
       listComments.add(list1[i].toString());
     }
-   
 
     //take each comment and retrieve its data
     this.postsId = [];
@@ -80,7 +81,9 @@ class _CommentsPostsState extends State<CommentsPosts> {
 
     for (int i = 0; i < listComments.length; i++) {
       final QuerySnapshot result = await Firestore.instance
-          .collection('commentsPosts')
+          .collection(widget.op == "createCommentsPostsGroups"
+              ? 'commentsPostsGroups'
+              : 'commentsPosts')
           .where('postId', isEqualTo: listComments[i])
           .getDocuments();
       final List<DocumentSnapshot> snapshot = result.documents;
@@ -110,18 +113,17 @@ class _CommentsPostsState extends State<CommentsPosts> {
       this.postsImages.add([image1, image2]);
     }
 
+    this.postsId = this.postsId.reversed.toList();
+    this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
+    this.postsCreationCountry = this.postsCreationCountry.reversed.toList();
+    this.postsCreationRegion = this.postsCreationRegion.reversed.toList();
+    this.postsCreationSubRegion = this.postsCreationSubRegion.reversed.toList();
+    this.postsCreationTime = this.postsCreationTime.reversed.toList();
+    this.postsText = this.postsText.reversed.toList();
+    this.postsTags = this.postsTags.reversed.toList();
+    this.postsImages = this.postsImages.reversed.toList();
 
-     this.postsId = this.postsId.reversed.toList();
-     this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
-     this.postsCreationCountry = this.postsCreationCountry.reversed.toList();
-     this.postsCreationRegion = this.postsCreationRegion.reversed.toList();
-     this.postsCreationSubRegion = this.postsCreationSubRegion.reversed.toList();
-     this.postsCreationTime = this.postsCreationTime.reversed.toList();
-     this.postsText = this.postsText.reversed.toList();
-     this.postsTags = this.postsTags.reversed.toList();
-     this.postsImages = this.postsImages.reversed.toList();
-
-     for (int i = 0; i < postsCreatorUid.length; i++) { 
+    for (int i = 0; i < postsCreatorUid.length; i++) { 
        final QuerySnapshot result = await Firestore.instance
           .collection('userData')
           .where('uid', isEqualTo: postsCreatorUid[i])
@@ -130,7 +132,6 @@ class _CommentsPostsState extends State<CommentsPosts> {
       this.postsCreatorName.add(snapshot[0].data['firstName'].toString() +  "  " + snapshot[0].data['lastName'].toString());
       this.postsCreatorProfileImage.add(snapshot[0].data['profileImages'][0].toString());
      }
-
 
     setState(() {});
   }
@@ -153,9 +154,9 @@ class _CommentsPostsState extends State<CommentsPosts> {
 
   @override
   Widget build(BuildContext context) {
-    if (listComments == null) return Container();
+  
+    if(postsCreatorUid==null) return Container(); 
 
-    
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -188,46 +189,42 @@ class _CommentsPostsState extends State<CommentsPosts> {
         ),
         backgroundColor: Colors.white,
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 0,
+        onTap: (int index) {
+          setState(() {
+            this.indexBottomBar = index;
+          });
 
-            bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: 0,
-          onTap: (int index) {
-            
-            setState(() {
-              this.indexBottomBar = index;
-            });
-
-            if (this.indexBottomBar == 1) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new MenuGroups()));
-            } else if (this.indexBottomBar == 2) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet(this.uid)));
-            } else if (this.indexBottomBar == 3) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Chats()));
-            }
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.perm_identity, size: 30.0),
-              title: new Text('Profile'),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.group, size: 30.0),
-              title: new Text('Groups'),
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_border, size: 30.0),
-                title: Text('Meet')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_outline, size: 30.0),
-                title: Text('Chats'))
-          ],
-        ),
-
-
+          if (this.indexBottomBar == 1) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new MenuGroups()));
+          } else if (this.indexBottomBar == 2) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Meet(this.uid)));
+          } else if (this.indexBottomBar == 3) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Chats()));
+          }
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.perm_identity, size: 30.0),
+            title: new Text('Profile'),
+          ),
+          BottomNavigationBarItem(
+            icon: new Icon(Icons.group, size: 30.0),
+            title: new Text('Groups'),
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.favorite_border, size: 30.0),
+              title: Text('Meet')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline, size: 30.0),
+              title: Text('Chats'))
+        ],
+      ),
       body: ListView.builder(
           shrinkWrap: true,
           scrollDirection: Axis.vertical,
@@ -239,17 +236,18 @@ class _CommentsPostsState extends State<CommentsPosts> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    new Container(
-                                                    width: 40.0,
-                                                    height: 40.0,
-                                                    decoration: new BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        image: new DecorationImage(
-                                                            fit: BoxFit.fill,
-                                                            image: new NetworkImage(
-                                                                this.postsCreatorProfileImage[
-                                                                      index] ??
-                                                                    null)))),
+                    if (this.postsCreatorProfileImage[index] != null) ...[
+                      new Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: new BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: new DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image: new NetworkImage(
+                                      this.postsCreatorProfileImage[index])))),
+                    ],
+
                     SizedBox(width: 10),
                     Text(
                         postsCreatorName[index] +
@@ -265,7 +263,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
                             fontSize: 16.0, fontWeight: FontWeight.w800)),
                     GestureDetector(
                         onTap: () async {
-                          await firebaseMethod.removeCommentPost(
+                          await firebaseMethod.removeCommentPost( widget.op == "createCommentsPostsGroups"? "createCommentsPostsGroups"  : "createCommentsPosts" ,
                               listComments[index] ,listComments ,widget.postId);
                           retrieveComments();
                         },
@@ -276,33 +274,30 @@ class _CommentsPostsState extends State<CommentsPosts> {
                     
                   ],
                 ),
-
                 SizedBox(height: 10.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        postsTags[index][0].toString() == '123456789'
-                            ? Container()
-                            : Text(postsTags[index][0].toString(),
-                                style: TextStyle(
-                                    color: Colors.blue, fontSize: 16.0)),
-                        SizedBox(width: 20.0),
-                        postsTags[index][1].toString() == '123456789'
-                            ? Container()
-                            : Text(postsTags[index][1].toString(),
-                                style: TextStyle(
-                                    color: Colors.blue, fontSize: 16.0)),
-                        SizedBox(width: 20.0),
-                        postsTags[index][2].toString() == '123456789'
-                            ? Container()
-                            : Text(postsTags[index][2].toString(),
-                                style: TextStyle(
-                                    color: Colors.blue, fontSize: 16.0)),
-                      ],
-                    ),
-                 
-                SizedBox(height:10.0), 
-
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    postsTags[index][0].toString() == '123456789'
+                        ? Container()
+                        : Text(postsTags[index][0].toString(),
+                            style:
+                                TextStyle(color: Colors.blue, fontSize: 16.0)),
+                    SizedBox(width: 20.0),
+                    postsTags[index][1].toString() == '123456789'
+                        ? Container()
+                        : Text(postsTags[index][1].toString(),
+                            style:
+                                TextStyle(color: Colors.blue, fontSize: 16.0)),
+                    SizedBox(width: 20.0),
+                    postsTags[index][2].toString() == '123456789'
+                        ? Container()
+                        : Text(postsTags[index][2].toString(),
+                            style:
+                                TextStyle(color: Colors.blue, fontSize: 16.0)),
+                  ],
+                ),
+                SizedBox(height: 10.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -335,17 +330,14 @@ class _CommentsPostsState extends State<CommentsPosts> {
                             ),
                           )
                         : Container(),
-                    
                     SizedBox(height: 10.0),
                   ],
                 ),
-   
-                 SizedBox(height:10.0),
-
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                     SizedBox(height: 10.0),
+                SizedBox(height: 10.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 10.0),
                     postsImages[index][1] != '123456789'
                         ? SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
@@ -374,43 +366,34 @@ class _CommentsPostsState extends State<CommentsPosts> {
                             ),
                           )
                         : Container(),
-                   ],
-                 ),
-
-                 SizedBox(height:10.0),
-
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.center,
-                   children: [
-                     postsText[index] != null?
-                                            Container(
-                                              width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.8,
-                                                    height: lengthTextBoxPost(
-                                                        postsText[index]
-                                                            .length),
-                                                    child: Column(
-                                                      children: [
-                                                        Text(
-                                                          postsText[index],
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              fontSize: 16),
-                                                          textAlign:
-                                                              TextAlign.justify,
-                                                        ),
-                                                        SizedBox(
-                                                          height: 10.0,
-                                                        ),
-                                                      ],),): Container()  
-                   ],
-                 ),
-
+                  ],
+                ),
+                SizedBox(height: 10.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    postsText[index] != null
+                        ? Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: lengthTextBoxPost(postsText[index].length),
+                            child: Column(
+                              children: [
+                                Text(
+                                  postsText[index],
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 16),
+                                  textAlign: TextAlign.justify,
+                                ),
+                                SizedBox(
+                                  height: 10.0,
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container()
+                  ],
+                ),
               ],
             );
           }),

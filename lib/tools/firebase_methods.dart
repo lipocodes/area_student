@@ -26,12 +26,18 @@ class FirebaseMethods {
 }
 
 
-removeCommentPost (commentId, List<String> commentsId,  String postId) async {
+removeCommentPost (op, commentId, List<String> commentsId,  String postId) async {
+
     String uid = await inputData();
-    await firestore.collection("commentsPosts").document(commentId).delete();
+    String collection = "";
+
+    if(op=="createCommentsPostsGroups") collection = "commentsPostsGroups";
+    else collection = "commentsPosts";
+
+    await firestore.collection(collection).document(commentId).delete();
     commentsId.remove(commentId);
-    await firestore.collection("posts").document(postId).updateData({'comments': commentsId});
-    print("wwwwwwwwwwwwwwww= " + commentId +  " " + commentsId.toString() +  " " + postId);
+    await firestore.collection(collection=="commentsPosts" ? "posts" : "postsGroups").document(postId).updateData({'comments': commentsId});
+   
 }
         
 
@@ -147,6 +153,7 @@ removeCommentPost (commentId, List<String> commentsId,  String postId) async {
     if (op == "createPost")
       collectionName = "posts";
     else if (op == "createCommentPost") collectionName = "commentsPosts";
+    else if(op == "createCommentPostGroups")  collectionName = "commentsPostsGroups";
 
     String newCommentId = uid + '_' + now.toString();
 
@@ -193,12 +200,15 @@ removeCommentPost (commentId, List<String> commentsId,  String postId) async {
 
   }
 
-  Future<bool> updatePostsComments(String postId, String existingPostId) async {
+  Future<bool> updatePostsComments(String op,String postId, String existingPostId) async {
     bool msg;
     String uid = await inputData();
+    String collection= "";
+    if(op=="createCommentPostGroups") collection = "postsGroups";  
+    else collection = "posts";
 
     final QuerySnapshot result = await Firestore.instance
-        .collection('posts')
+        .collection(collection)
         .where('postId', isEqualTo: existingPostId)
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
@@ -210,15 +220,18 @@ removeCommentPost (commentId, List<String> commentsId,  String postId) async {
     comments.add(postId);
 
     await firestore
-        .collection("posts")
+        .collection(collection)
         .document(existingPostId)
         .updateData({'comments': comments});
     return true;
   }
 
-  Future updateLikeListPost(String postId, List<String> postLikes) async {
+  Future updateLikeListPost(String op, String postId, List<String> postLikes) async {
+    
+    String collection = op;
+  
     await firestore
-        .collection("posts")
+        .collection(collection)
         .document(postId)
         .updateData({'likes': postLikes});
   }
@@ -370,6 +383,11 @@ removeCommentPost (commentId, List<String> commentsId,  String postId) async {
       }
       else if(op == "createCommentPost"){
         await firestore .collection("commentsPosts").document(postId).updateData({'images': data}).whenComplete(() {
+        msg = true;
+      });
+      }
+      else if(op == "createCommentPostGroups"){
+        await firestore .collection("commentsPostsGroups").document(postId).updateData({'images': data}).whenComplete(() {
         msg = true;
       });
       }

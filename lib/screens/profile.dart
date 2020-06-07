@@ -457,7 +457,7 @@ class _ProfileState extends State<Profile> {
       postsLikes[index].remove(this.uid);
     }
 
-    await firebaseMethods.updateLikeListPost(postsId[index], postsLikes[index]);
+    await firebaseMethods.updateLikeListPost("posts",postsId[index], postsLikes[index]);
 
     setState(() {});
   }
@@ -1004,7 +1004,7 @@ class _ProfileState extends State<Profile> {
                                                                     .push(new CupertinoPageRoute(
                                                                         builder:
                                                                             (BuildContext context) =>
-                                                                                new CommentsPosts(postsId[index], postsComments[index] )));
+                                                                                new CommentsPosts("createCommentsPosts" ,postsId[index], postsComments[index] )));
 
                                                                 setState(() {
                                                                   
