@@ -37,7 +37,7 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
     await firestore.collection(collection).document(commentId).delete();
     commentsId.remove(commentId);
     await firestore.collection(collection=="commentsPosts" ? "posts" : "postsGroups").document(postId).updateData({'comments': commentsId});
-   
+
 }
         
 

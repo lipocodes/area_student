@@ -11,6 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'menu_groups.dart';
 import 'meet.dart';
 import 'chats.dart';
+import 'profile.dart';
 
 class CommentsPosts extends StatefulWidget {
   String op = "";
@@ -113,6 +114,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
       this.postsImages.add([image1, image2]);
     }
 
+    this.listComments = this.listComments.reversed.toList();
     this.postsId = this.postsId.reversed.toList();
     this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
     this.postsCreationCountry = this.postsCreationCountry.reversed.toList();
@@ -155,7 +157,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
   @override
   Widget build(BuildContext context) {
   
-    if(postsCreatorUid==null) return Container(); 
+    if(listComments==null) return Container(); 
 
     return Scaffold(
       key: scaffoldKey,
@@ -191,13 +193,17 @@ class _CommentsPostsState extends State<CommentsPosts> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
+        currentIndex: widget.op == "createCommentsPostsGroups"? 1 : 0 ,
         onTap: (int index) {
           setState(() {
             this.indexBottomBar = index;
           });
 
-          if (this.indexBottomBar == 1) {
+          if (this.indexBottomBar == 0 ) {
+            Navigator.of(context).push(new CupertinoPageRoute(
+                builder: (BuildContext context) => new Profile()));
+          }
+          else if (this.indexBottomBar == 1 ) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new MenuGroups()));
           } else if (this.indexBottomBar == 2) {
