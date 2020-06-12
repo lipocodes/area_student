@@ -169,6 +169,7 @@ class FirebaseMethods {
 
   Future createNewPost(
     String op,
+    String postTitle,
     String postText,
     List<File> postImageList,
     List<String> postId,
@@ -223,6 +224,7 @@ class FirebaseMethods {
           'creationTime': now.toString(),
           'creatorUid': uid,
           'postId': postName,
+          'title': postTitle,
           'text': postText,
           'tags': [tag1, tag2, tag3],
           'images': ['123456789', '123456789'],
@@ -357,7 +359,10 @@ class FirebaseMethods {
 
     await inputData();
     if (op == "posts" && addOrRemove == true)
-      notifications.add(myProfileImage +
+      notifications.add(
+        creatorUid +
+        "^^^" + 
+        myProfileImage +
           "^^^" +
           myName +
           "^^^" +
@@ -367,7 +372,10 @@ class FirebaseMethods {
           "^^^" +
           postId);
     else if (op == "postsGroups" && addOrRemove == true)
-      notifications.add(myProfileImage +
+      notifications.add(
+         creatorUid +
+        "^^^" + 
+        myProfileImage +
           "^^^" +
           myName +
           "^^^" +

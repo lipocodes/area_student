@@ -22,6 +22,7 @@ class CreatePost extends StatefulWidget {
 class _CreatePostState extends State<CreatePost> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
+  TextEditingController controllerPostTitle = new TextEditingController();
   TextEditingController controllerPostText = new TextEditingController();
   String textWarning = "";
   List<String> postsId = [];
@@ -29,8 +30,8 @@ class _CreatePostState extends State<CreatePost> {
   FirebaseMethods firebaseMethods = new FirebaseMethods();
 
   onPressedCreateButton() async {
-    if (this.controllerPostText.text.toString().length == 0 &&
-        postImageList.length == 0) {
+    if ((this.controllerPostTitle.text.toString().length==0) ||  (this.controllerPostText.text.toString().length == 0 &&
+        postImageList.length == 0)) {
       setState(() {
         this.textWarning = screen13Warning;
       });
@@ -41,6 +42,7 @@ class _CreatePostState extends State<CreatePost> {
 
       await firebaseMethods.createNewPost(
           widget.op,
+          this.controllerPostTitle.text,
           this.controllerPostText.text,
           this.postImageList,
           this.postsId,
@@ -253,6 +255,21 @@ class _CreatePostState extends State<CreatePost> {
               ],
             ),
             SizedBox(height: 20.0),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),
+              child: TextField(
+                controller: controllerPostTitle,
+                keyboardType: TextInputType.text,
+                maxLength: 50,
+                maxLines: 1,
+                decoration: InputDecoration(
+                    border: new OutlineInputBorder(
+                        borderRadius: new BorderRadius.circular(25.0)),
+                    hintText: 'Title..'),
+              ),
+            ),
+            SizedBox(height: 10.0),
             Padding(
               padding: const EdgeInsets.only(
                   left: 5.0, right: 5.0, top: 10.0, bottom: 5.0),

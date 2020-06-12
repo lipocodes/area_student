@@ -62,6 +62,7 @@ class _ProfileState extends State<Profile> {
   List<String> postsCreationRegion = [];
   List<String> postsCreationSubRegion = [];
   List<String> postsCreationTime = [];
+  List<String> postsTitle = [];
   List<String> postsText = [];
   List<List<String>> postsTags = [];
   List<List<String>> postsImages = [];
@@ -85,31 +86,25 @@ class _ProfileState extends State<Profile> {
   List<String> notificationLink = [];
   String myUid;
 
-
-
-
-
-
-
-
-
-  onTapNotification(int index) async{
-   
-  final QuerySnapshot result = await Firestore.instance
+  onTapNotification(int index) async {
+    final QuerySnapshot result = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: myUid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot = result.documents;
     List str1 = snapshot[0].data['notifications'];
     List<String> notifications = [];
-    if(str1==null) str1=[];
+    if (str1 == null) str1 = [];
 
     for (int i = 0; i < str1.length; i++) {
       notifications.add(str1[i].toString());
     }
 
     for (int h = 0; h < notifications.length; h++) {
-      if (notifications[h].contains(notificationCreationTime[index].toString())) {notifications.removeAt(h);}
+      if (notifications[h]
+          .contains(notificationCreationTime[index].toString())) {
+        notifications.removeAt(h);
+      }
     }
 
     try {
@@ -120,65 +115,60 @@ class _ProfileState extends State<Profile> {
           .updateData({'notifications': notifications});
     } catch (e) {}
 
+    if (notificationOperation[index] == "Comment on Post") {
+      final QuerySnapshot result = await Firestore.instance
+          .collection('posts')
+          .where('postId', isEqualTo: notificationOriginalPostUid[index])
+          .getDocuments();
+      final List<DocumentSnapshot> snapshot = result.documents;
+      List temp = snapshot[0].data['comments'];
+      List<String> comments = [];
+      for (int i = 0; i < temp.length; i++) {
+        comments.add(temp[i].toString());
+      }
 
-
-    if(notificationOperation[index]=="Comment on Post"){
-     
-     final QuerySnapshot result = await Firestore.instance
-        .collection('posts')
-        .where('postId', isEqualTo: notificationOriginalPostUid[index])
-        .getDocuments();
-     final List<DocumentSnapshot> snapshot = result.documents;
-     List temp = snapshot[0].data['comments'];
-     List<String> comments = [];
-     for(int i=0; i<temp.length; i++){
-       comments.add(temp[i].toString());
-     }
-     
-      await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) => new CommentsPosts("createCommentsPosts", notificationOriginalPostUid[index], comments)));
+      await Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) => new CommentsPosts(
+              "createCommentsPosts",
+              notificationOriginalPostUid[index],
+              comments)));
       retrieveNotifications();
-    }
-    else if(notificationOperation[index]=="Comment on Post in Group"){
+    } else if (notificationOperation[index] == "Comment on Post in Group") {
+      final QuerySnapshot result = await Firestore.instance
+          .collection('postsGroups')
+          .where('postId', isEqualTo: notificationOriginalPostUid[index])
+          .getDocuments();
+      final List<DocumentSnapshot> snapshot = result.documents;
+      List temp = snapshot[0].data['comments'];
+      List<String> comments = [];
+      for (int i = 0; i < temp.length; i++) {
+        comments.add(temp[i].toString());
+      }
 
-     final QuerySnapshot result = await Firestore.instance
-        .collection('postsGroups')
-        .where('postId', isEqualTo: notificationOriginalPostUid[index])
-        .getDocuments();
-     final List<DocumentSnapshot> snapshot = result.documents;
-     List temp = snapshot[0].data['comments'];
-     List<String> comments = [];
-     for(int i=0; i<temp.length; i++){
-       comments.add(temp[i].toString());
-     }
-     
-      await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) => new CommentsPosts("createCommentsPostsGroups", notificationOriginalPostUid[index], comments)));
+      await Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) => new CommentsPosts(
+              "createCommentsPostsGroups",
+              notificationOriginalPostUid[index],
+              comments)));
       retrieveNotifications();
-
+    } else if (notificationOperation[index] == "Liked Post") {
+      await Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) =>
+              new Meet(notificationOriginalPostUid[index])));
+      retrieveNotifications();
+    } else if (notificationOperation[index] == "Liked Post in Group") {
+      await Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) =>
+              new Meet(notificationOriginalPostUid[index])));
+      retrieveNotifications();
+    } else if (notificationOperation[index] == "Followed You") {
+      await Navigator.of(context).push(new CupertinoPageRoute(
+          builder: (BuildContext context) =>
+              new Meet(notificationOriginalPostUid[index])));
     }
-    else if(notificationOperation[index]=="Liked Post"){
-      
-    }
-    else if(notificationOperation[index]=="Liked Post in Group"){
-
-    }
-    else if(notificationOperation[index]=="Followed You"){
-      await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) => new Meet(notificationLink[index])));
-    }
-    
-
 
     Navigator.of(context).pop();
-  
-
   }
-
-
-
-
-
-
-
-
 
   Future retrieveNotifications() async {
     notificationOriginalPostUid = [];
@@ -197,11 +187,9 @@ class _ProfileState extends State<Profile> {
     final List<DocumentSnapshot> snapshot = result.documents;
     List<dynamic> str1 = snapshot[0].data['notifications'];
 
-
-
     for (int i = 0; i < str1.length; i++) {
       var not = str1[i].toString();
-      var notification = not.split("^^^");   
+      var notification = not.split("^^^");
       notificationOriginalPostUid.add(notification[0]);
       notificationIcon.add(notification[1]);
       notificationCreatorName.add(notification[2]);
@@ -209,7 +197,6 @@ class _ProfileState extends State<Profile> {
       notificationOperation.add(notification[4]);
       notificationLink.add(notification[5]);
     }
-   
   }
 
   Future<String> inputData() async {
@@ -310,6 +297,7 @@ class _ProfileState extends State<Profile> {
     this.postsCreationRegion = [];
     this.postsCreationSubRegion = [];
     this.postsCreationTime = [];
+    this.postsTitle = [];
     this.postsText = [];
     this.postsTags = [];
     this.postsImages = [];
@@ -334,6 +322,8 @@ class _ProfileState extends State<Profile> {
           .add(snapshot[i].data['creationSubRegion'].toString());
 
       this.postsCreationTime.add(snapshot[i].data['creationTime'].toString());
+
+      this.postsTitle.add(snapshot[i].data['title'].toString());
 
       this.postsText.add(snapshot[i].data['text'].toString());
 
@@ -611,7 +601,6 @@ class _ProfileState extends State<Profile> {
   createNewPost(String op, String existingPostId) async {
     var res = await Navigator.of(context).push(new CupertinoPageRoute(
         builder: (BuildContext context) => new CreatePost(op, existingPostId)));
-   
   }
 
   @override
@@ -667,13 +656,18 @@ class _ProfileState extends State<Profile> {
                             ),
                           ],
                         ),
-                        content: ListView.builder(
+                        content: ListView.separated(
+                          separatorBuilder: (context, index) => Divider(
+                            color: Colors.black,
+                          ),
                           itemCount: notificationIcon.length,
                           itemBuilder: (context, index) {
                             return GestureDetector(
-                              onTap: () {onTapNotification(index);},
-                                child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              onTap: () {
+                                onTapNotification(index);
+                              },
+                              child: Row(
+                                //mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
                                   new Container(
                                       width: 48.0,
@@ -684,6 +678,7 @@ class _ProfileState extends State<Profile> {
                                               fit: BoxFit.fill,
                                               image: new NetworkImage(
                                                   notificationIcon[index])))),
+                                  SizedBox(width: 10.0),
                                   Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
@@ -691,7 +686,7 @@ class _ProfileState extends State<Profile> {
                                         children: [
                                           Text(notificationCreatorName[index],
                                               style: TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 14,
                                                   fontWeight: FontWeight.w800)),
                                         ],
                                       ),
@@ -699,22 +694,22 @@ class _ProfileState extends State<Profile> {
                                         children: [
                                           Text(notificationOperation[index],
                                               style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600)),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w300)),
                                         ],
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        timestampToTimeGap(
-                                            notificationCreationTime[index]),
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w300),
-                                      ),
-                                    ],
+                                  SizedBox(width: 10.0),
+                                  SizedBox(
+                                    width: 40.0,
+                                    child: Text(
+                                      timestampToTimeGap(
+                                          notificationCreationTime[index]),
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w300),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -804,6 +799,7 @@ class _ProfileState extends State<Profile> {
                   ),
                 )),
             Positioned(
+             
               child: Column(
                 children: [
                   Row(
@@ -822,7 +818,7 @@ class _ProfileState extends State<Profile> {
                           },
                         ),
                       ),
-                      Padding(
+                      /*Padding(
                         padding: const EdgeInsets.only(top: 10.0, right: 10.0),
                         child: IconButton(
                           icon: Icon(
@@ -835,7 +831,7 @@ class _ProfileState extends State<Profile> {
                                 scaffoldKey);
                           },
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                   SizedBox(height: 40.0),
@@ -1126,6 +1122,10 @@ class _ProfileState extends State<Profile> {
                                                     ),
                                                   )
                                                 : Container(),
+                                            SizedBox(height: 10.0),
+                                            postsTitle[index] != null?
+                                            Text(postsTitle[index], style:  TextStyle(fontSize: 20, fontWeight: FontWeight.w900),):
+                                            Container(),   
                                             SizedBox(height: 10.0),
                                             postsText[index] != null
                                                 ? Container(

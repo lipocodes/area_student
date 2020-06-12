@@ -33,6 +33,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
   List<String> postsCreationRegion = [];
   List<String> postsCreationSubRegion = [];
   List<String> postsCreationTime = [];
+  List<String> postsTitle = [];
   List<String> postsText = [];
   List<List<String>> postsTags = [];
   List<List<String>> postsImages = [];
@@ -52,7 +53,6 @@ class _CommentsPostsState extends State<CommentsPosts> {
   }
 
   retrieveComments() async {
-   
     this.uid = await inputData();
 
     final QuerySnapshot result = await Firestore.instance
@@ -60,16 +60,15 @@ class _CommentsPostsState extends State<CommentsPosts> {
             widget.op == "createCommentsPostsGroups" ? 'postsGroups' : 'posts')
         .where('postId', isEqualTo: widget.postId)
         .getDocuments();
-         
+
     final List<DocumentSnapshot> snapshot = result.documents;
-   
- 
+
     List list1 = snapshot[0].data['comments'];
     listComments = [];
     for (int i = 0; i < list1.length; i++) {
       listComments.add(list1[i].toString());
     }
-    
+
     //take each comment and retrieve its data
     this.postsId = [];
     this.postsCreatorUid = [];
@@ -79,6 +78,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
     this.postsCreationRegion = [];
     this.postsCreationSubRegion = [];
     this.postsCreationTime = [];
+    this.postsTitle = [];
     this.postsText = [];
     this.postsTags = [];
     this.postsImages = [];
@@ -103,6 +103,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
           .postsCreationSubRegion
           .add(snapshot[0].data['creationSubRegion'].toString());
       this.postsCreationTime.add(snapshot[0].data['creationTime'].toString());
+      this.postsTitle.add(snapshot[0].data['title'].toString());
       this.postsText.add(snapshot[0].data['text'].toString());
 
       List temp = snapshot[0].data['tags'];
@@ -124,19 +125,24 @@ class _CommentsPostsState extends State<CommentsPosts> {
     this.postsCreationRegion = this.postsCreationRegion.reversed.toList();
     this.postsCreationSubRegion = this.postsCreationSubRegion.reversed.toList();
     this.postsCreationTime = this.postsCreationTime.reversed.toList();
+    this.postsTitle = this.postsTitle.reversed.toList();
     this.postsText = this.postsText.reversed.toList();
     this.postsTags = this.postsTags.reversed.toList();
     this.postsImages = this.postsImages.reversed.toList();
 
-    for (int i = 0; i < postsCreatorUid.length; i++) { 
-       final QuerySnapshot result = await Firestore.instance
+    for (int i = 0; i < postsCreatorUid.length; i++) {
+      final QuerySnapshot result = await Firestore.instance
           .collection('userData')
           .where('uid', isEqualTo: postsCreatorUid[i])
           .getDocuments();
       final List<DocumentSnapshot> snapshot = result.documents;
-      this.postsCreatorName.add(snapshot[0].data['firstName'].toString() +  "  " + snapshot[0].data['lastName'].toString());
-      this.postsCreatorProfileImage.add(snapshot[0].data['profileImages'][0].toString());
-     }
+      this.postsCreatorName.add(snapshot[0].data['firstName'].toString() +
+          "  " +
+          snapshot[0].data['lastName'].toString());
+      this
+          .postsCreatorProfileImage
+          .add(snapshot[0].data['profileImages'][0].toString());
+    }
 
     setState(() {});
   }
@@ -159,8 +165,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
 
   @override
   Widget build(BuildContext context) {
-  
-    if(listComments==null) return Container(); 
+    if (listComments == null) return Container();
 
     return Scaffold(
       key: scaffoldKey,
@@ -196,17 +201,16 @@ class _CommentsPostsState extends State<CommentsPosts> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: widget.op == "createCommentsPostsGroups"? 1 : 0 ,
+        currentIndex: widget.op == "createCommentsPostsGroups" ? 1 : 0,
         onTap: (int index) {
           setState(() {
             this.indexBottomBar = index;
           });
 
-          if (this.indexBottomBar == 0 ) {
+          if (this.indexBottomBar == 0) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Profile()));
-          }
-          else if (this.indexBottomBar == 1 ) {
+          } else if (this.indexBottomBar == 1) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new MenuGroups()));
           } else if (this.indexBottomBar == 2) {
@@ -256,12 +260,11 @@ class _CommentsPostsState extends State<CommentsPosts> {
                                   image: new NetworkImage(
                                       this.postsCreatorProfileImage[index])))),
                     ],
-
                     SizedBox(width: 10),
                     Text(
                         postsCreatorName[index] +
-                                                        "\n" +
-                        postsCreationCountry[index] +
+                            "\n" +
+                            postsCreationCountry[index] +
                             "," +
                             postsCreationRegion[index] +
                             "," +
@@ -272,15 +275,18 @@ class _CommentsPostsState extends State<CommentsPosts> {
                             fontSize: 16.0, fontWeight: FontWeight.w800)),
                     GestureDetector(
                         onTap: () async {
-                          await firebaseMethod.removeCommentPost( widget.op == "createCommentsPostsGroups"? "createCommentsPostsGroups"  : "createCommentsPosts" ,
-                              listComments[index] ,listComments ,widget.postId);
+                          await firebaseMethod.removeCommentPost(
+                              widget.op == "createCommentsPostsGroups"
+                                  ? "createCommentsPostsGroups"
+                                  : "createCommentsPosts",
+                              listComments[index],
+                              listComments,
+                              widget.postId);
                           retrieveComments();
                         },
                         child: Text(" X ",
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w500))),
-                    
-                    
                   ],
                 ),
                 SizedBox(height: 10.0),
@@ -377,6 +383,14 @@ class _CommentsPostsState extends State<CommentsPosts> {
                         : Container(),
                   ],
                 ),
+               
+                postsTitle[index] != null
+                    ? Text(
+                        postsTitle[index],
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w900),
+                      )
+                    : Container(),
                 SizedBox(height: 10.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
