@@ -1,10 +1,6 @@
 import 'package:areastudent/data/constants.dart';
-import 'package:areastudent/screens/chat_screen.dart';
-import 'package:areastudent/tools/auth_service.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:share/share.dart';
 import 'blocked_users.dart';
@@ -13,19 +9,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
 import 'followers.dart';
 import 'following.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:areastudent/tools/methods.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'create_post.dart';
 import 'menu_groups.dart';
 import 'meet.dart';
 import 'chats.dart';
 import 'package:areastudent/screens/images_in_large.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'comments_posts.dart';
 
 class Profile extends StatefulWidget {
@@ -78,126 +70,9 @@ class _ProfileState extends State<Profile> {
   String textTag1 = "Add tag";
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
   int indexBottomBar = 0;
-  List<String> notificationOriginalPostUid = [];
-  List<String> notificationIcon = [];
-  List<String> notificationCreationTime = [];
-  List<String> notificationCreatorName = [];
-  List<String> notificationOperation = [];
-  List<String> notificationLink = [];
   String myUid;
 
-  onTapNotification(int index) async {
-    final QuerySnapshot result = await Firestore.instance
-        .collection('userData')
-        .where('uid', isEqualTo: myUid)
-        .getDocuments();
-    final List<DocumentSnapshot> snapshot = result.documents;
-    List str1 = snapshot[0].data['notifications'];
-    List<String> notifications = [];
-    if (str1 == null) str1 = [];
-
-    for (int i = 0; i < str1.length; i++) {
-      notifications.add(str1[i].toString());
-    }
-
-    for (int h = 0; h < notifications.length; h++) {
-      if (notifications[h]
-          .contains(notificationCreationTime[index].toString())) {
-        notifications.removeAt(h);
-      }
-    }
-
-    try {
-      String uid = await inputData();
-      await Firestore.instance
-          .collection("userData")
-          .document(myUid)
-          .updateData({'notifications': notifications});
-    } catch (e) {}
-
-    if (notificationOperation[index] == "Comment on Post") {
-      final QuerySnapshot result = await Firestore.instance
-          .collection('posts')
-          .where('postId', isEqualTo: notificationOriginalPostUid[index])
-          .getDocuments();
-      final List<DocumentSnapshot> snapshot = result.documents;
-      List temp = snapshot[0].data['comments'];
-      List<String> comments = [];
-      for (int i = 0; i < temp.length; i++) {
-        comments.add(temp[i].toString());
-      }
-
-      await Navigator.of(context).push(new CupertinoPageRoute(
-          builder: (BuildContext context) => new CommentsPosts(
-              "createCommentsPosts",
-              notificationOriginalPostUid[index],
-              comments)));
-      retrieveNotifications();
-    } else if (notificationOperation[index] == "Comment on Post in Group") {
-      final QuerySnapshot result = await Firestore.instance
-          .collection('postsGroups')
-          .where('postId', isEqualTo: notificationOriginalPostUid[index])
-          .getDocuments();
-      final List<DocumentSnapshot> snapshot = result.documents;
-      List temp = snapshot[0].data['comments'];
-      List<String> comments = [];
-      for (int i = 0; i < temp.length; i++) {
-        comments.add(temp[i].toString());
-      }
-
-      await Navigator.of(context).push(new CupertinoPageRoute(
-          builder: (BuildContext context) => new CommentsPosts(
-              "createCommentsPostsGroups",
-              notificationOriginalPostUid[index],
-              comments)));
-      retrieveNotifications();
-    } else if (notificationOperation[index] == "Liked Post") {
-      await Navigator.of(context).push(new CupertinoPageRoute(
-          builder: (BuildContext context) =>
-              new Meet(notificationOriginalPostUid[index])));
-      retrieveNotifications();
-    } else if (notificationOperation[index] == "Liked Post in Group") {
-      await Navigator.of(context).push(new CupertinoPageRoute(
-          builder: (BuildContext context) =>
-              new Meet(notificationOriginalPostUid[index])));
-      retrieveNotifications();
-    } else if (notificationOperation[index] == "Followed You") {
-      await Navigator.of(context).push(new CupertinoPageRoute(
-          builder: (BuildContext context) =>
-              new Meet(notificationOriginalPostUid[index])));
-    }
-
-    Navigator.of(context).pop();
-  }
-
-  Future retrieveNotifications() async {
-    notificationOriginalPostUid = [];
-    notificationIcon = [];
-    notificationCreationTime = [];
-    notificationCreatorName = [];
-    notificationOperation = [];
-    notificationLink = [];
-
-    myUid = await inputData();
-
-    final QuerySnapshot result = await firestore
-        .collection("userData")
-        .where('uid', isEqualTo: myUid)
-        .getDocuments();
-    final List<DocumentSnapshot> snapshot = result.documents;
-    List<dynamic> str1 = snapshot[0].data['notifications'];
-
-    for (int i = 0; i < str1.length; i++) {
-      var not = str1[i].toString();
-      var notification = not.split("^^^");
-      notificationOriginalPostUid.add(notification[0]);
-      notificationIcon.add(notification[1]);
-      notificationCreatorName.add(notification[2]);
-      notificationCreationTime.add(notification[3]);
-      notificationOperation.add(notification[4]);
-      notificationLink.add(notification[5]);
-    }
-  }
+  
 
   Future<String> inputData() async {
     try {
@@ -566,7 +441,7 @@ class _ProfileState extends State<Profile> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    retrieveNotifications();
+     
     retrieveUserData();
     pageController = PageController(
       initialPage: 1,
@@ -605,6 +480,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
@@ -656,66 +533,7 @@ class _ProfileState extends State<Profile> {
                             ),
                           ],
                         ),
-                        content: ListView.separated(
-                          separatorBuilder: (context, index) => Divider(
-                            color: Colors.black,
-                          ),
-                          itemCount: notificationIcon.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                onTapNotification(index);
-                              },
-                              child: Row(
-                                //mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  new Container(
-                                      width: 48.0,
-                                      height: 48.0,
-                                      decoration: new BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: new DecorationImage(
-                                              fit: BoxFit.fill,
-                                              image: new NetworkImage(
-                                                  notificationIcon[index])))),
-                                  SizedBox(width: 10.0),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(notificationCreatorName[index],
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w800)),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text(notificationOperation[index],
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w300)),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(width: 10.0),
-                                  SizedBox(
-                                    width: 40.0,
-                                    child: Text(
-                                      timestampToTimeGap(
-                                          notificationCreationTime[index]),
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                        content: notifications(),
                       );
                     },
                   );

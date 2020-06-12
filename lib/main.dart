@@ -1,17 +1,11 @@
 //import 'dart:html';
 
-import 'package:areastudent/screens/menu_groups.dart';
 import 'package:flutter/material.dart';
 import 'package:areastudent/screens/login.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:io';
-import 'package:areastudent/screens/chat_screen.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:areastudent/screens/meet.dart';
-import 'package:areastudent/screens/search_options.dart';
-import 'package:areastudent/screens/chats.dart';
+import 'package:areastudent/tools/widgets.dart';
+
 
 
  /* void checkPermissions() async {
@@ -32,6 +26,8 @@ void main() async{
   // Pass all uncaught errors from the framework to Crashlytics.
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
   runApp(MyApp());
+
+  retrieveNotifications();  //in widgets.dart
 
     //checkPermissions();
 }
