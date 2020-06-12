@@ -9,6 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 
+String myUid;
+String myProfileImage = "";
+String myName = "";
+
 class FirebaseMethods {
   Firestore firestore = Firestore.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -23,25 +27,69 @@ class FirebaseMethods {
         .collection("userData")
         .document(uid)
         .updateData({'posts': postsId});
-}
+  }
 
-
-removeCommentPost (op, commentId, List<String> commentsId,  String postId) async {
-
+  removeCommentPost(
+      op, commentId, List<String> commentsId, String postId) async {
     String uid = await inputData();
     String collection = "";
 
-    if(op=="createCommentsPostsGroups") collection = "commentsPostsGroups";
-    else collection = "commentsPosts";
+    if (op == "createCommentsPostsGroups")
+      collection = "commentsPostsGroups";
+    else
+      collection = "commentsPosts";
 
     await firestore.collection(collection).document(commentId).delete();
     commentsId.remove(commentId);
-    await firestore.collection(collection=="commentsPosts" ? "posts" : "postsGroups").document(postId).updateData({'comments': commentsId});
+    await firestore
+        .collection(collection == "commentsPosts" ? "posts" : "postsGroups")
+        .document(postId)
+        .updateData({'comments': commentsId});
 
-}
-        
+
+    final QuerySnapshot result1 = await Firestore.instance
+        .collection(collection == "commentsPosts" ? "posts" : "postsGroups")
+        .where('postId', isEqualTo: postId)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot1 = result1.documents;
+    String creatorUid = snapshot1[0].data['creatorUid'];
 
 
+   final QuerySnapshot result2 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: creatorUid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot2 = result2.documents;
+    List str1 = snapshot1[0].data['notifications'];
+    List<String> notifications = [];
+    if(str1==null) str1=[];
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+    
+    for (int h = 0; h < notifications.length; h++) {
+      if (notifications[h].contains("Liked Post") &&
+          notifications[h].contains(myUid) &&
+          notifications[h].contains(postId)) {
+        notifications.removeAt(h);
+      } 
+    }
+    
+    try {
+      String uid = await inputData();
+      await Firestore.instance
+          .collection("userData")
+          .document(creatorUid)
+          .updateData({'notifications': notifications});
+    } catch (e) {}
+
+
+   
+   
+
+  
+
+  }
 
   removePostGroup(String postName, String nameGroup) async {
     List<String> postsId = [];
@@ -108,9 +156,15 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
   }
 
   Future<String> inputData() async {
-    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    final String uid = user.uid.toString();
-    return uid;
+    try {
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      myUid = user.uid.toString();
+      myProfileImage = user.photoUrl.toString();
+      myName = user.displayName.toString();
+      return myUid;
+    } catch (e) {
+      return "";
+    }
   }
 
   Future createNewPost(
@@ -152,8 +206,10 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
     String collectionName = "";
     if (op == "createPost")
       collectionName = "posts";
-    else if (op == "createCommentPost") collectionName = "commentsPosts";
-    else if(op == "createCommentPostGroups")  collectionName = "commentsPostsGroups";
+    else if (op == "createCommentPost")
+      collectionName = "commentsPosts";
+    else if (op == "createCommentPostGroups")
+      collectionName = "commentsPostsGroups";
 
     String newCommentId = uid + '_' + now.toString();
 
@@ -178,34 +234,33 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
       await prefs.setString('postId', postName);
 
       final QuerySnapshot result = await firestore
-        .collection("userData")
-        .where('uid', isEqualTo: uid)
-        .getDocuments();
-     final List<DocumentSnapshot> snapshot = result.documents;
-     List<dynamic> str1 = snapshot[0].data['posts'];
-     List<String> str2 =  [];
-     for(int i=0; i<str1.length ; i++){
-      str2.add(str1[i].toString());
-     }
-     str2.add(postName); 
-            
+          .collection("userData")
+          .where('uid', isEqualTo: uid)
+          .getDocuments();
+      final List<DocumentSnapshot> snapshot = result.documents;
+      List<dynamic> str1 = snapshot[0].data['posts'];
+      List<String> str2 = [];
+      for (int i = 0; i < str1.length; i++) {
+        str2.add(str1[i].toString());
+      }
+      str2.add(postName);
+
       await firestore
           .collection("userData")
           .document(uid)
           .updateData({'posts': str2});
-
     });
-
-     
-
   }
 
-  Future<bool> updatePostsComments(String op,String postId, String existingPostId) async {
+  Future<bool> updatePostsComments(
+      String op, String postId, String existingPostId) async {
     bool msg;
     String uid = await inputData();
-    String collection= "";
-    if(op=="createCommentPostGroups") collection = "postsGroups";  
-    else collection = "posts";
+    String collection = "";
+    if (op == "createCommentPostGroups")
+      collection = "postsGroups";
+    else
+      collection = "posts";
 
     final QuerySnapshot result = await Firestore.instance
         .collection(collection)
@@ -223,17 +278,129 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
         .collection(collection)
         .document(existingPostId)
         .updateData({'comments': comments});
+
+    String creatorUid = snapshot[0].data['creatorUid'].toString();
+
+    final QuerySnapshot result1 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: creatorUid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot1 = result1.documents;
+    List str1 = snapshot1[0].data['notifications'];
+    List<String> notifications = [];
+
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+    var now = new DateTime.now().microsecondsSinceEpoch;
+    if (collection == "posts")
+      notifications.add(
+        existingPostId + 
+        "^^^" + 
+        myProfileImage +
+          "^^^" +
+          myName +
+          "^^^" +
+          now.toString() +
+          "^^^" +
+          "Comment on Post" +
+          "^^^" +
+          postId);
+    else
+      notifications.add(
+      existingPostId + 
+       "^^^"
+       +
+        myProfileImage +
+          "^^^" +
+          myName +
+          "^^^" +
+          now.toString() +
+          "^^^" +
+          "Comment on Post in Group" +
+          "^^^" +
+          postId);
+
+    try {
+      String uid = await inputData();
+
+      await Firestore.instance
+          .collection("userData")
+          .document(creatorUid)
+          .updateData({'notifications': notifications});
+    } catch (e) {}
+
     return true;
   }
 
-  Future updateLikeListPost(String op, String postId, List<String> postLikes) async {
-    
+  Future updateLikeListPost(bool addOrRemove, String creatorUid, String op,
+      String postId, List<String> postLikes) async {
     String collection = op;
-  
+
     await firestore
         .collection(collection)
         .document(postId)
         .updateData({'likes': postLikes});
+
+    int now = new DateTime.now().millisecondsSinceEpoch;
+    final QuerySnapshot result1 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: creatorUid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot1 = result1.documents;
+
+    List str1 = snapshot1[0].data['notifications'];
+    List<String> notifications = [];
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+
+    await inputData();
+    if (op == "posts" && addOrRemove == true)
+      notifications.add(myProfileImage +
+          "^^^" +
+          myName +
+          "^^^" +
+          now.toString() +
+          "^^^" +
+          "Liked Post" +
+          "^^^" +
+          postId);
+    else if (op == "postsGroups" && addOrRemove == true)
+      notifications.add(myProfileImage +
+          "^^^" +
+          myName +
+          "^^^" +
+          now.toString() +
+          "^^^" +
+          "Liked Post in Group" +
+          "^^^" +
+          postId);
+    else if (op == "posts" && addOrRemove == false) {
+      for (int h = 0; h < notifications.length; h++) {
+        if (notifications[h].contains("Liked Post") &&
+            notifications[h].contains(myUid) &&
+            notifications[h].contains(postId)) {
+          notifications.removeAt(h);
+        }
+      }
+    } else if (op == "postsGroups" && addOrRemove == false) {
+      for (int h = 0; h < notifications.length; h++) {
+        if (notifications[h].contains("Liked Post in Group") &&
+            notifications[h].contains(myUid) &&
+            notifications[h].contains(postId)) {
+          notifications.removeAt(h);
+        }
+      }
+    }
+
+    try {
+      String uid = await inputData();
+      await Firestore.instance
+          .collection("userData")
+          .document(creatorUid)
+          .updateData({'notifications': notifications});
+    } catch (e) {}
   }
 
   Future createNewPostGroup(
@@ -380,16 +547,20 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
             .updateData({'images': data}).whenComplete(() {
           msg = true;
         });
-      }
-      else if(op == "createCommentPost"){
-        await firestore .collection("commentsPosts").document(postId).updateData({'images': data}).whenComplete(() {
-        msg = true;
-      });
-      }
-      else if(op == "createCommentPostGroups"){
-        await firestore .collection("commentsPostsGroups").document(postId).updateData({'images': data}).whenComplete(() {
-        msg = true;
-      });
+      } else if (op == "createCommentPost") {
+        await firestore
+            .collection("commentsPosts")
+            .document(postId)
+            .updateData({'images': data}).whenComplete(() {
+          msg = true;
+        });
+      } else if (op == "createCommentPostGroups") {
+        await firestore
+            .collection("commentsPostsGroups")
+            .document(postId)
+            .updateData({'images': data}).whenComplete(() {
+          msg = true;
+        });
       }
 
       postsId.add(postId);
@@ -460,6 +631,7 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
     List<String> blockedUsers,
     List<String> followers,
     List<String> following,
+    List<String> notifications,
   }) async {
     String uid = await inputData();
 
@@ -486,6 +658,7 @@ removeCommentPost (op, commentId, List<String> commentsId,  String postId) async
           'posts': posts,
           'followers': followers,
           'following': following,
+          'notifications': notifications,
         }))
         .whenComplete(() {
       updatePreference();

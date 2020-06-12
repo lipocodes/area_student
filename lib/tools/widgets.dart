@@ -7,9 +7,13 @@ import 'package:areastudent/screens/followers.dart';
 import 'package:areastudent/screens/following.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:areastudent/tools/firebase_methods.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 int indexLargeProfileImage = 0;
 FirebaseMethods firebaseMethod = new FirebaseMethods();
+Firestore firestore = Firestore.instance;
+
 
 Widget signupInputBox(
     {String labelText,
@@ -311,16 +315,30 @@ String timestampToTimeGap(String timestamp) {
     //if less than 60 minutes
     int remainder = gap % (60 * 1000);
     gap = gap - remainder;
-    return (gap / (60 * 1000)).toString() + " mins ago";
+    return (gap / (60 * 1000)).round().toString() + " mins";
   } else if (gap < 24 * 60 * 60 * 1000) {
     //if less than 24 hours
     int remainder = gap % (60 * 60 * 1000);
     gap = gap - remainder;
-    return (gap / (60 * 60 * 1000)).toString() + " hours ago";
+    return (gap / (60 * 60 * 1000)).round().toString() + " hours";
   } else {
     //if more than 24 hours
     int remainder = gap % (24 * 60 * 60 * 1000);
     gap = gap - remainder;
-    return (gap / (24 * 60 * 60 * 1000)).toString() + " days ago";
+    return (gap / (24 * 60 * 60 * 1000)).round().toString() + " days";
   }
 }
+
+Future<String> inputData() async {
+  try {
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    myUid = user.uid.toString();
+    myProfileImage = user.photoUrl.toString();
+    myName = user.displayName.toString();
+    return myUid;
+  } catch (e) {
+    return "";
+  }
+}
+
+

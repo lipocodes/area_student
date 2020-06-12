@@ -30,6 +30,7 @@ class _SignupState extends State<Signup> {
   List<String> blocked = [];
   List<String> followers = [];
   List<String> following = [];
+  List<String> notifications = [];
   DateTime _birthDate = DateTime.now();
   String birthDate;
   String userAddress;
@@ -280,6 +281,7 @@ class _SignupState extends State<Signup> {
 
       List<String> blocked = [];
       List<String> blockedBy = [];
+      
 
       await firebaseMethod.createUserAccount(
         firstName: controllerFirstName.text,
@@ -300,6 +302,7 @@ class _SignupState extends State<Signup> {
         posts: this.posts,
         followers: this.followers,
         following: this.following,
+        notifications: this.notifications,
       );
       if (imageList.length > 0) {
         imagesUrl =

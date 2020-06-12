@@ -52,6 +52,7 @@ class _CommentsPostsState extends State<CommentsPosts> {
   }
 
   retrieveComments() async {
+   
     this.uid = await inputData();
 
     final QuerySnapshot result = await Firestore.instance
@@ -59,14 +60,16 @@ class _CommentsPostsState extends State<CommentsPosts> {
             widget.op == "createCommentsPostsGroups" ? 'postsGroups' : 'posts')
         .where('postId', isEqualTo: widget.postId)
         .getDocuments();
+         
     final List<DocumentSnapshot> snapshot = result.documents;
-
+   
+ 
     List list1 = snapshot[0].data['comments'];
     listComments = [];
     for (int i = 0; i < list1.length; i++) {
       listComments.add(list1[i].toString());
     }
-
+    
     //take each comment and retrieve its data
     this.postsId = [];
     this.postsCreatorUid = [];

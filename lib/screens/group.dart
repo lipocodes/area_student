@@ -84,6 +84,8 @@ class _GroupState extends State<Group> {
       this.textFollowButton = "Unfollow";
     else
       this.textFollowButton = "Follow";
+
+      
   }
 
   Future retrievePostsContents() async {
@@ -195,13 +197,17 @@ class _GroupState extends State<Group> {
   }
 
   likePost(int index) async {
+    bool addOrRemove = false;
+
     if (didILikeThisPostAlready(index) == false) {
       postsLikes[index].add(this.uid);
+      addOrRemove = true;
     } else {
       postsLikes[index].remove(this.uid);
+      addOrRemove = false;
     }
    
-    await firebaseMethods.updateLikeListPost(
+    await firebaseMethods.updateLikeListPost(addOrRemove, creatorUid[index],
         "postsGroups", postsId[index], postsLikes[index]);
     setState(() {});
   }

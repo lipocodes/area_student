@@ -18,7 +18,6 @@ import 'package:areastudent/screens/images_in_large.dart';
 import 'chats.dart';
 
 String targetUidd;
-String myUid;
 String textBlockUser = "";
 List<String> globalProfilelImages = [];
 String globalName;
@@ -32,6 +31,9 @@ List<String> postsText = [];
 List<List<String>> postsTags = [];
 List<List<String>> postsImages = [];
 List<File> postImageList = [];
+String myUid;
+String myProfileImage = "";
+String myName = "";
 
 class Meet extends StatefulWidget {
   String targetUid;
@@ -45,6 +47,7 @@ class _MeetState extends State<Meet> {
   int indexBottomBar = 0;
   String uid;
   int myIndex = 0;
+
 
   Future<void> retrievePostsCurrentUser() async {
     //this.uid = await inputData();
@@ -463,6 +466,8 @@ class _PersonalCardState extends State<PersonalCard> {
 
   int myIndex = 0;
   followThisUser() async {
+    int now = new DateTime.now().millisecondsSinceEpoch;
+   
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: this.uid)
@@ -475,13 +480,42 @@ class _PersonalCardState extends State<PersonalCard> {
       followers.add(str1[i].toString());
     }
 
-    followers.add(this.uid);
+    followers.add(myUid);
+
     try {
       String uid = await inputData();
       await Firestore.instance
           .collection("userData")
           .document(this.uid)
           .updateData({'followers': followers});
+    } catch(e) {}
+
+
+
+
+     final QuerySnapshot result1 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: targetUidd)
+        .getDocuments();
+     final List<DocumentSnapshot> snapshot1 = result.documents;   
+      
+
+     str1 = snapshot1[0].data['notifications'];
+    List<String> notifications = [];
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+     
+    notifications.add(myProfileImage + "^^^" + myName + "^^^" +  now.toString() + "^^^" + "Followed You" + "^^^" + myUid);
+    try {
+      String uid = await inputData();
+      
+      await Firestore.instance
+          .collection("userData")
+          .document(targetUidd)
+          .updateData({'notifications': notifications});      
+
+
 
       setState(() {
         this.textFollowButton = "Unfollow";
@@ -503,7 +537,7 @@ class _PersonalCardState extends State<PersonalCard> {
     for (int i = 0; i < str1.length; i++) {
       followers.add(str1[i].toString());
     }
-    followers.remove(this.uid);
+    followers.remove(myUid);
     try {
       String uid = await inputData();
       await Firestore.instance
@@ -516,6 +550,32 @@ class _PersonalCardState extends State<PersonalCard> {
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeee followThisUser");
     }
+
+
+    final QuerySnapshot result1 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: targetUidd)
+        .getDocuments();
+     final List<DocumentSnapshot> snapshot1 = result.documents;   
+      
+
+     str1 = snapshot1[0].data['notifications'];
+    List<String> notifications = [];
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+    
+    for(int h=0; h<notifications.length; h++){
+      if(notifications[h].contains('Followed You') && notifications[h].contains(myUid)) {
+        notifications.removeAt(h);
+      }
+    }
+
+     await Firestore.instance
+          .collection("userData")
+          .document(targetUidd)
+          .updateData({'notifications': notifications});
+
   }
 
   retrieveUserData() async {
@@ -1045,8 +1105,10 @@ blockUser(String uidBlockedUser, bool op) async {
 Future<String> inputData() async {
   try {
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    String uid = user.uid.toString();
-    return uid;
+    myUid = user.uid.toString();
+    myProfileImage = user.photoUrl.toString();
+    myName  = user.displayName.toString();
+    return myUid;
   } catch (e) {
     return "";
   }

@@ -77,6 +77,140 @@ class _ProfileState extends State<Profile> {
   String textTag1 = "Add tag";
   String tag1 = "123456789", tag2 = "123456789", tag3 = "123456789";
   int indexBottomBar = 0;
+  List<String> notificationOriginalPostUid = [];
+  List<String> notificationIcon = [];
+  List<String> notificationCreationTime = [];
+  List<String> notificationCreatorName = [];
+  List<String> notificationOperation = [];
+  List<String> notificationLink = [];
+  String myUid;
+
+
+
+
+
+
+
+
+
+  onTapNotification(int index) async{
+   
+  final QuerySnapshot result = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: myUid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    List str1 = snapshot[0].data['notifications'];
+    List<String> notifications = [];
+    if(str1==null) str1=[];
+
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+
+    for (int h = 0; h < notifications.length; h++) {
+      if (notifications[h].contains(notificationCreationTime[index].toString())) {notifications.removeAt(h);}
+    }
+
+    try {
+      String uid = await inputData();
+      await Firestore.instance
+          .collection("userData")
+          .document(myUid)
+          .updateData({'notifications': notifications});
+    } catch (e) {}
+
+
+
+    if(notificationOperation[index]=="Comment on Post"){
+     
+     final QuerySnapshot result = await Firestore.instance
+        .collection('posts')
+        .where('postId', isEqualTo: notificationOriginalPostUid[index])
+        .getDocuments();
+     final List<DocumentSnapshot> snapshot = result.documents;
+     List temp = snapshot[0].data['comments'];
+     List<String> comments = [];
+     for(int i=0; i<temp.length; i++){
+       comments.add(temp[i].toString());
+     }
+     
+      await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) => new CommentsPosts("createCommentsPosts", notificationOriginalPostUid[index], comments)));
+      retrieveNotifications();
+    }
+    else if(notificationOperation[index]=="Comment on Post in Group"){
+
+     final QuerySnapshot result = await Firestore.instance
+        .collection('postsGroups')
+        .where('postId', isEqualTo: notificationOriginalPostUid[index])
+        .getDocuments();
+     final List<DocumentSnapshot> snapshot = result.documents;
+     List temp = snapshot[0].data['comments'];
+     List<String> comments = [];
+     for(int i=0; i<temp.length; i++){
+       comments.add(temp[i].toString());
+     }
+     
+      await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) => new CommentsPosts("createCommentsPostsGroups", notificationOriginalPostUid[index], comments)));
+      retrieveNotifications();
+
+    }
+    else if(notificationOperation[index]=="Liked Post"){
+      
+    }
+    else if(notificationOperation[index]=="Liked Post in Group"){
+
+    }
+    else if(notificationOperation[index]=="Followed You"){
+      await Navigator.of(context).push(new CupertinoPageRoute(builder: (BuildContext context) => new Meet(notificationLink[index])));
+    }
+    
+
+
+    Navigator.of(context).pop();
+  
+
+  }
+
+
+
+
+
+
+
+
+
+  Future retrieveNotifications() async {
+    notificationOriginalPostUid = [];
+    notificationIcon = [];
+    notificationCreationTime = [];
+    notificationCreatorName = [];
+    notificationOperation = [];
+    notificationLink = [];
+
+    myUid = await inputData();
+
+    final QuerySnapshot result = await firestore
+        .collection("userData")
+        .where('uid', isEqualTo: myUid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    List<dynamic> str1 = snapshot[0].data['notifications'];
+
+
+
+    for (int i = 0; i < str1.length; i++) {
+      var not = str1[i].toString();
+      var notification = not.split("^^^");   
+      notificationOriginalPostUid.add(notification[0]);
+      notificationIcon.add(notification[1]);
+      notificationCreatorName.add(notification[2]);
+      notificationCreationTime.add(notification[3]);
+      notificationOperation.add(notification[4]);
+      notificationLink.add(notification[5]);
+    }
+   
+  }
 
   Future<String> inputData() async {
     try {
@@ -231,7 +365,7 @@ class _ProfileState extends State<Profile> {
       //this.postsComments = [];
       for (int i = 0; i < temp.length; i++) {
         str16.add(temp[i].toString());
-                          
+
         visitedLoop = true;
       }
       if (visitedLoop == true) {
@@ -240,7 +374,6 @@ class _ProfileState extends State<Profile> {
         this.postsComments.add([]);
       }
     }
-    
 
     this.postsId = this.postsId.reversed.toList();
     this.postsCreatorUid = this.postsCreatorUid.reversed.toList();
@@ -443,6 +576,7 @@ class _ProfileState extends State<Profile> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    retrieveNotifications();
     retrieveUserData();
     pageController = PageController(
       initialPage: 1,
@@ -451,13 +585,18 @@ class _ProfileState extends State<Profile> {
   }
 
   likePost(int index) async {
+    bool addOrRemove = false;
+
     if (didILikeThisPostAlready(index) == false) {
       postsLikes[index].add(this.uid);
+      addOrRemove = true;
     } else {
       postsLikes[index].remove(this.uid);
+      addOrRemove = false;
     }
 
-    await firebaseMethods.updateLikeListPost("posts",postsId[index], postsLikes[index]);
+    await firebaseMethods.updateLikeListPost(addOrRemove,
+        postsCreatorUid[index], "posts", postsId[index], postsLikes[index]);
 
     setState(() {});
   }
@@ -472,10 +611,7 @@ class _ProfileState extends State<Profile> {
   createNewPost(String op, String existingPostId) async {
     var res = await Navigator.of(context).push(new CupertinoPageRoute(
         builder: (BuildContext context) => new CreatePost(op, existingPostId)));
-
-    setState(() {
-      retrievePostsCurrentUser();
-    });
+   
   }
 
   @override
@@ -508,8 +644,86 @@ class _ProfileState extends State<Profile> {
                 ),
                 color: Colors.black87,
                 onPressed: () {
-                  showSnackBar(
-                      "In the future - Inbox will be here!", scaffoldKey);
+                  return showDialog<void>(
+                    context: context,
+                    barrierDismissible: false, // user must tap button!
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text('Notifications',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w900)),
+                            FlatButton(
+                              child: Text(
+                                'X',
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w600),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                        content: ListView.builder(
+                          itemCount: notificationIcon.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {onTapNotification(index);},
+                                child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  new Container(
+                                      width: 48.0,
+                                      height: 48.0,
+                                      decoration: new BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: new DecorationImage(
+                                              fit: BoxFit.fill,
+                                              image: new NetworkImage(
+                                                  notificationIcon[index])))),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(notificationCreatorName[index],
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w800)),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Text(notificationOperation[index],
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        timestampToTimeGap(
+                                            notificationCreationTime[index]),
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w300),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
             ],
@@ -998,17 +1212,17 @@ class _ProfileState extends State<Profile> {
                                                                   .blueAccent,
                                                               splashColor:
                                                                   Colors.purple,
-                                                              onPressed: () async{ 
-                                                                await Navigator.of(
-                                                                        context)
-                                                                    .push(new CupertinoPageRoute(
-                                                                        builder:
-                                                                            (BuildContext context) =>
-                                                                                new CommentsPosts("createCommentsPosts" ,postsId[index], postsComments[index] )));
+                                                              onPressed:
+                                                                  () async {
+                                                                await Navigator.of(context).push(new CupertinoPageRoute(
+                                                                    builder: (BuildContext context) => new CommentsPosts(
+                                                                        "createCommentsPosts",
+                                                                        postsId[
+                                                                            index],
+                                                                        postsComments[
+                                                                            index])));
 
-                                                                setState(() {
-                                                                  
-                                                                });                
+                                                                setState(() {});
                                                               },
                                                             ),
                                                             this.postsComments[index].length !=
@@ -1040,8 +1254,6 @@ class _ProfileState extends State<Profile> {
                                                                             .blueAccent)),
                                                           ],
                                                         ),
-                                                       
-
                                                         Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
@@ -1072,7 +1284,6 @@ class _ProfileState extends State<Profile> {
                                                             ),
                                                           ],
                                                         ),
-
                                                         Divider(
                                                           thickness: 10,
                                                         ),
