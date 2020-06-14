@@ -472,6 +472,9 @@ Future<String> inputData() async {
       notificationOperation.add(notification[4]);
       notificationLink.add(notification[5]);
     }
+
+    print("ppppppppppppppppppppp= " + notificationOriginalPostUid.toString());
+
   }
 
 
@@ -489,11 +492,11 @@ Widget notifications() {
                                 onTapNotification(index,context);
                               },
                               child: Row(
-                                //mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
                                   new Container(
-                                      width: 48.0,
-                                      height: 48.0,
+                                      width: 64.0,
+                                      height:64.0,
                                       decoration: new BoxDecoration(
                                           shape: BoxShape.circle,
                                           image: new DecorationImage(
@@ -508,7 +511,7 @@ Widget notifications() {
                                         children: [
                                           Text(notificationCreatorName[index],
                                               style: TextStyle(
-                                                  fontSize: 14,
+                                                  fontSize: 18,
                                                   fontWeight: FontWeight.w800)),
                                         ],
                                       ),
@@ -516,7 +519,7 @@ Widget notifications() {
                                         children: [
                                           Text(notificationOperation[index],
                                               style: TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: 16,
                                                   fontWeight: FontWeight.w300)),
                                         ],
                                       ),
@@ -529,7 +532,7 @@ Widget notifications() {
                                       timestampToTimeGap(
                                           notificationCreationTime[index]),
                                       style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.w300),
                                     ),
                                   ),

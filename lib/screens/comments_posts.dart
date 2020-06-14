@@ -12,6 +12,7 @@ import 'menu_groups.dart';
 import 'meet.dart';
 import 'chats.dart';
 import 'profile.dart';
+import 'notifications.dart';
 
 class CommentsPosts extends StatefulWidget {
   String op = "";
@@ -191,33 +192,8 @@ class _CommentsPostsState extends State<CommentsPosts> {
               ),
               color: Colors.black87,
               onPressed: () {
-                      return showDialog<void>(
-                    context: context,
-                    barrierDismissible: false, // user must tap button!
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text('Notifications',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w900)),
-                            FlatButton(
-                              child: Text(
-                                'X',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w600),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                        content: notifications(),
-                      );
-                    },
-                  );
+                      Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Notifications())); 
               },
             ),
           ],
