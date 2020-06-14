@@ -507,7 +507,7 @@ class _PersonalCardState extends State<PersonalCard> {
       notifications.add(str1[i].toString());
     }
      
-    notifications.add(myProfileImage + "^^^" + myName + "^^^" +  now.toString() + "^^^" + "Followed You" + "^^^" + myUid);
+    notifications.add("^^^" + myProfileImage + "^^^" + myName + "^^^" +  now.toString() + "^^^" + "Followed You" + "^^^" + myUid);
     try {
       String uid = await inputData();
       
@@ -515,8 +515,6 @@ class _PersonalCardState extends State<PersonalCard> {
           .collection("userData")
           .document(targetUidd)
           .updateData({'notifications': notifications});      
-
-
 
       setState(() {
         this.textFollowButton = "Unfollow";

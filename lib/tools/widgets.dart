@@ -447,19 +447,6 @@ Future<String> inputData() async {
 
    Future retrieveNotifications() async {     
 
-    AlertDialog(
-          title: new Text("aaaaaaaaaaaaaaa"),
-          content: new Text("aaaaaaaaaaaaaaaa"),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text("Close"),
-              onPressed: () {
-             
-              },
-            ),
-          ],
-        );
 
     notificationOriginalPostUid = [];
     notificationIcon = [];
@@ -487,10 +474,6 @@ Future<String> inputData() async {
       notificationOperation.add(notification[4]);
       notificationLink.add(notification[5]);
     }
-
-
-   
-
 
   }
 
