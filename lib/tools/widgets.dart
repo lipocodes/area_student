@@ -445,7 +445,22 @@ Future<String> inputData() async {
 
 
 
-   Future retrieveNotifications() async {
+   Future retrieveNotifications() async {     
+
+    AlertDialog(
+          title: new Text("aaaaaaaaaaaaaaa"),
+          content: new Text("aaaaaaaaaaaaaaaa"),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Close"),
+              onPressed: () {
+             
+              },
+            ),
+          ],
+        );
+
     notificationOriginalPostUid = [];
     notificationIcon = [];
     notificationCreationTime = [];
@@ -473,7 +488,9 @@ Future<String> inputData() async {
       notificationLink.add(notification[5]);
     }
 
-    print("ppppppppppppppppppppp= " + notificationOriginalPostUid.toString());
+
+   
+
 
   }
 
@@ -481,6 +498,8 @@ Future<String> inputData() async {
 
 
 Widget notifications() {
+  
+  
   return ListView.separated(
                           separatorBuilder: (context, index) => Divider(
                             color: Colors.black,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:areastudent/tools/widgets.dart';
+import 'package:flutter/cupertino.dart';
 
 
 class Notifications extends StatefulWidget {
@@ -9,16 +10,24 @@ class Notifications extends StatefulWidget {
 
 class _NotificationsState extends State<Notifications> {
 
+
    @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    retrieveNotifications().then((value) {
+      setState(() {
+          
+
+      });
+    });
+    
   }
 
   @override
   Widget build(BuildContext context) {
 
-  
+  // if(notificationCreationTime == null || notificationCreationTime.length == 0 ) return Container();
 
     return Scaffold(
              appBar: AppBar(
@@ -45,3 +54,6 @@ class _NotificationsState extends State<Notifications> {
     );
   }
 }
+
+
+

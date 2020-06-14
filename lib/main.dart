@@ -27,8 +27,6 @@ void main() async{
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
   runApp(MyApp());
 
-  retrieveNotifications();  //in widgets.dart
-
     //checkPermissions();
 }
 
