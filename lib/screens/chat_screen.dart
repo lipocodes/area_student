@@ -311,7 +311,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    super.initState();
+    super.initState();  
+
 
     getCurrentUser();
 
@@ -389,18 +390,16 @@ class _ChatScreenState extends State<ChatScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.0),
-                    color: Colors.black12),
-                child: widget.iconGroup.length > 10
-                    ? ListTile(
-                        leading: Image.network(widget.iconGroup),
-                      )
-                    : Container(),
-              ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20.0),
+                  color: Colors.white),
+              child: widget.iconGroup.length > 10
+                  ? ListTile(
+                      leading: Image.network(widget.iconGroup),
+                      title: Text(widget.textPost, maxLines:3),
+                    )
+                  : Container(),
             ),
             widget.creatorUid.length != 0
                 ? MessagesStream(

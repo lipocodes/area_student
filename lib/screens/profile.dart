@@ -73,8 +73,6 @@ class _ProfileState extends State<Profile> {
   int indexBottomBar = 0;
   String myUid;
 
-  
-
   Future<String> inputData() async {
     try {
       final FirebaseUser user = await FirebaseAuth.instance.currentUser();
@@ -442,7 +440,7 @@ class _ProfileState extends State<Profile> {
   void initState() {
     // TODO: implement initState
     super.initState();
-     
+
     retrieveUserData();
     pageController = PageController(
       initialPage: 1,
@@ -481,8 +479,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-
-
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
@@ -511,9 +507,8 @@ class _ProfileState extends State<Profile> {
                 ),
                 color: Colors.black87,
                 onPressed: () {
-                    Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Notifications())); 
-                  
+                  Navigator.of(context).push(new CupertinoPageRoute(
+                      builder: (BuildContext context) => new Notifications()));
                 },
               ),
             ],
@@ -574,10 +569,25 @@ class _ProfileState extends State<Profile> {
                     children: [
                       profileImages.length > 0
                           ? GestureDetector(
-                            onTap: ()  {
-                              
-                            },
-                                child: SizedBox(
+                              onTap: () {
+                                showDialog<void>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.height,
+                                        height: MediaQuery.of(context).size.width,
+                                        decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                image: NetworkImage(
+                                                   profileImages[indexProfileImage]),
+                                                fit: BoxFit.cover)),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: SizedBox(
                                 width: MediaQuery.of(context).size.width,
                                 height: MediaQuery.of(context).size.height,
                                 child: CachedNetworkImage(
@@ -593,13 +603,12 @@ class _ProfileState extends State<Profile> {
                                   fit: BoxFit.fill,
                                 ),
                               ),
-                          )
+                            )
                           : Container(),
                     ],
                   ),
                 )),
             Positioned(
-             
               child: Column(
                 children: [
                   Row(
@@ -710,7 +719,7 @@ class _ProfileState extends State<Profile> {
                   children: [
                     userDetails(name, age, country, region, academicField,
                         aboutMe, numFollowers, numFollowings, context),
-                    SizedBox(height: 50.0),
+                   Divider(height:20, thickness:20, color: Colors.black38),
                     this.postsId.length > 0
                         ? SizedBox(
                             height: 600,
@@ -923,9 +932,15 @@ class _ProfileState extends State<Profile> {
                                                   )
                                                 : Container(),
                                             SizedBox(height: 10.0),
-                                            postsTitle[index] != null?
-                                            Text(postsTitle[index], style:  TextStyle(fontSize: 20, fontWeight: FontWeight.w900),):
-                                            Container(),   
+                                            postsTitle[index] != null
+                                                ? Text(
+                                                    postsTitle[index],
+                                                    style: TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w900),
+                                                  )
+                                                : Container(),
                                             SizedBox(height: 10.0),
                                             postsText[index] != null
                                                 ? Container(

@@ -130,9 +130,9 @@ class _MeetState extends State<Meet> {
 
     getMyUid();
 
-    retrievePostsCurrentUser().then((value) {
+    /*retrievePostsCurrentUser().then((value) {
       setState(() {});
-    });
+    });*/
   }
 
   @override
@@ -221,7 +221,7 @@ class _MeetState extends State<Meet> {
         child: Column(children: [
           searchUserBox(context),
           PersonalCard(),
-          Posts(),
+          //Posts(),
         ]),
       ),
     );
@@ -274,12 +274,11 @@ class _PostsState extends State<Posts> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
-                                            Navigator.of(context).push(
+                                        Navigator.of(context).push(
                                             new CupertinoPageRoute(
                                                 builder:
                                                     (BuildContext context) =>
-                                                        new Meet(targetUidd
-                                                            )));
+                                                        new Meet(targetUidd)));
                                       },
                                       child: new Container(
                                           width: 40.0,
@@ -475,7 +474,7 @@ class _PersonalCardState extends State<PersonalCard> {
   int myIndex = 0;
   followThisUser() async {
     int now = new DateTime.now().millisecondsSinceEpoch;
-
+    
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: this.uid)
@@ -498,11 +497,35 @@ class _PersonalCardState extends State<PersonalCard> {
           .updateData({'followers': followers});
     } catch (e) {}
 
+
     final QuerySnapshot result1 = await Firestore.instance
         .collection('userData')
-        .where('uid', isEqualTo: targetUidd)
+        .where('uid', isEqualTo: this.uid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot1 = result.documents;
+
+
+
+    String uid = await inputData(); 
+    final QuerySnapshot result2 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot2 = result2.documents;
+    List<dynamic> str2 = snapshot2[0].data['following'];
+    List<String> following = [];
+    for (int i = 0; i < str2.length; i++) {
+      following.add(str2[i].toString());
+    }
+    following.add(targetUidd);
+    try {
+      await Firestore.instance
+          .collection("userData")
+          .document(uid)
+          .updateData({'following': following});
+    } catch (e) {}
+
+
 
     str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];
@@ -744,20 +767,43 @@ class _PersonalCardState extends State<PersonalCard> {
                     // mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       profileImages != null && profileImages.length > 0
-                          ? SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height,
-                              child: CachedNetworkImage(
-                                imageUrl: profileImages[indexProfileImage],
-                                placeholder: (context, url) => Container(
-                                  child: Center(
-                                      child: new CircularProgressIndicator()),
+                          ? GestureDetector(
+                              onTap: () {
+                                showDialog<void>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Dialog(
+                                      child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.height,
+                                        height:
+                                            MediaQuery.of(context).size.width,
+                                        decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                image: NetworkImage(
+                                                    profileImages[
+                                                        indexProfileImage]),
+                                                fit: BoxFit.cover)),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                child: CachedNetworkImage(
+                                  imageUrl: profileImages[indexProfileImage],
+                                  placeholder: (context, url) => Container(
+                                    child: Center(
+                                        child: new CircularProgressIndicator()),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      new Icon(Icons.error),
+                                  fadeInCurve: Curves.easeIn,
+                                  fadeInDuration: Duration(milliseconds: 1000),
+                                  fit: BoxFit.fill,
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    new Icon(Icons.error),
-                                fadeInCurve: Curves.easeIn,
-                                fadeInDuration: Duration(milliseconds: 1000),
-                                fit: BoxFit.fill,
                               ),
                             )
                           : Container(),
@@ -766,7 +812,7 @@ class _PersonalCardState extends State<PersonalCard> {
                 ),
               ),
             ),
-            Positioned(
+            /*Positioned(
               top: 0,
               right: 0,
               left: 0,
@@ -809,11 +855,12 @@ class _PersonalCardState extends State<PersonalCard> {
                   ),
                 ],
               ),
-            ),
+            ),*/
             Positioned(
+              top: 25,
               bottom: 0,
-              right: 0,
-              left: 0,
+              right: 10,
+              left: 10,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [

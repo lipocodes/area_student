@@ -247,11 +247,11 @@ Widget userDetails(
             SizedBox(height: 10.0),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
-              height: 100,
+              height: aboutMe.length<20 ? 50.0 : (aboutMe.length/25) * 20,
               child: Text(
                 aboutMe != null ? aboutMe : "",
                 style: TextStyle(fontWeight: FontWeight.w300, fontSize: 16),
-                textAlign: TextAlign.justify,
+                textAlign: TextAlign.justify,  maxLines: 5,
               ),
             ),
             Row(
@@ -286,6 +286,9 @@ Widget userDetails(
                 ),
               ],
             ),
+
+           
+
           ],
         ),
       ),

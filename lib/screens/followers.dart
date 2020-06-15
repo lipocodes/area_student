@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/data/constants.dart';
+import 'meet.dart';
+import 'package:flutter/cupertino.dart';
 
 class Followers extends StatefulWidget {
   @override
@@ -154,19 +156,20 @@ class _FollowersState extends State<Followers> {
                         children: <Widget>[
                           GestureDetector(
                             onTap: () {
-                              //Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: VisitedProfile(firstName[index] +  " " + lastName[index] , email[index], icon[index], listVisitedUid[index])));
+                              Navigator.of(context).push(
+                                      new CupertinoPageRoute(
+                                          builder: (BuildContext context) =>
+                                              new Meet(followerUid[index])));
                             },
                             child: Container(
-                              width: 50.0,
-                              height: 50.0,
-                              child: new CachedNetworkImage(
-                                imageUrl: followerProfileImage[index],
-                                placeholder: (context, url) =>
-                                    CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
-                              ),
-                            ),
+                                width: 48.0,
+                                height: 48.0,
+                                decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: new DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image: new NetworkImage(
+                                             followerProfileImage[index])))),
                           ),
                           SizedBox(
                             width: 200.0,
@@ -194,16 +197,19 @@ class _FollowersState extends State<Followers> {
                                       Color(0xFF29B6F6),
                                     ],
                                   ),
-                                borderRadius:
-                                      BorderRadius.all(Radius.circular(8.0))),  
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8.0))),
                               child: new FlatButton(
-                                 color: Colors.transparent,
+                                color: Colors.transparent,
                                 onPressed: () {
-                              removeFollower(index);
-                            }, //the click event is impolemented in the screen classes
+                                  removeFollower(index);
+                                }, //the click event is impolemented in the screen classes
                                 padding: const EdgeInsets.all(0.0),
-                                child: new Text(screen10Delete ,  style: TextStyle(
-                                      fontSize: 18, color: Colors.white,)),
+                                child: new Text(screen10Delete,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    )),
                               ),
                             ),
                           ),

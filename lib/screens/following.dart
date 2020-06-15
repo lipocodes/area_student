@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:areastudent/data/constants.dart';
+import 'meet.dart';
+import 'package:flutter/cupertino.dart';
+
 
 class Followings extends StatefulWidget {
   @override
@@ -45,7 +48,8 @@ class _FollowingsState extends State<Followings> {
       this.followingLastName.add(snapshot[0].data['lastName']);
       this.followingProfileImage.add('none');
       int len = this.followingProfileImage.length;
-      this.followingProfileImage[len - 1] = snapshot[0].data['profileImages'][0];
+      this.followingProfileImage[len - 1] =
+          snapshot[0].data['profileImages'][0];
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeeeeeeeee= " + e.toString());
     }
@@ -154,19 +158,20 @@ class _FollowingsState extends State<Followings> {
                         children: <Widget>[
                           GestureDetector(
                             onTap: () {
-                              //Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: VisitedProfile(firstName[index] +  " " + lastName[index] , email[index], icon[index], listVisitedUid[index])));
+                              Navigator.of(context).push(
+                                      new CupertinoPageRoute(
+                                          builder: (BuildContext context) =>
+                                              new Meet(followingUid[index])));
                             },
                             child: Container(
-                              width: 50.0,
-                              height: 50.0,
-                              child: new CachedNetworkImage(
-                                imageUrl: followingProfileImage[index],
-                                placeholder: (context, url) =>
-                                    CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
-                              ),
-                            ),
+                                width: 48.0,
+                                height: 48.0,
+                                decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: new DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image: new NetworkImage(
+                                            followingProfileImage[index])))),
                           ),
                           SizedBox(
                             width: 200.0,
@@ -194,16 +199,19 @@ class _FollowingsState extends State<Followings> {
                                       Color(0xFF29B6F6),
                                     ],
                                   ),
-                                borderRadius:
-                                      BorderRadius.all(Radius.circular(8.0))),  
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8.0))),
                               child: new FlatButton(
-                                 color: Colors.transparent,
+                                color: Colors.transparent,
                                 onPressed: () {
-                              removeFollowing(index);
-                            }, //the click event is impolemented in the screen classes
+                                  removeFollowing(index);
+                                }, //the click event is impolemented in the screen classes
                                 padding: const EdgeInsets.all(0.0),
-                                child: new Text(screen10Delete ,  style: TextStyle(
-                                      fontSize: 18, color: Colors.white,)),
+                                child: new Text(screen10Delete,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    )),
                               ),
                             ),
                           ),
