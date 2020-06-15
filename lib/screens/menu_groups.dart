@@ -124,10 +124,7 @@ class _MenuGroupsState extends State<MenuGroups> {
         ),
         backgroundColor: Colors.white,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {},
-        child: Icon(Icons.add),
-      ),
+      
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: 1, // this will be set when a new tab is tapped

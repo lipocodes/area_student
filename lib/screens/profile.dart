@@ -573,22 +573,27 @@ class _ProfileState extends State<Profile> {
                     // mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       profileImages.length > 0
-                          ? SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height,
-                              child: CachedNetworkImage(
-                                imageUrl: profileImages[indexProfileImage],
-                                placeholder: (context, url) => Container(
-                                  child: Center(
-                                      child: new CircularProgressIndicator()),
+                          ? GestureDetector(
+                            onTap: ()  {
+                              
+                            },
+                                child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                child: CachedNetworkImage(
+                                  imageUrl: profileImages[indexProfileImage],
+                                  placeholder: (context, url) => Container(
+                                    child: Center(
+                                        child: new CircularProgressIndicator()),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      new Icon(Icons.error),
+                                  fadeInCurve: Curves.easeIn,
+                                  fadeInDuration: Duration(milliseconds: 1000),
+                                  fit: BoxFit.fill,
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    new Icon(Icons.error),
-                                fadeInCurve: Curves.easeIn,
-                                fadeInDuration: Duration(milliseconds: 1000),
-                                fit: BoxFit.fill,
                               ),
-                            )
+                          )
                           : Container(),
                     ],
                   ),

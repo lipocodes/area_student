@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:areastudent/screens/meet.dart';
 import 'package:areastudent/tools/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,6 +38,7 @@ File tempAttachedImage;
 String tempAttachment = "";
 FocusNode focusTextField = new FocusNode();
 bool isTextFieldFocus = false;
+String globalSenderUid;
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -536,6 +538,8 @@ class MessagesStream extends StatelessWidget {
           final currentUser = loggedInUser.uid;
 
           bool yesNo = false;
+          bool isItMe = currentUser == senderUid;
+          globalSenderUid = senderUid;
 
           if (creatorUid == senderUid && loggedInUser.uid == recipientUid)
             yesNo = true;
@@ -548,7 +552,7 @@ class MessagesStream extends StatelessWidget {
               attachedImage: messageAttachedImage,
               attachedVoiceRecording: messageAttachedVoiceRecording,
               attachedFile: messageAttachedFile,
-              isMe: currentUser == senderUid,
+              isMe: isItMe,
               profileImagePostCreator: profileImagePostCreator,
               creationTime: creationTime,
             );
@@ -613,11 +617,24 @@ class MessageBubble extends StatelessWidget {
                       backgroundImage: NetworkImage(loggedInUser.photoUrl),
                       backgroundColor: Colors.transparent,
                     )
-                  : CircleAvatar(
-                      radius: 30.0,
-                      backgroundImage: NetworkImage(profileImagePostCreator),
-                      backgroundColor: Colors.transparent,
-                    ),
+                  : GestureDetector(
+                    onTap: () {
+                      if(isMe==false){                        
+                        Navigator.of(context).push(
+                                            new CupertinoPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        new Meet(globalSenderUid,
+                                                            )));
+                      }
+                      
+                    },
+                                      child: CircleAvatar(
+                        radius: 30.0,
+                        backgroundImage: NetworkImage(profileImagePostCreator),
+                        backgroundColor: Colors.transparent,
+                      ),
+                  ),
           if (text.length > 0) ...[
             Material(
               borderRadius: isMe

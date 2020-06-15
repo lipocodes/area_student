@@ -85,8 +85,6 @@ class _GroupState extends State<Group> {
       this.textFollowButton = "Unfollow";
     else
       this.textFollowButton = "Follow";
-
-      
   }
 
   Future retrievePostsContents() async {
@@ -113,7 +111,7 @@ class _GroupState extends State<Group> {
     for (int i = 0; i < snapshot.length; i++) {
       if (postsName.contains(snapshot[i].data['postId'])) {
         postsId.add(snapshot[i].data['postId']);
-        
+
         creationTime.add(snapshot[i].data['creationTime']);
         creatorName.add(snapshot[i].data['creatorName']);
         creatorUid.add(snapshot[i].data['creatorUid']);
@@ -158,7 +156,6 @@ class _GroupState extends State<Group> {
     this.profileImage = this.profileImage.reversed.toList();
     this.text = this.text.reversed.toList();
     this.images = this.images.reversed.toList();
-   
 
     setState(() {});
   }
@@ -207,7 +204,7 @@ class _GroupState extends State<Group> {
       postsLikes[index].remove(this.uid);
       addOrRemove = false;
     }
-   
+
     await firebaseMethods.updateLikeListPost(addOrRemove, creatorUid[index],
         "postsGroups", postsId[index], postsLikes[index]);
     setState(() {});
@@ -220,9 +217,7 @@ class _GroupState extends State<Group> {
       return false;
   }
 
-
-
-    createNewPost(String op, String existingPostId) async {
+  createNewPost(String op, String existingPostId) async {
     var res = await Navigator.of(context).push(new CupertinoPageRoute(
         builder: (BuildContext context) => new CreatePost(op, existingPostId)));
 
@@ -231,11 +226,8 @@ class _GroupState extends State<Group> {
     });
   }
 
-
-
   @override
   void initState() {
-
     // TODO: implement initState
     super.initState();
 
@@ -253,8 +245,7 @@ class _GroupState extends State<Group> {
 
   @override
   Widget build(BuildContext context) {
-
-    if(this.postsName==null)  return Container();
+    if (this.postsName == null) return Container();
 
     return Scaffold(
       appBar: AppBar(
@@ -279,8 +270,8 @@ class _GroupState extends State<Group> {
               ),
               color: Colors.black87,
               onPressed: () {
-                 Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Notifications())); 
+                Navigator.of(context).push(new CupertinoPageRoute(
+                    builder: (BuildContext context) => new Notifications()));
               },
             ),
           ],
@@ -400,15 +391,26 @@ class _GroupState extends State<Group> {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   this.profileImage[index].length != 0
-                                      ? new Container(
-                                          width: 50.0,
-                                          height: 50.0,
-                                          decoration: new BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: new DecorationImage(
-                                                  fit: BoxFit.fill,
-                                                  image: new NetworkImage(
-                                                      profileImage[index]))))
+                                      ? GestureDetector(
+                                          onTap: () {
+                                               Navigator.of(context).push(
+                                            new CupertinoPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        new Meet(creatorUid[index],
+                                                            )));
+                                          },
+                                          child: new Container(
+                                              width: 50.0,
+                                              height: 50.0,
+                                              decoration: new BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: new DecorationImage(
+                                                      fit: BoxFit.fill,
+                                                      image: new NetworkImage(
+                                                          profileImage[
+                                                              index])))),
+                                        )
                                       : Container(),
                                   this.creationTime[index].length != 0
                                       ? Text(
@@ -571,7 +573,8 @@ class _GroupState extends State<Group> {
                                       await Navigator.of(context).push(
                                           new CupertinoPageRoute(
                                               builder: (BuildContext context) =>
-                                                  new CommentsPosts("createCommentsPostsGroups",
+                                                  new CommentsPosts(
+                                                      "createCommentsPostsGroups",
                                                       postsId[index],
                                                       postsComments[index])));
 

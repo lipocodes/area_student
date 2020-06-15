@@ -49,11 +49,9 @@ class _MeetState extends State<Meet> {
   String uid;
   int myIndex = 0;
 
-
   Future<void> retrievePostsCurrentUser() async {
     //this.uid = await inputData();
     this.uid = targetUidd;
-    
 
     final QuerySnapshot result = await Firestore.instance
         .collection('posts')
@@ -133,9 +131,8 @@ class _MeetState extends State<Meet> {
     getMyUid();
 
     retrievePostsCurrentUser().then((value) {
-       setState(() {});
+      setState(() {});
     });
-    
   }
 
   @override
@@ -176,8 +173,8 @@ class _MeetState extends State<Meet> {
               ),
               color: Colors.black87,
               onPressed: () {
-                     Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Notifications())); 
+                Navigator.of(context).push(new CupertinoPageRoute(
+                    builder: (BuildContext context) => new Notifications()));
               },
             ),
           ],
@@ -198,8 +195,7 @@ class _MeetState extends State<Meet> {
           } else if (this.indexBottomBar == 1) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new MenuGroups()));
-          }
-          else if (this.indexBottomBar == 3) {
+          } else if (this.indexBottomBar == 3) {
             Navigator.of(context).push(new CupertinoPageRoute(
                 builder: (BuildContext context) => new Chats()));
           }
@@ -276,15 +272,26 @@ class _PostsState extends State<Posts> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceAround,
                                   children: [
-                                    new Container(
-                                        width: 40.0,
-                                        height: 40.0,
-                                        decoration: new BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: new DecorationImage(
-                                                fit: BoxFit.fill,
-                                                image: new NetworkImage(
-                                                    globalProfilelImages[0])))),
+                                    GestureDetector(
+                                      onTap: () {
+                                            Navigator.of(context).push(
+                                            new CupertinoPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        new Meet(targetUidd
+                                                            )));
+                                      },
+                                      child: new Container(
+                                          width: 40.0,
+                                          height: 40.0,
+                                          decoration: new BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: new DecorationImage(
+                                                  fit: BoxFit.fill,
+                                                  image: new NetworkImage(
+                                                      globalProfilelImages[
+                                                          0])))),
+                                    ),
                                     SizedBox(width: 10),
                                     Text(
                                         globalName +
@@ -468,7 +475,7 @@ class _PersonalCardState extends State<PersonalCard> {
   int myIndex = 0;
   followThisUser() async {
     int now = new DateTime.now().millisecondsSinceEpoch;
-   
+
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: this.uid)
@@ -489,32 +496,37 @@ class _PersonalCardState extends State<PersonalCard> {
           .collection("userData")
           .document(this.uid)
           .updateData({'followers': followers});
-    } catch(e) {}
+    } catch (e) {}
 
-
-
-
-     final QuerySnapshot result1 = await Firestore.instance
+    final QuerySnapshot result1 = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: targetUidd)
         .getDocuments();
-     final List<DocumentSnapshot> snapshot1 = result.documents;   
-      
+    final List<DocumentSnapshot> snapshot1 = result.documents;
 
-     str1 = snapshot1[0].data['notifications'];
+    str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];
     for (int i = 0; i < str1.length; i++) {
       notifications.add(str1[i].toString());
     }
-     
-    notifications.add("^^^" + myProfileImage + "^^^" + myName + "^^^" +  now.toString() + "^^^" + "Followed You" + "^^^" + myUid);
+
+    notifications.add("^^^" +
+        myProfileImage +
+        "^^^" +
+        myName +
+        "^^^" +
+        now.toString() +
+        "^^^" +
+        "Followed You" +
+        "^^^" +
+        myUid);
     try {
       String uid = await inputData();
-      
+
       await Firestore.instance
           .collection("userData")
           .document(targetUidd)
-          .updateData({'notifications': notifications});      
+          .updateData({'notifications': notifications});
 
       setState(() {
         this.textFollowButton = "Unfollow";
@@ -550,31 +562,29 @@ class _PersonalCardState extends State<PersonalCard> {
       print("eeeeeeeeeeeeeeeeeeeeee followThisUser");
     }
 
-
     final QuerySnapshot result1 = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: targetUidd)
         .getDocuments();
-     final List<DocumentSnapshot> snapshot1 = result.documents;   
-      
+    final List<DocumentSnapshot> snapshot1 = result.documents;
 
-     str1 = snapshot1[0].data['notifications'];
+    str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];
     for (int i = 0; i < str1.length; i++) {
       notifications.add(str1[i].toString());
     }
-    
-    for(int h=0; h<notifications.length; h++){
-      if(notifications[h].contains('Followed You') && notifications[h].contains(myUid)) {
+
+    for (int h = 0; h < notifications.length; h++) {
+      if (notifications[h].contains('Followed You') &&
+          notifications[h].contains(myUid)) {
         notifications.removeAt(h);
       }
     }
 
-     await Firestore.instance
-          .collection("userData")
-          .document(targetUidd)
-          .updateData({'notifications': notifications});
-
+    await Firestore.instance
+        .collection("userData")
+        .document(targetUidd)
+        .updateData({'notifications': notifications});
   }
 
   retrieveUserData() async {
@@ -602,7 +612,7 @@ class _PersonalCardState extends State<PersonalCard> {
       this.name =
           snapshot[0].data['firstName'] + "  " + snapshot[0].data['lastName'];
       globalName = this.name;
-    
+
       this.gender = snapshot[0].data['gender'];
       this.country = snapshot[0].data['country'];
       this.region = snapshot[0].data['region'];
@@ -621,9 +631,8 @@ class _PersonalCardState extends State<PersonalCard> {
       String birthDate = snapshot[0].data['birthDate'];
       int yearBirthDate = int.parse(birthDate.substring(birthDate.length - 4));
       this.age = yearNow - yearBirthDate;
-        
+
       setState(() {});
-      
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeee= " + e.toString());
     }
@@ -700,12 +709,13 @@ class _PersonalCardState extends State<PersonalCard> {
     }
 
     targetUidd = filteredUserListUid[prefMyIndex];
-   
-    prefs.setInt('myIndex', prefMyIndex);
-    
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => new Meet(targetUidd)));
 
-     //this.retrieveUserData();
+    prefs.setInt('myIndex', prefMyIndex);
+
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => new Meet(targetUidd)));
+
+    //this.retrieveUserData();
   }
 
   @override
@@ -756,11 +766,10 @@ class _PersonalCardState extends State<PersonalCard> {
                 ),
               ),
             ),
-
-              Positioned(
+            Positioned(
               top: 0,
-              right:0,
-              left:0,
+              right: 0,
+              left: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -771,15 +780,11 @@ class _PersonalCardState extends State<PersonalCard> {
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(30))),
                     child: IconButton(
-                        icon: Icon(
-                          Icons.fast_rewind
-                        ),
+                        icon: Icon(Icons.fast_rewind),
                         iconSize: 35,
                         color: Colors.white,
                         onPressed: () {
                           switchNextMeet(false);
-
-                          
                         }),
                   ),
                   SizedBox(
@@ -799,20 +804,16 @@ class _PersonalCardState extends State<PersonalCard> {
                       color: Colors.white,
                       onPressed: () {
                         switchNextMeet(true);
-                        
                       },
                     ),
                   ),
                 ],
               ),
             ),
-
-
-
             Positioned(
               bottom: 0,
-               right:0,
-              left:0,
+              right: 0,
+              left: 0,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -835,8 +836,7 @@ class _PersonalCardState extends State<PersonalCard> {
                             if (indexProfileImage > 0) {
                               indexProfileImage = indexProfileImage - 1;
                             } else {
-                              indexProfileImage =
-                                  this.profileImages.length - 1;
+                              indexProfileImage = this.profileImages.length - 1;
                             }
                           });
                         }),
@@ -1106,7 +1106,7 @@ Future<String> inputData() async {
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
     myUid = user.uid.toString();
     myProfileImage = user.photoUrl.toString();
-    myName  = user.displayName.toString();
+    myName = user.displayName.toString();
     return myUid;
   } catch (e) {
     return "";
@@ -1150,17 +1150,16 @@ Widget searchUserBox(context) {
   Future<List> searchUsers() async {
     String searchText = "";
     searchText = controllerSearchName.text;
-  
+
     searchText = convertUpperCase(searchText);
 
     if (searchText.length > 1 &&
-        searchText.substring(searchText.length - 1) == " ") { 
+        searchText.substring(searchText.length - 1) == " ") {
       var input = searchText;
       var str = input.split(" ");
       //print("ddddddddddddddd= "  + str.toString());
 
       if (str.length == 2) {
-         
         uid1 = [];
         profileImage1 = [];
         name1 = [];
@@ -1302,7 +1301,7 @@ Widget searchUserBox(context) {
             hintText: 'Look for someone else...',
             border: OutlineInputBorder())),
     suggestionsCallback: (pattern) async {
-     // print(pattern.toString());
+      // print(pattern.toString());
       //return await BackendService.getSuggestions(pattern);
       return searchUsers();
     },
