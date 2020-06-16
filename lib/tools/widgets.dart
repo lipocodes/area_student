@@ -11,7 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/screens/meet.dart';
 import 'package:areastudent/screens/comments_posts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 
 int indexLargeProfileImage = 0;
 FirebaseMethods firebaseMethod = new FirebaseMethods();
@@ -25,6 +25,7 @@ List<String> notificationLink = [];
 String myUid;
 String myProfileImage;
 String myName;
+TextEditingController controllerSearchUsers = new TextEditingController();
 
 Widget signupInputBox(
     {String labelText,
@@ -465,70 +466,26 @@ Future retrieveNotifications() async {
   }
 }
 
-Widget notifications() {
-  return ListView.separated(
-    separatorBuilder: (context, index) => Divider(
-      color: Colors.black,
-    ),
-    itemCount: notificationIcon.length,
-    itemBuilder: (context, index) {
-      return GestureDetector(
-        onTap: () {
-          onTapNotification(index, context);
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            new Container(
-              width: 64.0,
-              height: 64.0,
-              child: CachedNetworkImage(
-                imageUrl:
-                   notificationIcon[index],
-                imageBuilder: (context, imageProvider) => Container(
-                  width: 80.0,
-                  height: 80.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        image: imageProvider, fit: BoxFit.cover),
-                  ),
-                ),
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-              ),
-            ),
-            SizedBox(width: 10.0),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(notificationCreatorName[index],
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w800)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(notificationOperation[index],
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w300)),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(width: 10.0),
-            SizedBox(
-              width: 40.0,
-              child: Text(
-                timestampToTimeGap(notificationCreationTime[index]),
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+
+
+
+  String convertUpperCase(query) {
+    String str = query.toString();
+
+    for (var i = 0; i < str.length; i++) {
+      if (i == 0 || (i > 0 && (str.substring(i - 1, i)) == " ")) {
+        str = str.substring(0, i) +
+            str.substring(i, i + 1).toUpperCase() +
+            str.substring(i + 1);
+      } else {
+        str = str.substring(0, i) +
+            str.substring(i, i + 1).toLowerCase() +
+            str.substring(i + 1);
+      }
+    }
+
+    return str;
+  }
+
+
+
