@@ -35,6 +35,7 @@ List<File> postImageList = [];
 String myUid;
 String myProfileImage = "";
 String myName = "";
+ QuerySnapshot resultSearchUsers;
 
 class Meet extends StatefulWidget {
   String targetUid;
@@ -122,6 +123,16 @@ class _MeetState extends State<Meet> {
     myUid = uid;
   }
 
+
+  Future retrieveAllUserNames() async {
+        resultSearchUsers = await Firestore.instance
+        .collection('userData')
+        //.where("firstName", isEqualTo: str[0])
+        .getDocuments();
+  }
+
+
+
   @override
   void initState() {
     // TODO: implement initState
@@ -129,6 +140,7 @@ class _MeetState extends State<Meet> {
     targetUidd = widget.targetUid;
 
     getMyUid();
+    retrieveAllUserNames();
 
     /*retrievePostsCurrentUser().then((value) {
       setState(() {});
@@ -190,47 +202,44 @@ class _MeetState extends State<Meet> {
           });
 
           if (this.indexBottomBar == 0) {
-
-             Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => new Profile(),
-                  transitionsBuilder: (c, anim, a2, child) =>
-                      FadeTransition(opacity: anim, child: child),
-                  transitionDuration: Duration(milliseconds: 2000),
-                ),
-              );
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => new Profile(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 2000),
+              ),
+            );
 
             //Navigator.of(context).push(new CupertinoPageRoute(
-              //  builder: (BuildContext context) => new Profile()));
+            //  builder: (BuildContext context) => new Profile()));
           } else if (this.indexBottomBar == 1) {
-
             Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => new MenuGroups(),
-                  transitionsBuilder: (c, anim, a2, child) =>
-                      FadeTransition(opacity: anim, child: child),
-                  transitionDuration: Duration(milliseconds: 2000),
-                ),
-              );
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => new MenuGroups(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 2000),
+              ),
+            );
 
             //Navigator.of(context).push(new CupertinoPageRoute(
-              //  builder: (BuildContext context) => new MenuGroups()));
+            //  builder: (BuildContext context) => new MenuGroups()));
           } else if (this.indexBottomBar == 3) {
-
             Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (c, a1, a2) => new Chats(),
-                  transitionsBuilder: (c, anim, a2, child) =>
-                      FadeTransition(opacity: anim, child: child),
-                  transitionDuration: Duration(milliseconds: 2000),
-                ),
-              );
+              context,
+              PageRouteBuilder(
+                pageBuilder: (c, a1, a2) => new Chats(),
+                transitionsBuilder: (c, anim, a2, child) =>
+                    FadeTransition(opacity: anim, child: child),
+                transitionDuration: Duration(milliseconds: 2000),
+              ),
+            );
 
             //Navigator.of(context).push(new CupertinoPageRoute(
-              //  builder: (BuildContext context) => new Chats()));
+            //  builder: (BuildContext context) => new Chats()));
           }
         },
         items: [
@@ -507,7 +516,7 @@ class _PersonalCardState extends State<PersonalCard> {
   int myIndex = 0;
   followThisUser() async {
     int now = new DateTime.now().millisecondsSinceEpoch;
-    
+
     final QuerySnapshot result = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: this.uid)
@@ -530,16 +539,13 @@ class _PersonalCardState extends State<PersonalCard> {
           .updateData({'followers': followers});
     } catch (e) {}
 
-
     final QuerySnapshot result1 = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: this.uid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot1 = result.documents;
 
-
-
-    String uid = await inputData(); 
+    String uid = await inputData();
     final QuerySnapshot result2 = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: uid)
@@ -557,8 +563,6 @@ class _PersonalCardState extends State<PersonalCard> {
           .document(uid)
           .updateData({'following': following});
     } catch (e) {}
-
-
 
     str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];
@@ -1230,142 +1234,68 @@ Widget searchUserBox(context) {
   Future<List> searchUsers() async {
     String searchText = "";
     searchText = controllerSearchName.text;
-
     searchText = convertUpperCase(searchText);
+    
+    uid1 = [];
+    profileImage1 = [];
+    name1 = [];
+ 
+    final List<DocumentSnapshot> snapshot = resultSearchUsers.documents;
 
-    if (searchText.length > 1 &&
-        searchText.substring(searchText.length - 1) == " ") {
-      var input = searchText;
-      var str = input.split(" ");
-      //print("ddddddddddddddd= "  + str.toString());
+    for (int i = 0; i < snapshot.length; i++) {
 
-      if (str.length == 2) {
-        uid1 = [];
-        profileImage1 = [];
-        name1 = [];
-        //search for the input word in user firstName
-        final QuerySnapshot result = await Firestore.instance
-            .collection('userData')
-            .where("firstName", isEqualTo: str[0])
-            .getDocuments();
-        final List<DocumentSnapshot> snapshot = result.documents;
-
-        for (int i = 0; i < snapshot.length; i++) {
-          uid1.add(snapshot[i].data['uid'].toString());
-          profileImage1.add(snapshot[i].data['profileImages'][0].toString());
-          name1.add(snapshot[i].data['firstName'].toString() +
-              "  " +
-              snapshot[i].data['lastName'].toString());
-        }
-
-        //check which of these users has blocked me
-        //retrieve list of users who have blocked me
-        String uid = await inputData();
-        final QuerySnapshot result1 = await Firestore.instance
-            .collection('userData')
-            .where('uid', isEqualTo: uid)
-            .getDocuments();
-        final List<DocumentSnapshot> snapshot1 = result1.documents;
-
-        List<dynamic> str1 = snapshot1[0].data['blockedBy'];
-        str2 = [];
-        for (int i = 0; i < str1.length; i++) {
-          str2.add(str1[i].toString()); //list of blockers
-        }
-
-        for (int i = 0; i < uid1.length; i++) {
-          //going over suggestions, filtering blockers
-          if (str2.contains(uid1[i])) {
-            uid1.removeAt(i);
-            name1.remove(i);
-            profileImage1.removeAt(i);
-          }
-        }
-        print("1st proposal is:  " + uid1.toString());
-      } else if (str.length == 3) {
-        uid2 = [];
-        profileImage2 = [];
-        name2 = [];
-        final QuerySnapshot result = await Firestore.instance
-            .collection('userData')
-            .where("lastName", isEqualTo: str[1])
-            .getDocuments();
-        final List<DocumentSnapshot> snapshot = result.documents;
-
-        String str1;
-
-        for (int i = 0; i < snapshot.length; i++) {
-          uid2.add(snapshot[i].data['uid'].toString());
-          profileImage2.add(snapshot[i].data['profileImages'][0].toString());
-          name2.add(snapshot[i].data['firstName'].toString() +
-              "  " +
-              snapshot[i].data['lastName'].toString());
-        }
-
-        print("2nd proposal is:  " + uid2.toString());
-
-        uid3 = [];
-        profileImage3 = [];
-        name3 = [];
-        if (uid1.length > uid2.length) {
-          for (int i = 0; i < uid2.length; i++) {
-            if (uid1.contains(uid2[i])) {
-              uid3.add(uid2[i]);
-              profileImage3.add(profileImage2[i]);
-              name3.add(name2[i]);
-            }
-          }
-        } else {
-          for (int i = 0; i < uid1.length; i++) {
-            if (uid2.contains(uid1[i])) {
-              uid3.add(uid1[i]);
-              profileImage3.add(profileImage1[i]);
-              name3.add(name1[i]);
-            }
-          }
-        }
-
-        for (int i = 0; i < uid3.length; i++) {
-          //going over suggestions, filtering blockers
-          if (str2.contains(uid3[i])) {
-            uid3.removeAt(i);
-            name3.remove(i);
-            profileImage3.removeAt(i);
-          }
-        }
-
-        print("Combined propsal is: " + uid3.toString());
+      String str = snapshot[i].data['firstName'].toString() +
+          " " +
+          snapshot[i].data['lastName'].toString();
+          
+      if (str.contains(searchText) && searchText.length>0) {
+        uid1.add(snapshot[i].data['uid'].toString());
+        profileImage1.add(snapshot[i].data['profileImages'][0].toString());
+        name1.add(snapshot[i].data['firstName'].toString() +
+            "  " +
+            snapshot[i].data['lastName'].toString());
       }
+    }
 
-      if (uid3.length > 0) {
-        suggestions = [];
+    //check which of these users has blocked me
+    //retrieve list of users who have blocked me
+    String uid = await inputData();
+    final QuerySnapshot result1 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot1 = result1.documents;
 
-        for (int i = 0; i < uid3.length; i++) {
-          var temp = {
-            'uid': '${uid3[i]}',
-            'profileImage': '${profileImage3[0]}',
-            'name': '${name3[i]}'
-          };
-          suggestions.add(temp);
-        }
-        return suggestions;
-      } else {
+    List<dynamic> str1 = snapshot1[0].data['blockedBy'];
+    str2 = [];
+    for (int i = 0; i < str1.length; i++) {
+      str2.add(str1[i].toString()); //list of blockers
+    }
+
+    for (int i = 0; i < uid1.length; i++) {
+      //going over suggestions, filtering blockers
+      if (str2.contains(uid1[i])) {
+        uid1.removeAt(i);
+        name1.remove(i);
+        profileImage1.removeAt(i);
+      }
+    }
+    print("1st proposal is:  " + uid1.toString());
+
+    
         suggestions = [];
 
         for (int i = 0; i < uid1.length; i++) {
           var temp = {
             'uid': '${uid1[i]}',
-            'profileImage': '${profileImage1[0]}',
+            'profileImage': '${profileImage1[i]}',
             'name': '${name1[i]}'
           };
           suggestions.add(temp);
         }
         return suggestions;
-      }
-    } else {
-      var temp = [];
-      return temp;
-    }
+
+    
   }
 
   return TypeAheadField(
@@ -1405,34 +1335,4 @@ Widget searchUserBox(context) {
       ));
     },
   );
-
-  /*return Padding(
-    padding: const EdgeInsets.all(15.0),
-    child: TextField(
-      onChanged: (e) {
-        searchUsers();
-      },
-      decoration: new InputDecoration(
-        prefixIcon: Icon(Icons.search),
-        labelText: 'Search name ..',
-        fillColor: Colors.grey[100],
-        filled: true,
-        contentPadding: EdgeInsets.only(
-          top: 10.0,
-          left: 10.0,
-          bottom: 10.0,
-        ),
-        border: new OutlineInputBorder(
-          borderRadius: new BorderRadius.circular(10.0),
-        ),
-      ),
-      controller: controllerSearchName,
-      keyboardType: TextInputType.text,
-      style: new TextStyle(
-        fontSize: 14.0,
-        fontFamily: "Poppins",
-        color: Colors.grey[600],
-      ),
-    ),
-  );*/
 }
