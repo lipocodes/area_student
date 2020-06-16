@@ -250,7 +250,7 @@ class _ProfileState extends State<Profile> {
     this.postsImages = this.postsImages.reversed.toList();
     this.postsLikes = this.postsLikes.reversed.toList();
     this.postsComments = this.postsComments.reversed.toList();
-
+    print("gggggggggggggggggggggggggggggggggggggg");
     setState(() {});
   }
 
@@ -475,6 +475,8 @@ class _ProfileState extends State<Profile> {
   createNewPost(String op, String existingPostId) async {
     var res = await Navigator.of(context).push(new CupertinoPageRoute(
         builder: (BuildContext context) => new CreatePost(op, existingPostId)));
+
+    retrieveUserData();
   }
 
   @override
@@ -530,14 +532,48 @@ class _ProfileState extends State<Profile> {
             });
 
             if (this.indexBottomBar == 1) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new MenuGroups()));
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => new MenuGroups(),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 2000),
+                ),
+              );
+
+              /*Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new MenuGroups()));*/
             } else if (this.indexBottomBar == 2) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet(uid)));
+              
+                Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => new Meet(uid),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 2000),
+                ),
+              );
+
+              /*Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Meet(uid)));*/
             } else if (this.indexBottomBar == 3) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Chats()));
+
+               Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => new Chats(),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 2000),
+                ),
+              );
+               
+
+
+              //Navigator.of(context).push(new CupertinoPageRoute(
+                //  builder: (BuildContext context) => new Chats()));
             }
           },
           items: [
@@ -557,566 +593,25 @@ class _ProfileState extends State<Profile> {
                 title: Text('Chats'))
           ],
         ),
-        body: new Stack(
+        body: Stack(
           children: [
-            Positioned(
-                top: 0,
-                left: 0,
-                height: MediaQuery.of(context).size.height * 0.4,
-                child: Container(
-                  child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      profileImages.length > 0
-                          ? GestureDetector(
-                              onTap: () {
-                                showDialog<void>(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Dialog(
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.height,
-                                        height: MediaQuery.of(context).size.width,
-                                        decoration: BoxDecoration(
-                                            image: DecorationImage(
-                                                image: NetworkImage(
-                                                   profileImages[indexProfileImage]),
-                                                fit: BoxFit.cover)),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height,
-                                child: CachedNetworkImage(
-                                  imageUrl: profileImages[indexProfileImage],
-                                  placeholder: (context, url) => Container(
-                                    child: Center(
-                                        child: new CircularProgressIndicator()),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      new Icon(Icons.error),
-                                  fadeInCurve: Curves.easeIn,
-                                  fadeInDuration: Duration(milliseconds: 1000),
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                            )
-                          : Container(),
-                    ],
-                  ),
-                )),
-            Positioned(
+            SingleChildScrollView(
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0, top: 10.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.settings,
-                          ),
-                          iconSize: 35,
-                          color: Colors.white,
-                          onPressed: () {
-                            onPressedSettingsButton();
-                          },
-                        ),
-                      ),
-                      /*Padding(
-                        padding: const EdgeInsets.only(top: 10.0, right: 10.0),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.notifications_none,
-                          ),
-                          iconSize: 35,
-                          color: Colors.white,
-                          onPressed: () {
-                            showSnackBar("In the future - Inbox will be here!",
-                                scaffoldKey);
-                          },
-                        ),
-                      ),*/
-                    ],
-                  ),
-                  SizedBox(height: 40.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.white70,
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30))),
-                          child: IconButton(
-                              icon: Icon(
-                                Icons.arrow_back,
-                              ),
-                              iconSize: 35,
-                              color: Colors.white,
-                              onPressed: () {
-                                setState(() {
-                                  if (indexProfileImage > 0) {
-                                    indexProfileImage = indexProfileImage - 1;
-                                  } else {
-                                    indexProfileImage =
-                                        this.profileImages.length - 1;
-                                  }
-                                });
-                              }),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.white70,
-                              ),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(30))),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.arrow_forward,
-                            ),
-                            iconSize: 35,
-                            color: Colors.white,
-                            onPressed: () {
-                              if (indexProfileImage <
-                                  this.profileImages.length - 1) {
-                                setState(() {
-                                  indexProfileImage = indexProfileImage + 1;
-                                });
-                              } else {
-                                setState(() {
-                                  indexProfileImage = 0;
-                                });
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  imageCarouselle(),
+                  userDetails(name, age, country, region, academicField,
+                      aboutMe, numFollowers, numFollowings, context),
+                  Divider(height: 20, thickness: 20, color: Colors.black38),
+                  listPosts(),
                 ],
               ),
             ),
             Positioned(
-              top: 200,
-              height: 400,
+              top: 40,
+              left: 0,
+              height: MediaQuery.of(context).size.height * 0.4,
               width: MediaQuery.of(context).size.width,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    userDetails(name, age, country, region, academicField,
-                        aboutMe, numFollowers, numFollowings, context),
-                   Divider(height:20, thickness:20, color: Colors.black38),
-                    this.postsId.length > 0
-                        ? SizedBox(
-                            height: 600,
-                            child: Container(
-                              decoration: new BoxDecoration(
-                                color: Colors.white,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 20.0, right: 20.0),
-                                child: Center(
-                                  child: ListView.builder(
-                                      shrinkWrap: true,
-                                      scrollDirection: Axis.vertical,
-                                      itemCount: postsId.length,
-                                      itemBuilder: (context, index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 0.0, right: 20.0),
-                                          child: Column(children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceAround,
-                                              children: [
-                                                new Container(
-                                                    width: 40.0,
-                                                    height: 40.0,
-                                                    decoration: new BoxDecoration(
-                                                        shape: BoxShape.circle,
-                                                        image: new DecorationImage(
-                                                            fit: BoxFit.fill,
-                                                            image: new NetworkImage(
-                                                                this.profileImages[
-                                                                        0] ??
-                                                                    null)))),
-                                                SizedBox(width: 10),
-                                                Text(
-                                                    name +
-                                                        "\n" +
-                                                        postsCreationCountry[
-                                                            index] +
-                                                        "," +
-                                                        postsCreationRegion[
-                                                            index] +
-                                                        "," +
-                                                        postsCreationSubRegion[
-                                                            index] +
-                                                        "\n" +
-                                                        timestampToTimeGap(
-                                                            postsCreationTime[
-                                                                index]),
-                                                    style: TextStyle(
-                                                        fontSize: 16.0,
-                                                        fontWeight:
-                                                            FontWeight.w800)),
-                                                GestureDetector(
-                                                    onTap: () async {
-                                                      await firebaseMethod
-                                                          .removePost(postsId,
-                                                              postsId[index]);
-                                                      retrievePostsCurrentUser();
-                                                    },
-                                                    child: Text(" X ",
-                                                        style: TextStyle(
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .w500))),
-                                              ],
-                                            ),
-                                            SizedBox(height: 10.0),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                postsTags[index][0]
-                                                            .toString() ==
-                                                        '123456789'
-                                                    ? Container()
-                                                    : Text(
-                                                        postsTags[index][0]
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 16.0)),
-                                                SizedBox(width: 20.0),
-                                                postsTags[index][1]
-                                                            .toString() ==
-                                                        '123456789'
-                                                    ? Container()
-                                                    : Text(
-                                                        postsTags[index][1]
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 16.0)),
-                                                SizedBox(width: 20.0),
-                                                postsTags[index][2]
-                                                            .toString() ==
-                                                        '123456789'
-                                                    ? Container()
-                                                    : Text(
-                                                        postsTags[index][2]
-                                                            .toString(),
-                                                        style: TextStyle(
-                                                            color: Colors.blue,
-                                                            fontSize: 16.0)),
-                                              ],
-                                            ),
-                                            SizedBox(height: 10.0),
-                                            postsImages[index][0] != '123456789'
-                                                ? SizedBox(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.8,
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.7,
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        Navigator.of(context).push(
-                                                            new CupertinoPageRoute(
-                                                                builder: (BuildContext
-                                                                        context) =>
-                                                                    new ImageInLarge(
-                                                                      postsImages[
-                                                                          index][0],
-                                                                    )));
-                                                      },
-                                                      child: CachedNetworkImage(
-                                                        imageUrl:
-                                                            postsImages[index]
-                                                                [0],
-                                                        placeholder:
-                                                            (context, url) =>
-                                                                Container(
-                                                          child: Center(
-                                                              child:
-                                                                  new CircularProgressIndicator()),
-                                                        ),
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            new Icon(
-                                                                Icons.error),
-                                                        fadeInCurve:
-                                                            Curves.easeIn,
-                                                        fadeInDuration:
-                                                            Duration(
-                                                                milliseconds:
-                                                                    1000),
-                                                        fit: BoxFit.fill,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : Container(),
-                                            SizedBox(height: 10.0),
-                                            postsImages[index][1] != '123456789'
-                                                ? SizedBox(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.8,
-                                                    height:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.7,
-                                                    child: GestureDetector(
-                                                      onTap: () {
-                                                        Navigator.of(context).push(
-                                                            new CupertinoPageRoute(
-                                                                builder: (BuildContext
-                                                                        context) =>
-                                                                    new ImageInLarge(
-                                                                      postsImages[
-                                                                          index][1],
-                                                                    )));
-                                                      },
-                                                      child: CachedNetworkImage(
-                                                        imageUrl:
-                                                            postsImages[index]
-                                                                [1],
-                                                        placeholder:
-                                                            (context, url) =>
-                                                                Container(
-                                                          child: Center(
-                                                              child:
-                                                                  new CircularProgressIndicator()),
-                                                        ),
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            new Icon(
-                                                                Icons.error),
-                                                        fadeInCurve:
-                                                            Curves.easeIn,
-                                                        fadeInDuration:
-                                                            Duration(
-                                                                milliseconds:
-                                                                    1000),
-                                                        fit: BoxFit.fill,
-                                                      ),
-                                                    ),
-                                                  )
-                                                : Container(),
-                                            SizedBox(height: 10.0),
-                                            postsTitle[index] != null
-                                                ? Text(
-                                                    postsTitle[index],
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w900),
-                                                  )
-                                                : Container(),
-                                            SizedBox(height: 10.0),
-                                            postsText[index] != null
-                                                ? Container(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.8,
-                                                    height: lengthTextBoxPost(
-                                                        postsText[index]
-                                                            .length),
-                                                    child: Column(
-                                                      children: [
-                                                        Text(
-                                                          postsText[index],
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w300,
-                                                              fontSize: 16),
-                                                          textAlign:
-                                                              TextAlign.justify,
-                                                        ),
-                                                        SizedBox(
-                                                          height: 10.0,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            IconButton(
-                                                              icon: Icon(Icons
-                                                                  .thumb_up),
-                                                              iconSize: 30,
-                                                              color: didILikeThisPostAlready(
-                                                                          index) ==
-                                                                      true
-                                                                  ? Colors
-                                                                      .blueAccent
-                                                                  : Colors.grey,
-                                                              splashColor:
-                                                                  Colors.purple,
-                                                              onPressed: () {
-                                                                likePost(index);
-                                                              },
-                                                            ),
-                                                            this.postsLikes[index].length !=
-                                                                        null &&
-                                                                    this.postsLikes[index].length !=
-                                                                        0
-                                                                ? Text(
-                                                                    this
-                                                                        .postsLikes[
-                                                                            index]
-                                                                        .length
-                                                                        .toString(),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w300,
-                                                                        color: Colors
-                                                                            .blueAccent))
-                                                                : Text("0",
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w300,
-                                                                        color: Colors
-                                                                            .blueAccent)),
-                                                            SizedBox(
-                                                                width: 50.0),
-                                                            IconButton(
-                                                              icon: Icon(
-                                                                Icons
-                                                                    .chat_bubble_outline,
-                                                              ),
-                                                              iconSize: 30,
-                                                              color: Colors
-                                                                  .blueAccent,
-                                                              splashColor:
-                                                                  Colors.purple,
-                                                              onPressed:
-                                                                  () async {
-                                                                await Navigator.of(context).push(new CupertinoPageRoute(
-                                                                    builder: (BuildContext context) => new CommentsPosts(
-                                                                        "createCommentsPosts",
-                                                                        postsId[
-                                                                            index],
-                                                                        postsComments[
-                                                                            index])));
-
-                                                                setState(() {});
-                                                              },
-                                                            ),
-                                                            this.postsComments[index].length !=
-                                                                        null &&
-                                                                    this.postsComments[index].length !=
-                                                                        0
-                                                                ? Text(
-                                                                    this
-                                                                        .postsComments[
-                                                                            index]
-                                                                        .length
-                                                                        .toString(),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w300,
-                                                                        color: Colors
-                                                                            .blueAccent))
-                                                                : Text("0",
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            16,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w300,
-                                                                        color: Colors
-                                                                            .blueAccent)),
-                                                          ],
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            FlatButton(
-                                                              color: Colors
-                                                                  .black26,
-                                                              textColor:
-                                                                  Colors.white,
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(8.0),
-                                                              splashColor: Colors
-                                                                  .blueAccent,
-                                                              onPressed: () {
-                                                                createNewPost(
-                                                                    "createCommentPost",
-                                                                    postsId[index]
-                                                                        .toString());
-                                                              },
-                                                              child: Text(
-                                                                "Comment",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        16.0),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Divider(
-                                                          thickness: 10,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                : Container(),
-                                          ]),
-                                        );
-                                      }),
-                                ),
-                              ),
-                            ),
-                          )
-                        : Container(),
-                  ],
-                ),
-              ),
+              child: buttonsLayer(),
             ),
           ],
         ),
@@ -1158,6 +653,460 @@ class _ProfileState extends State<Profile> {
         margin: EdgeInsets.all(10.0),
         child: Image.network(this.profileImages[index], fit: BoxFit.fitWidth),
       ),
+    );
+  }
+
+  Widget imageCarouselle() {
+    return SizedBox(
+      height: 200,
+      child: profileImages.length > 0
+          ? GestureDetector(
+              onTap: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      child: Container(
+                        width: MediaQuery.of(context).size.height,
+                        height: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: NetworkImage(
+                                    profileImages[indexProfileImage]),
+                                fit: BoxFit.cover)),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: CachedNetworkImage(
+                  imageUrl: profileImages[indexProfileImage],
+                  placeholder: (context, url) => Container(
+                    child: Center(child: new CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => new Icon(Icons.error),
+                  fadeInCurve: Curves.easeIn,
+                  fadeInDuration: Duration(milliseconds: 1000),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            )
+          : Container(),
+    );
+  }
+
+  Widget listPosts() {
+    return this.postsId.length > 0
+        ? SizedBox(
+            height: 600,
+            child: Container(
+              decoration: new BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                child: Center(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      itemCount: postsId.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding:
+                              const EdgeInsets.only(left: 0.0, right: 20.0),
+                          child: Column(children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                new Container(
+                                    width: 40.0,
+                                    height: 40.0,
+                                    decoration: new BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: new DecorationImage(
+                                            fit: BoxFit.fill,
+                                            image: new NetworkImage(
+                                                this.profileImages[0] ??
+                                                    null)))),
+                                SizedBox(width: 10),
+                                Text(
+                                    name +
+                                        "\n" +
+                                        postsCreationCountry[index] +
+                                        "," +
+                                        postsCreationRegion[index] +
+                                        "," +
+                                        postsCreationSubRegion[index] +
+                                        "\n" +
+                                        timestampToTimeGap(
+                                            postsCreationTime[index]),
+                                    style: TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w800)),
+                                GestureDetector(
+                                    onTap: () async {
+                                      await firebaseMethod.removePost(
+                                          postsId, postsId[index]);
+                                      retrievePostsCurrentUser();
+                                    },
+                                    child: Text(" X ",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500))),
+                              ],
+                            ),
+                            SizedBox(height: 10.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                postsTags[index][0].toString() == '123456789'
+                                    ? Container()
+                                    : Text(postsTags[index][0].toString(),
+                                        style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 16.0)),
+                                SizedBox(width: 20.0),
+                                postsTags[index][1].toString() == '123456789'
+                                    ? Container()
+                                    : Text(postsTags[index][1].toString(),
+                                        style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 16.0)),
+                                SizedBox(width: 20.0),
+                                postsTags[index][2].toString() == '123456789'
+                                    ? Container()
+                                    : Text(postsTags[index][2].toString(),
+                                        style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 16.0)),
+                              ],
+                            ),
+                            SizedBox(height: 10.0),
+                            postsImages[index][0] != '123456789'
+                                ? SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.7,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            new CupertinoPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        new ImageInLarge(
+                                                          postsImages[index][0],
+                                                        )));
+                                      },
+                                      child: CachedNetworkImage(
+                                        imageUrl: postsImages[index][0],
+                                        placeholder: (context, url) =>
+                                            Container(
+                                          child: Center(
+                                              child:
+                                                  new CircularProgressIndicator()),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            new Icon(Icons.error),
+                                        fadeInCurve: Curves.easeIn,
+                                        fadeInDuration:
+                                            Duration(milliseconds: 1000),
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  )
+                                : Container(),
+                            SizedBox(height: 10.0),
+                            postsImages[index][1] != '123456789'
+                                ? SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
+                                    height:
+                                        MediaQuery.of(context).size.width * 0.7,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            new CupertinoPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        new ImageInLarge(
+                                                          postsImages[index][1],
+                                                        )));
+                                      },
+                                      child: CachedNetworkImage(
+                                        imageUrl: postsImages[index][1],
+                                        placeholder: (context, url) =>
+                                            Container(
+                                          child: Center(
+                                              child:
+                                                  new CircularProgressIndicator()),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            new Icon(Icons.error),
+                                        fadeInCurve: Curves.easeIn,
+                                        fadeInDuration:
+                                            Duration(milliseconds: 1000),
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  )
+                                : Container(),
+                            SizedBox(height: 10.0),
+                            postsTitle[index] != null
+                                ? Text(
+                                    postsTitle[index],
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900),
+                                  )
+                                : Container(),
+                            SizedBox(height: 10.0),
+                            postsText[index] != null
+                                ? Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.8,
+                                    height: lengthTextBoxPost(
+                                        postsText[index].length),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          postsText[index],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w300,
+                                              fontSize: 16),
+                                          textAlign: TextAlign.justify,
+                                        ),
+                                        SizedBox(
+                                          height: 10.0,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            IconButton(
+                                              icon: Icon(Icons.thumb_up),
+                                              iconSize: 30,
+                                              color: didILikeThisPostAlready(
+                                                          index) ==
+                                                      true
+                                                  ? Colors.blueAccent
+                                                  : Colors.grey,
+                                              splashColor: Colors.purple,
+                                              onPressed: () {
+                                                likePost(index);
+                                              },
+                                            ),
+                                            this.postsLikes[index].length !=
+                                                        null &&
+                                                    this
+                                                            .postsLikes[index]
+                                                            .length !=
+                                                        0
+                                                ? Text(
+                                                    this
+                                                        .postsLikes[index]
+                                                        .length
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        color:
+                                                            Colors.blueAccent))
+                                                : Text("0",
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        color:
+                                                            Colors.blueAccent)),
+                                            SizedBox(width: 50.0),
+                                            IconButton(
+                                              icon: Icon(
+                                                Icons.chat_bubble_outline,
+                                              ),
+                                              iconSize: 30,
+                                              color: Colors.blueAccent,
+                                              splashColor: Colors.purple,
+                                              onPressed: () async {
+                                                await Navigator.of(context).push(
+                                                    new CupertinoPageRoute(
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            new CommentsPosts(
+                                                                "createCommentsPosts",
+                                                                postsId[index],
+                                                                postsComments[
+                                                                    index])));
+
+                                                setState(() {});
+                                              },
+                                            ),
+                                            this.postsComments[index].length !=
+                                                        null &&
+                                                    this
+                                                            .postsComments[
+                                                                index]
+                                                            .length !=
+                                                        0
+                                                ? Text(
+                                                    this
+                                                        .postsComments[index]
+                                                        .length
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        color:
+                                                            Colors.blueAccent))
+                                                : Text("0",
+                                                    style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        color:
+                                                            Colors.blueAccent)),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            FlatButton(
+                                              color: Colors.black26,
+                                              textColor: Colors.white,
+                                              padding: EdgeInsets.all(8.0),
+                                              splashColor: Colors.blueAccent,
+                                              onPressed: () {
+                                                createNewPost(
+                                                    "createCommentPost",
+                                                    postsId[index].toString());
+                                              },
+                                              child: Text(
+                                                "Comment",
+                                                style:
+                                                    TextStyle(fontSize: 16.0),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Divider(
+                                          thickness: 10,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Container(),
+                          ]),
+                        );
+                      }),
+                ),
+              ),
+            ),
+          )
+        : Container();
+  }
+
+  Widget buttonsLayer() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0, top: 10.0),
+              child: IconButton(
+                icon: Icon(
+                  Icons.settings,
+                ),
+                iconSize: 35,
+                color: Colors.white,
+                onPressed: () {
+                  onPressedSettingsButton();
+                },
+              ),
+            ),
+            /*Padding(
+                        padding: const EdgeInsets.only(top: 10.0, right: 10.0),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.notifications_none,
+                          ),
+                          iconSize: 35,
+                          color: Colors.white,
+                          onPressed: () {
+                            showSnackBar("In the future - Inbox will be here!",
+                                scaffoldKey);
+                          },
+                        ),
+                      ),*/
+          ],
+        ),
+        SizedBox(height: 40.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white70,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(30))),
+                child: IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                    ),
+                    iconSize: 35,
+                    color: Colors.white,
+                    onPressed: () {
+                      setState(() {
+                        if (indexProfileImage > 0) {
+                          indexProfileImage = indexProfileImage - 1;
+                        } else {
+                          indexProfileImage = this.profileImages.length - 1;
+                        }
+                      });
+                    }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white70,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(30))),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_forward,
+                  ),
+                  iconSize: 35,
+                  color: Colors.white,
+                  onPressed: () {
+                    if (indexProfileImage < this.profileImages.length - 1) {
+                      setState(() {
+                        indexProfileImage = indexProfileImage + 1;
+                      });
+                    } else {
+                      setState(() {
+                        indexProfileImage = 0;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

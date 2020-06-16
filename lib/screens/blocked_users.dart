@@ -126,28 +126,7 @@ class _BlockedUsersState extends State<BlockedUsers> {
           ),
           backgroundColor: Colors.white,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: 0, // this will be set when a new tab is tapped
-          items: [
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.perm_identity, size: 30.0),
-              title: new Text('Profile'),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(Icons.group, size: 30.0),
-              title: new Text('Groups'),
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home, size: 30.0), title: Text('Home')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_border, size: 30.0),
-                title: Text('Meet')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_outline, size: 30.0),
-                title: Text('Chats'))
-          ],
-        ),
+   
         body: Column(
           children: <Widget>[
             SizedBox(height: 20.0),

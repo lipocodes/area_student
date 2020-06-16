@@ -52,9 +52,10 @@ class _CreatePostState extends State<CreatePost> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String postId = prefs.getString('postId');
 
-      firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId);
 
       if (widget.op == "createCommentPost" && this.postImageList.length > 0) {
+
+        firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId);
         
         await firebaseMethods.uploadPostImages(this.postImageList, postId);
         List<String> imagesUrl = prefs.getStringList('imagesUrl'); 
@@ -65,6 +66,8 @@ class _CreatePostState extends State<CreatePost> {
       } 
 
       else if (widget.op == "createCommentPostGroups" && this.postImageList.length > 0) {
+
+        firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId);
         
         await firebaseMethods.uploadPostImages(this.postImageList, postId);
         List<String> imagesUrl = prefs.getStringList('imagesUrl'); 

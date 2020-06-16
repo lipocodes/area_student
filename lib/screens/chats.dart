@@ -186,7 +186,7 @@ class _ChatsState extends State<Chats> {
 
   //retrieve all the data needed for showing the different chats, arranged by read/unread & time of last message
   createChatList() async {
-    displayProgressDialog(context);
+    //displayProgressDialog(context);
 
     initiaizeLists();
 
@@ -405,7 +405,7 @@ class _ChatsState extends State<Chats> {
       listViewContentsFile.add(readListFile[k]);
     }
 
-    closeProgressDialog(context);
+    //closeProgressDialog(context);
 
     setState(() {});
   }
@@ -485,15 +485,48 @@ class _ChatsState extends State<Chats> {
             });
 
             if (this.indexBottomBar == 0) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Profile()));
+
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => new Profile(),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 2000),
+                ),
+              );
+
+              //Navigator.of(context).push(new CupertinoPageRoute(
+                  //builder: (BuildContext context) => new Profile()));
             }
             if (this.indexBottomBar == 1) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new MenuGroups()));
+
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => new MenuGroups(),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 2000),
+                ),
+              );
+
+              /*Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new MenuGroups()));*/
             } else if (this.indexBottomBar == 2) {
-              Navigator.of(context).push(new CupertinoPageRoute(
-                  builder: (BuildContext context) => new Meet(this.uid)));
+
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (c, a1, a2) => new Meet(this.uid),
+                  transitionsBuilder: (c, anim, a2, child) =>
+                      FadeTransition(opacity: anim, child: child),
+                  transitionDuration: Duration(milliseconds: 2000),
+                ),
+              );
+
+              /*Navigator.of(context).push(new CupertinoPageRoute(
+                  builder: (BuildContext context) => new Meet(this.uid)));*/
             }
           },
           items: [
