@@ -29,6 +29,7 @@ class _CreatePostGroupState extends State<CreatePostGroup> {
        FirebaseMethods firebaseMethods = new FirebaseMethods();
 
     onPressedCreateButton() async {
+      
     if (this.controllerPostText.text.toString().length == 0 &&
         postImageList.length == 0) {
       setState(() {

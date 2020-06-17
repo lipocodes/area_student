@@ -264,6 +264,8 @@ class FirebaseMethods {
     else
       collection = "posts";
 
+    
+
     final QuerySnapshot result = await Firestore.instance
         .collection(collection)
         .where('postId', isEqualTo: existingPostId)

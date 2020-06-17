@@ -150,6 +150,7 @@ class _GroupState extends State<Group> {
     }
 
     this.postsName = this.postsName.reversed.toList();
+    this.postsId = this.postsId.reversed.toList();
     this.creationTime = this.creationTime.reversed.toList();
     this.creatorName = this.creatorName.reversed.toList();
     this.creatorUid = this.creatorUid.reversed.toList();
@@ -246,6 +247,8 @@ class _GroupState extends State<Group> {
   @override
   Widget build(BuildContext context) {
     if (this.postsName == null) return Container();
+
+   
 
     return Scaffold(
       appBar: AppBar(
@@ -640,9 +643,12 @@ class _GroupState extends State<Group> {
                                     textColor: Colors.white,
                                     padding: EdgeInsets.all(8.0),
                                     splashColor: Colors.blueAccent,
-                                    onPressed: () {
-                                      createNewPost("createCommentPostGroups",
+                                    onPressed: () async{
+                                      await createNewPost("createCommentPostGroups",
                                           postsId[index].toString());
+
+                                      //retrievePostsContents();
+
                                     },
                                     child: Text(
                                       "Comment",

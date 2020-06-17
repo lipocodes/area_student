@@ -52,10 +52,11 @@ class _CreatePostState extends State<CreatePost> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String postId = prefs.getString('postId');
 
+     
 
-      if (widget.op == "createCommentPost" && this.postImageList.length > 0) {
+     if (widget.op == "createCommentPost" && this.postImageList.length > 0) {
 
-        firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId);
+         firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId);
         
         await firebaseMethods.uploadPostImages(this.postImageList, postId);
         List<String> imagesUrl = prefs.getStringList('imagesUrl'); 
@@ -64,6 +65,10 @@ class _CreatePostState extends State<CreatePost> {
         await firebaseMethod.updatePostsImages(
             "createCommentPost", imagesUrl, postId, this.postsId);
       } 
+
+      if (widget.op == "createCommentPost" && this.postImageList.length == 0) {
+         firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId); 
+      }
 
       else if (widget.op == "createCommentPostGroups" && this.postImageList.length > 0) {
 
@@ -75,9 +80,13 @@ class _CreatePostState extends State<CreatePost> {
             
         await firebaseMethod.updatePostsImages(
             "createCommentPostGroups", imagesUrl, postId, this.postsId);
+      }
+      
+      else if (widget.op == "createCommentPostGroups" && this.postImageList.length == 0) {
+        firebaseMethods.updatePostsComments(widget.op,postId, widget.existingPostId);
       } 
       
-      else if (widget.op == "createPost" && this.postImageList.length > 0) {
+      else if (widget.op == "createPost" && this.postImageList.length > 0) {   
           await firebaseMethods.uploadPostImages(this.postImageList, postId);
           List<String> imagesUrl = prefs.getStringList('imagesUrl');
            if(imagesUrl.length<2) imagesUrl.add('123456789');
@@ -89,7 +98,9 @@ class _CreatePostState extends State<CreatePost> {
 
       closeProgressDialog(context);
 
-      Navigator.of(context).pop();
+      //Navigator.of(context).pop();
+      Navigator.of(context).pushNamedAndRemoveUntil('/menuGroups', (Route<dynamic> route) => false);
+ 
     }
   }
 
