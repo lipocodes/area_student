@@ -46,7 +46,6 @@ class FirebaseMethods {
         .document(postId)
         .updateData({'comments': commentsId});
 
-
     final QuerySnapshot result1 = await Firestore.instance
         .collection(collection == "commentsPosts" ? "posts" : "postsGroups")
         .where('postId', isEqualTo: postId)
@@ -54,27 +53,26 @@ class FirebaseMethods {
     final List<DocumentSnapshot> snapshot1 = result1.documents;
     String creatorUid = snapshot1[0].data['creatorUid'];
 
-
-   final QuerySnapshot result2 = await Firestore.instance
+    final QuerySnapshot result2 = await Firestore.instance
         .collection('userData')
         .where('uid', isEqualTo: creatorUid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot2 = result2.documents;
     List str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];
-    if(str1==null) str1=[];
+    if (str1 == null) str1 = [];
     for (int i = 0; i < str1.length; i++) {
       notifications.add(str1[i].toString());
     }
-    
+
     for (int h = 0; h < notifications.length; h++) {
       if (notifications[h].contains("Liked Post") &&
           notifications[h].contains(myUid) &&
           notifications[h].contains(postId)) {
         notifications.removeAt(h);
-      } 
+      }
     }
-    
+
     try {
       String uid = await inputData();
       await Firestore.instance
@@ -82,13 +80,6 @@ class FirebaseMethods {
           .document(creatorUid)
           .updateData({'notifications': notifications});
     } catch (e) {}
-
-
-   
-   
-
-  
-
   }
 
   removePostGroup(String postName, String nameGroup) async {
@@ -264,8 +255,6 @@ class FirebaseMethods {
     else
       collection = "posts";
 
-    
-
     final QuerySnapshot result = await Firestore.instance
         .collection(collection)
         .where('postId', isEqualTo: existingPostId)
@@ -298,10 +287,9 @@ class FirebaseMethods {
     }
     var now = new DateTime.now().microsecondsSinceEpoch;
     if (collection == "posts")
-      notifications.add(
-        existingPostId + 
-        "^^^" + 
-        myProfileImage +
+      notifications.add(existingPostId +
+          "^^^" +
+          myProfileImage +
           "^^^" +
           myName +
           "^^^" +
@@ -311,11 +299,9 @@ class FirebaseMethods {
           "^^^" +
           postId);
     else
-      notifications.add(
-      existingPostId + 
-       "^^^"
-       +
-        myProfileImage +
+      notifications.add(existingPostId +
+          "^^^" +
+          myProfileImage +
           "^^^" +
           myName +
           "^^^" +
@@ -335,6 +321,43 @@ class FirebaseMethods {
     } catch (e) {}
 
     return true;
+  }
+
+  Future addSentMessageToNotifications(String creatorUid, String myProfileImage,
+      String myName, String documentId) async {
+    
+    int now = new DateTime.now().millisecondsSinceEpoch;
+    final QuerySnapshot result1 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: creatorUid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot1 = result1.documents;
+
+    List str1 = snapshot1[0].data['notifications'];
+    List<String> notifications = [];
+    for (int i = 0; i < str1.length; i++) {
+      notifications.add(str1[i].toString());
+    }
+
+    notifications.add(creatorUid +
+        "^^^" +
+        myProfileImage +
+        "^^^" +
+        myName +
+        "^^^" +
+        now.toString() +
+        "^^^" +
+        "Sent Message" +
+        "^^^" +
+        documentId);
+
+    try {
+      String uid = await inputData();
+      await Firestore.instance
+          .collection("userData")
+          .document(creatorUid)
+          .updateData({'notifications': notifications});
+    } catch (e) {}
   }
 
   Future updateLikeListPost(bool addOrRemove, String creatorUid, String op,
@@ -361,10 +384,9 @@ class FirebaseMethods {
 
     await inputData();
     if (op == "posts" && addOrRemove == true)
-      notifications.add(
-        creatorUid +
-        "^^^" + 
-        myProfileImage +
+      notifications.add(creatorUid +
+          "^^^" +
+          myProfileImage +
           "^^^" +
           myName +
           "^^^" +
@@ -374,10 +396,9 @@ class FirebaseMethods {
           "^^^" +
           postId);
     else if (op == "postsGroups" && addOrRemove == true)
-      notifications.add(
-         creatorUid +
-        "^^^" + 
-        myProfileImage +
+      notifications.add(creatorUid +
+          "^^^" +
+          myProfileImage +
           "^^^" +
           myName +
           "^^^" +

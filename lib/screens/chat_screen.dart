@@ -87,6 +87,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'recipientUid': widget.creatorUid,
       'senderName': loggedInUser.displayName,
       'senderUid': loggedInUser.uid,
+      'senderProfileImage': loggedInUser.photoUrl,
       'text': "",
       'attachedAttachedImage': "",
       'attachedVoiceRecording': "",
@@ -201,6 +202,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'recipientUid': widget.creatorUid,
       'senderName': loggedInUser.displayName,
       'senderUid': loggedInUser.uid,
+      'senderProfileImage': loggedInUser.photoUrl,
       'text': "",
       'attachedAttachedImage': "",
       'attachedVoiceRecording': "",
@@ -233,6 +235,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
       'recipientUid': widget.creatorUid,
       'senderName': loggedInUser.displayName,
+      'senderProfileImage': loggedInUser.photoUrl,
       'senderUid': loggedInUser.uid,
       'text': "",
       'attachedAttachedImage': "",
@@ -471,12 +474,15 @@ class _ChatScreenState extends State<ChatScreen> {
                           'recipientUid': widget.creatorUid,
                           'senderName': loggedInUser.displayName,
                           'senderUid': loggedInUser.uid,
+                           'senderProfileImage': loggedInUser.photoUrl,
                           'text': messageTextController.text,
                           'attachedAttachedImage': "",
                           'attachedVoiceRecording': "",
                           'attachedFile': "",
-                        });
+                        });                        
                         messageTextController.clear();
+                        
+                        firebaseMethod.addSentMessageToNotifications(widget.creatorUid, loggedInUser.photoUrl, loggedInUser.displayName, documentId);
                       },
                     ),
                   ),

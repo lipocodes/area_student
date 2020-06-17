@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:areastudent/data/constants.dart';
 import 'dart:io';
-
 import 'package:areastudent/screens/followers.dart';
 import 'package:areastudent/screens/following.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:areastudent/screens/meet.dart';
 import 'package:areastudent/screens/comments_posts.dart';
+import 'package:areastudent/screens/chat_screen.dart';
 
 
 int indexLargeProfileImage = 0;
@@ -432,6 +432,22 @@ onTapNotification(int index, context) async {
     await Navigator.of(context).push(new CupertinoPageRoute(
         builder: (BuildContext context) =>
             new Meet(notificationOriginalPostUid[index])));
+  } else if (notificationOperation[index] == "Sent Message") {
+
+    final QuerySnapshot result = await firestore
+        .collection("messages")
+        .where('id', isEqualTo: notificationLink[index])
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot = result.documents;
+    String senderUid = snapshot[0].data['senderUid'];
+    String senderProfileImage = snapshot[0].data['senderProfileImage'];
+    String senderName = snapshot[0].data['senderName'];
+
+    await Navigator.of(context).push(new CupertinoPageRoute(
+        builder: (BuildContext context) =>
+            new ChatScreen(senderUid, senderName, " ", " ", senderProfileImage)));
+
+    retrieveNotifications();
   }
 
   Navigator.of(context).pop();
@@ -453,7 +469,6 @@ Future retrieveNotifications() async {
       .getDocuments();
   final List<DocumentSnapshot> snapshot = result.documents;
   List<dynamic> str1 = snapshot[0].data['notifications'];
-  
 
   for (int i = 0; i < str1.length; i++) {
     var not = str1[i].toString();
@@ -466,37 +481,28 @@ Future retrieveNotifications() async {
     notificationLink.add(notification[5]);
   }
 
- 
   notificationOriginalPostUid = notificationOriginalPostUid.reversed.toList();
   notificationIcon = notificationIcon.reversed.toList();
   notificationCreationTime = notificationCreationTime.reversed.toList();
   notificationCreatorName = notificationCreatorName.reversed.toList();
   notificationOperation = notificationOperation.reversed.toList();
   notificationLink = notificationLink.reversed.toList();
-
-
 }
 
+String convertUpperCase(query) {
+  String str = query.toString();
 
-
-
-  String convertUpperCase(query) {
-    String str = query.toString();
-
-    for (var i = 0; i < str.length; i++) {
-      if (i == 0 || (i > 0 && (str.substring(i - 1, i)) == " ")) {
-        str = str.substring(0, i) +
-            str.substring(i, i + 1).toUpperCase() +
-            str.substring(i + 1);
-      } else {
-        str = str.substring(0, i) +
-            str.substring(i, i + 1).toLowerCase() +
-            str.substring(i + 1);
-      }
+  for (var i = 0; i < str.length; i++) {
+    if (i == 0 || (i > 0 && (str.substring(i - 1, i)) == " ")) {
+      str = str.substring(0, i) +
+          str.substring(i, i + 1).toUpperCase() +
+          str.substring(i + 1);
+    } else {
+      str = str.substring(0, i) +
+          str.substring(i, i + 1).toLowerCase() +
+          str.substring(i + 1);
     }
-
-    return str;
   }
 
-
-
+  return str;
+}
