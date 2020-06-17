@@ -75,10 +75,11 @@ class _NotificationsState extends State<Notifications> {
     }
   }
 
+ 
   retrieveNotifications().then((value) {
       setState(() {
           
-
+       
       });
     });
 }
@@ -106,7 +107,7 @@ Widget notifications() {
                 decoration: InputDecoration(
                     border: InputBorder.none, hintText: 'Look for someone...'),
               ),
-              if(controllerSearchUsers.text.length==0 || filteredUser.contains(index)) Row(
+              if(controllerSearchUsers.text.length==0 || (filteredUser!=null && filteredUser.contains(index))) Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   new Container(

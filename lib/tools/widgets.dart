@@ -453,6 +453,7 @@ Future retrieveNotifications() async {
       .getDocuments();
   final List<DocumentSnapshot> snapshot = result.documents;
   List<dynamic> str1 = snapshot[0].data['notifications'];
+  
 
   for (int i = 0; i < str1.length; i++) {
     var not = str1[i].toString();
@@ -464,6 +465,16 @@ Future retrieveNotifications() async {
     notificationOperation.add(notification[4]);
     notificationLink.add(notification[5]);
   }
+
+ 
+  notificationOriginalPostUid = notificationOriginalPostUid.reversed.toList();
+  notificationIcon = notificationIcon.reversed.toList();
+  notificationCreationTime = notificationCreationTime.reversed.toList();
+  notificationCreatorName = notificationCreatorName.reversed.toList();
+  notificationOperation = notificationOperation.reversed.toList();
+  notificationLink = notificationLink.reversed.toList();
+
+
 }
 
 
