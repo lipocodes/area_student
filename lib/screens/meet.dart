@@ -36,6 +36,7 @@ String myUid;
 String myProfileImage = "";
 String myName = "";
  QuerySnapshot resultSearchUsers;
+List globalFollowers; 
 
 class Meet extends StatefulWidget {
   String targetUid;
@@ -530,6 +531,7 @@ class _PersonalCardState extends State<PersonalCard> {
     }
 
     followers.add(myUid);
+    globalFollowers.add(myUid);
 
     try {
       String uid = await inputData();
@@ -594,6 +596,11 @@ class _PersonalCardState extends State<PersonalCard> {
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeee followThisUser");
     }
+
+  setState(() {
+    
+  });
+
   }
 
   unfollowThisUser() async {
@@ -609,6 +616,7 @@ class _PersonalCardState extends State<PersonalCard> {
       followers.add(str1[i].toString());
     }
     followers.remove(myUid);
+    globalFollowers.remove(myUid);
     try {
       String uid = await inputData();
       await Firestore.instance
@@ -628,6 +636,28 @@ class _PersonalCardState extends State<PersonalCard> {
         .getDocuments();
     final List<DocumentSnapshot> snapshot1 = result.documents;
 
+   String uid = await inputData();
+    final QuerySnapshot result2 = await Firestore.instance
+        .collection('userData')
+        .where('uid', isEqualTo: uid)
+        .getDocuments();
+    final List<DocumentSnapshot> snapshot2 = result2.documents;
+    List<dynamic> str2 = snapshot2[0].data['following'];
+    List<String> following = [];
+    for (int i = 0; i < str2.length; i++) {
+      following.add(str2[i].toString());
+    }
+    following.remove(targetUidd);
+    try {
+      await Firestore.instance
+          .collection("userData")
+          .document(uid)
+          .updateData({'following': following});
+    } catch (e) {}
+
+
+
+
     str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];
     for (int i = 0; i < str1.length; i++) {
@@ -645,6 +675,11 @@ class _PersonalCardState extends State<PersonalCard> {
         .collection("userData")
         .document(targetUidd)
         .updateData({'notifications': notifications});
+
+
+    setState(() {
+      
+    });    
   }
 
   retrieveUserData() async {
@@ -680,8 +715,10 @@ class _PersonalCardState extends State<PersonalCard> {
       this.locality = snapshot[0].data['locality'];
       this.academicField = snapshot[0].data['academicField'];
       this.aboutMe = snapshot[0].data['aboutMe'];
-      List followers = snapshot[0].data['followers'];
-      this.numFollowers = followers.length;
+      globalFollowers = snapshot[0].data['followers'];
+ 
+       
+      this.numFollowers = globalFollowers.length;
       List following = snapshot[0].data['following'];
       this.numFollowing = following.length;
 
@@ -783,6 +820,11 @@ class _PersonalCardState extends State<PersonalCard> {
     // TODO: implement initState
     super.initState();
     this.retrieveUserData();
+
+    setState(() {
+      
+    });
+    
   }
 
   @override
@@ -790,7 +832,12 @@ class _PersonalCardState extends State<PersonalCard> {
     if (this.uid == null ||
         this.uid.length == 0 ||
         this.numFollowers == null ||
-        this.numFollowing == null) return Container();
+        this.numFollowing == null || globalFollowers == null) return Container();
+
+    print("xxxxxxxxxxxxxxx= " + myUid.toString() +  " " + globalFollowers.toString()); 
+
+    if(globalFollowers.contains(myUid)) this.textFollowButton = "Unfollow";
+    else this.textFollowButton = "Follow";
 
     return Column(
       children: [
