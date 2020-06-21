@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:areastudent/screens/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -488,8 +490,21 @@ class _PersonalCardState extends State<PersonalCard> {
   int numFollowing;
   String textFollowButton = "Follow";
   String textBlockUser = "";
+  final _firestore = Firestore.instance;
 
   int myIndex = 0;
+
+
+    String _randomString(int length) {
+    var rand = new Random();
+    var codeUnits = new List.generate(length, (index) {
+      int rc = rand.nextInt(33) + 89;
+      return rc;
+    });
+
+    return new String.fromCharCodes(codeUnits);
+  }
+
   followThisUser() async {
     int now = new DateTime.now().millisecondsSinceEpoch;
 
@@ -571,6 +586,26 @@ class _PersonalCardState extends State<PersonalCard> {
     } catch (e) {
       print("eeeeeeeeeeeeeeeeeeeeee followThisUser");
     }
+
+   
+
+   final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+   
+   String documentId = this._randomString(6);
+  _firestore.collection('messages').document(documentId).setData({
+      'id'  : documentId,
+      'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+      'recipientUid': targetUidd,
+      'senderName': user.displayName,
+      'senderUid': user.uid,
+      'senderProfileImage': user.photoUrl,
+      'text': user.displayName + " followed you",
+      'attachedAttachedImage': "",
+      'attachedVoiceRecording': "",
+      'attachedFile': "",
+    });
+   
+
 
   setState(() {
     
