@@ -488,10 +488,6 @@ class _ProfileState extends State<Profile> {
         resizeToAvoidBottomInset: false,
         resizeToAvoidBottomPadding: false,
         appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

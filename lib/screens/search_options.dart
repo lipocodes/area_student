@@ -121,10 +121,7 @@ class _SearchOptionsState extends State<SearchOptions> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

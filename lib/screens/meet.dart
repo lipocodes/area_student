@@ -153,21 +153,7 @@ class _MeetState extends State<Meet> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            new Text(
-              "Meet",
-              style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 24),
-            ),
-            IconButton(
+        leading: 	        IconButton(
               icon: Icon(
                 Icons.settings,
                 size: 40,
@@ -179,6 +165,18 @@ class _MeetState extends State<Meet> {
                 setState(() {});
               },
             ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+           
+            new Text(
+              "Meet",
+              style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24),
+            ),
+       
             IconButton(
               icon: Icon(
                 Icons.notifications_none,
