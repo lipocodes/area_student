@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
+import 'dart:math';
 
 String myUid;
 String myProfileImage = "";
@@ -158,7 +159,18 @@ class FirebaseMethods {
     }
   }
 
+  String _randomString(int length) {
+    var rand = new Random();
+    var codeUnits = new List.generate(length, (index) {
+      int rc = rand.nextInt(33) + 89;
+      return rc;
+    });
+
+    return new String.fromCharCodes(codeUnits);
+  }
+
   Future createNewPost(
+    String creatorUid,
     String op,
     String postTitle,
     String postText,
@@ -198,10 +210,43 @@ class FirebaseMethods {
     String collectionName = "";
     if (op == "createPost")
       collectionName = "posts";
-    else if (op == "createCommentPost")
+    else if (op == "createCommentPost") {
       collectionName = "commentsPosts";
-    else if (op == "createCommentPostGroups")
+
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+      String documentId = this._randomString(6);
+      await firestore.collection('messages').document(documentId).setData({
+        'id': documentId,
+        'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+        'recipientUid': creatorUid,
+        'senderName': user.displayName,
+        'senderUid': user.uid,
+        'senderProfileImage': user.photoUrl,
+        'text': user.displayName + " commented on your post",
+        'attachedAttachedImage': "",
+        'attachedVoiceRecording': "",
+        'attachedFile': "",
+      });
+    } else if (op == "createCommentPostGroups") {
       collectionName = "commentsPostsGroups";
+
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+      String documentId = this._randomString(6);
+      await firestore.collection('messages').document(documentId).setData({
+        'id': documentId,
+        'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+        'recipientUid': creatorUid,
+        'senderName': user.displayName,
+        'senderUid': user.uid,
+        'senderProfileImage': user.photoUrl,
+        'text': user.displayName + " commented on your post in a group",
+        'attachedAttachedImage': "",
+        'attachedVoiceRecording': "",
+        'attachedFile': "",
+      });
+    }
 
     String newCommentId = uid + '_' + now.toString();
 
@@ -325,7 +370,6 @@ class FirebaseMethods {
 
   Future addSentMessageToNotifications(String creatorUid, String myProfileImage,
       String myName, String documentId) async {
-    
     int now = new DateTime.now().millisecondsSinceEpoch;
     final QuerySnapshot result1 = await Firestore.instance
         .collection('userData')
@@ -375,6 +419,44 @@ class FirebaseMethods {
         .where('uid', isEqualTo: creatorUid)
         .getDocuments();
     final List<DocumentSnapshot> snapshot1 = result1.documents;
+
+    if (addOrRemove == true && op == "posts") {
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+      String documentId = this._randomString(6);
+      await firestore.collection('messages').document(documentId).setData({
+        'id': documentId,
+        'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+        'recipientUid': creatorUid,
+        'senderName': user.displayName,
+        'senderUid': user.uid,
+        'senderProfileImage': user.photoUrl,
+        'text': user.displayName + " liked your post",
+        'attachedAttachedImage': "",
+        'attachedVoiceRecording': "",
+        'attachedFile': "",
+      });
+    }
+
+
+    if (addOrRemove == true && op == "postsGroups") {
+      final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+
+      String documentId = this._randomString(6);
+      await firestore.collection('messages').document(documentId).setData({
+        'id': documentId,
+        'creationTime': new DateTime.now().millisecondsSinceEpoch.toString(),
+        'recipientUid': creatorUid,
+        'senderName': user.displayName,
+        'senderUid': user.uid,
+        'senderProfileImage': user.photoUrl,
+        'text': user.displayName + " liked your post in a group",
+        'attachedAttachedImage': "",
+        'attachedVoiceRecording': "",
+        'attachedFile': "",
+      });
+    }
+
 
     List str1 = snapshot1[0].data['notifications'];
     List<String> notifications = [];

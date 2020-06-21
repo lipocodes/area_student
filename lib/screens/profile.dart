@@ -472,9 +472,9 @@ class _ProfileState extends State<Profile> {
       return false;
   }
 
-  createNewPost(String op, String existingPostId) async {
+  createNewPost(String op, String existingPostId, String creatorUid) async {
     var res = await Navigator.of(context).push(new CupertinoPageRoute(
-        builder: (BuildContext context) => new CreatePost(op, existingPostId)));
+        builder: (BuildContext context) => new CreatePost(op, existingPostId, creatorUid)));
 
     retrieveUserData();
   }
@@ -515,7 +515,7 @@ class _ProfileState extends State<Profile> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            createNewPost("createPost", "");
+            createNewPost("createPost", "", myUid);
           },
           child: Icon(Icons.add),
         ),
@@ -957,7 +957,7 @@ class _ProfileState extends State<Profile> {
                                               onPressed: () {
                                                 createNewPost(
                                                     "createCommentPost",
-                                                    postsId[index].toString());
+                                                    postsId[index].toString(), myUid);
                                               },
                                               child: Text(
                                                 "Comment",

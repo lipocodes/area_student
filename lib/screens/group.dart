@@ -218,9 +218,10 @@ class _GroupState extends State<Group> {
       return false;
   }
 
-  createNewPost(String op, String existingPostId) async {
+  createNewPost(String op, String existingPostId, String creatorUid) async {
+
     var res = await Navigator.of(context).push(new CupertinoPageRoute(
-        builder: (BuildContext context) => new CreatePost(op, existingPostId)));
+        builder: (BuildContext context) => new CreatePost(op, existingPostId, creatorUid)));
 
     setState(() {
       retrievePostsContents();
@@ -248,7 +249,7 @@ class _GroupState extends State<Group> {
   Widget build(BuildContext context) {
     if (this.postsName == null) return Container();
 
-   
+
 
     return Scaffold(
       appBar: AppBar(
@@ -612,8 +613,9 @@ class _GroupState extends State<Group> {
                                     padding: EdgeInsets.all(8.0),
                                     splashColor: Colors.blueAccent,
                                     onPressed: () async{
+                                         
                                       await createNewPost("createCommentPostGroups",
-                                          postsId[index].toString());
+                                          postsId[index].toString(), creatorUid[index]);
 
                                       //retrievePostsContents();
 

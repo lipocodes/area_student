@@ -14,7 +14,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class CreatePost extends StatefulWidget {
   String op = "";
   String existingPostId;
-  CreatePost(this.op, this.existingPostId);
+  String creatorUid;
+  CreatePost(this.op, this.existingPostId, this.creatorUid);
   @override
   _CreatePostState createState() => _CreatePostState();
 }
@@ -40,7 +41,8 @@ class _CreatePostState extends State<CreatePost> {
     } else {
       displayProgressDialog(context);
 
-      await firebaseMethods.createNewPost(
+      await firebaseMethods.createNewPost( 
+          widget.creatorUid,
           widget.op,
           this.controllerPostTitle.text,
           this.controllerPostText.text,
